@@ -12,6 +12,7 @@ Contains background literature, project indices, data access logs, API configura
 *   **[reading_tracker.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/related_papers/reading_tracker.md)**: Tabulated literature review tracking method details, project relevance, and study status.
 *   **[data_access_notes.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/data_access_notes.md)**: Developer credentials, login steps, download scripts, and rate limits for IMD, MOSDAC, Copernicus (ERA5), and NASA EarthData.
 *   **[project_tracker.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/project_tracker.md)**: Master timeline progress tracker for all 16 implementation weeks.
+*   **[project_dashboard.html](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/project_dashboard.html)**: Interactive visual dashboard to track tasks, progress percentages, and log performance metrics (opens in web browser).
 
 
 ### [01_raw_data](file:///D:/Projects/PyGeoParallax-IN/01_raw_data)

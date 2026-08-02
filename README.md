@@ -16,6 +16,7 @@ PyGeoParallax-IN/
 ├── 00_Documentation/
 │   ├── PROJECT_INDEX.md             # Guide to directory roles & workflow
 │   ├── project_tracker.md           # 16-week project implementation tracker
+│   ├── project_dashboard.html       # Interactive visual roadmap & metrics dashboard
 │   ├── related_papers/              # Core literature papers
 │   │   ├── vicente_2002.pdf         # Vicente et al. (2002) foundational paper
 │   │   ├── bielinski_2020.pdf       # Bieliński (2020) modern implementation

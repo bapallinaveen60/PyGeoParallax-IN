@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyGeoParallax-IN Roadmap Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #070913;
+            --bg-card: rgba(13, 18, 36, 0.7);
+            --bg-card-hover: rgba(22, 29, 56, 0.85);
+            --border-glow: rgba(59, 130, 246, 0.15);
+            --border-color: rgba(255, 255, 255, 0.06);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            
+            /* Status Colors */
+            --color-completed: #10b981;
+            --color-inprogress: #3b82f6;
+            --color-pending: #4b5563;
+            --color-highlight: #8b5cf6;
+            
+            /* Gradients */
+            --grad-primary: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --grad-success: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            --grad-dark: linear-gradient(180deg, #0d1224 0%, #070913 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* Header Styles */
+        header {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, #93c5fd, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--grad-primary);
+            border: none;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(139, 92, 246, 0.4);
+            filter: brightness(1.1);
+        }
+
+        /* Dashboard Overview Grid */
+        .overview-grid {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .glass-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(130deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* Progress Card Details */
+        .progress-card {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .progress-circle-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .progress-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 8;
+        }
+
+        .progress-circle-val {
+            fill: none;
+            stroke: url(#progress-gradient);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 351.8;
+            stroke-dashoffset: 351.8;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.8s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .progress-info h3 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .progress-info p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-flat {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            width: 250px;
+        }
+
+        .progress-bar-flat-fill {
+            height: 100%;
+            background: var(--grad-primary);
+            width: 0%;
+            transition: width 0.8s ease-in-out;
+        }
+
+        /* Stat cards */
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stat-card-title {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(to right, #ffffff, #e0f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card-sub {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-card-sub .badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-completed);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        /* Tab Navigation */
+        .tabs-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .tab-headers {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            gap: 30px;
+            margin-bottom: 24px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 12px 6px;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-weight: 600;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--color-inprogress);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Timeline Layout (Roadmap Tab) */
+        .roadmap-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .month-section {
+            border-left: 2px solid rgba(255, 255, 255, 0.05);
+            padding-left: 30px;
+            margin-left: 10px;
+            position: relative;
+        }
+
+        .month-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            position: relative;
+            left: -42px;
+        }
+
+        .month-badge {
+            background: var(--grad-primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .month-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .weeks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .week-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+        }
+
+        .week-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .week-card.completed {
+            border-color: rgba(16, 185, 129, 0.25);
+            background: rgba(16, 185, 129, 0.03);
+        }
+
+        .week-card.completed:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .week-card.active-week {
+            border-color: rgba(59, 130, 246, 0.6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .week-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .week-num {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .week-card.active-week .week-num {
+            color: var(--color-inprogress);
+        }
+
+        .week-card.completed .week-num {
+            color: var(--color-completed);
+        }
+
+        .week-checkbox {
+            position: relative;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .week-card.completed .week-checkbox {
+            border-color: var(--color-completed);
+            background: var(--color-completed);
+        }
+
+        .week-checkbox svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: white;
+            stroke-width: 3;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .week-card.completed .week-checkbox svg {
+            opacity: 1;
+        }
+
+        .week-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .week-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            flex-grow: 1;
+            margin-bottom: 16px;
+        }
+
+        .week-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+            color: var(--text-secondary);
+        }
+
+        .week-tag {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        /* Detail Sidebar Panel */
+        .detail-panel {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 420px;
+            height: 100vh;
+            background: rgba(10, 14, 27, 0.95);
+            border-left: 1px solid var(--border-color);
+            backdrop-filter: blur(30px);
+            z-index: 100;
+            box-shadow: -15px 0 30px rgba(0,0,0,0.5);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .detail-panel.open {
+            right: 0;
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-bottom: 15px;
+        }
+
+        .detail-header h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+        }
+
+        .close-panel-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-panel-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .detail-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .detail-section h4 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+        }
+
+        .detail-section p, .detail-section li {
+            font-size: 0.95rem;
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+
+        .detail-section ul {
+            padding-left: 20px;
+        }
+
+        .file-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #93c5fd;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .file-link:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Metrics Tab */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .metric-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .metric-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .metric-target-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .metric-val-box span {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .metric-val-box strong {
+            font-size: 1.1rem;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .metric-visualizer {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .metric-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--color-inprogress);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+            transition: transform 0.1s;
+        }
+
+        .metric-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .metric-progress-track {
+            position: relative;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .metric-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--grad-primary);
+            width: 0%;
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+
+        .metric-label-pos {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Architecture Tab */
+        .arch-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .arch-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .arch-tree {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .arch-tree-item {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .arch-tree-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-inprogress);
+        }
+
+        .arch-tree-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: #93c5fd;
+            border-left: 3px solid var(--color-inprogress);
+        }
+
+        .arch-details-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .arch-details-panel h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem;
+        }
+
+        .arch-details-panel p {
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+
+        .arch-detail-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+        }
+
+        .arch-meta-box h5 {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .arch-meta-box p {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        /* Overlay Background */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 90;
+            display: none;
+        }
+
+        .overlay.open {
+            display: block;
+        }
+
+        .pulse-bullet {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .pulse-bullet.completed { color: var(--color-completed); background-color: var(--color-completed); }
+        .pulse-bullet.inprogress { 
+            color: var(--color-inprogress); 
+            background-color: var(--color-inprogress);
+            animation: pulse-glow 2s infinite;
+        }
+        .pulse-bullet.pending { color: var(--color-pending); background-color: var(--color-pending); }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.9); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SVG Definitions for Gradients -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#8b5cf6" />
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <!-- App Header -->
+    <header>
+        <div class="header-title">
+            <h1>PyGeoParallax-IN Roadmap</h1>
+            <p>Interactive 16-Week Project Implementation, Geometry Correction, and Downstream Validation</p>
+        </div>
+        <div class="header-controls">
+            <button class="btn" id="reset-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                Reset Progress
+            </button>
+            <a href="PROJECT_INDEX.md" class="btn btn-primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3.5A2.5 2.5 0 0 1 6.5 1H20v21H6.5a2.5 2.5 0 0 1-2.5-2.5z"/></svg>
+                Open Project Index
+            </a>
+        </div>
+    </header>
+
+    <!-- Top Summary Statistics -->
+    <div class="overview-grid">
+        <!-- Main Progress Panel -->
+        <div class="glass-panel progress-card">
+            <div class="progress-circle-container">
+                <svg width="120" height="120">
+                    <circle class="progress-circle-bg" cx="60" cy="60" r="56" />
+                    <circle class="progress-circle-val" id="main-progress-ring" cx="60" cy="60" r="56" />
+                </svg>
+                <div class="progress-text" id="main-progress-text">0%</div>
+            </div>
+            <div class="progress-info">
+                <h3>Overall Implementation Progress</h3>
+                <p>Tracked week-by-week implementation deliverables, geometry models, and radar calibration metrics.</p>
+                <div class="progress-bar-flat">
+                    <div class="progress-bar-flat-fill" id="main-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Task Panel -->
+        <div class="glass-panel stat-card">
+            <div class="stat-card-title">Active Implementation Week</div>
+            <div class="stat-card-value" id="active-week-display">Week 1</div>
+            <div class="stat-card-sub">
+                <span class="pulse-bullet inprogress"></span>
+                <span id="active-week-name">Data Acquisition & Ingestion</span>
+            </div>
+        </div>
+
+        <!-- Metrics Targets Panel -->
+        <div class="glass-panel stat-card">
+            <div class="stat-card-title">Completed Milestone Tasks</div>
+            <div class="stat-card-value" id="completed-stat">0 / 16</div>
+            <div class="stat-card-sub">
+                <span class="badge" id="completion-badge">0% Done</span>
+                <span>Weeks fully complete</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-container">
+        <div class="tab-headers">
+            <button class="tab-btn active" onclick="switchTab('roadmap')">📅 Roadmap Timeline</button>
+            <button class="tab-btn" onclick="switchTab('metrics')">📊 Target Performance Metrics</button>
+            <button class="tab-btn" onclick="switchTab('architecture')">🛠️ Workspace Architecture Map</button>
+        </div>
+
+        <!-- TAB 1: ROADMAP TIMELINE -->
+        <div id="roadmap-tab" class="tab-content active">
+            <div class="roadmap-timeline" id="roadmap-container">
+                <!-- Javascript will inject weeks dynamically here -->
+            </div>
+        </div>
+
+        <!-- TAB 2: TARGET PERFORMANCE METRICS -->
+        <div id="metrics-tab" class="tab-content">
+            <div class="metrics-grid" id="metrics-container">
+                <!-- Javascript will inject metrics dynamically here -->
+            </div>
+        </div>
+
+        <!-- TAB 3: WORKSPACE ARCHITECTURE MAP -->
+        <div id="architecture-tab" class="tab-content">
+            <div class="arch-container">
+                <div class="arch-tree" id="arch-tree-container">
+                    <!-- Javascript will inject folders here -->
+                </div>
+                <div class="arch-details-panel" id="arch-details-panel">
+                    <h3 id="arch-detail-title">Select a workspace component</h3>
+                    <p id="arch-detail-desc">Click on any directory in the tree layout on the left to see its detailed description, input dependencies, and pipeline scripts.</p>
+                    <div class="arch-detail-meta" id="arch-detail-meta" style="display:none;">
+                        <div class="arch-meta-box">
+                            <h5>Primary Inputs</h5>
+                            <p id="arch-meta-inputs">-</p>
+                        </div>
+                        <div class="arch-meta-box">
+                            <h5>Core Processing Scripts</h5>
+                            <p id="arch-meta-scripts">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Sidebar -->
+    <div class="overlay" id="panel-overlay" onclick="closeSidebar()"></div>
+    <div class="detail-panel" id="detail-panel">
+        <div class="detail-header">
+            <h2 id="panel-week-id">Week X Detail</h2>
+            <button class="close-panel-btn" onclick="closeSidebar()">&times;</button>
+        </div>
+        
+        <div class="detail-section">
+            <h4>Objectives</h4>
+            <p id="panel-week-title" style="font-weight: 600; font-size: 1.1rem; color: white;"></p>
+            <p id="panel-week-desc"></p>
+        </div>
+
+        <div class="detail-section">
+            <h4>Key Deliverables</h4>
+            <ul id="panel-week-deliverables">
+                <!-- Injected dynamically -->
+            </ul>
+        </div>
+
+        <div class="detail-section">
+            <h4>Target Code Folder</h4>
+            <div id="panel-week-files">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+
+        <div class="detail-section" style="margin-top: auto;">
+            <button class="btn btn-primary" style="width: 100%; justify-content: center;" id="panel-toggle-complete-btn">
+                Mark Week Completed
+            </button>
+        </div>
+    </div>
+
+    <!-- Roadmap & Project Data Script -->
+    <script>
+        // Project timeline definition
+        const projectData = [
+            {
+                month: "Month 1",
+                title: "Pipeline Setup, Data Engineering & Spatial Transformations",
+                weeks: [
+                    {
+                        id: 1,
+                        title: "Data Acquisition & Standardized Ingestion",
+                        desc: "Download 3 monsoon seasons (JJAS 2022–2024) of INSAT-3DR Imager L1C, Sounder CTH, GPM 2ADPR, and SRTM DEM data over South Asia. Build ingest parsers to standardize raw instrument scans onto a uniform 0.04° grid.",
+                        deliverables: [
+                            "Download JJAS 2022-2024 INSAT, GPM, and SRTM tiles.",
+                            "Implement ingest parsers in Python (h5py, netCDF4, pyproj).",
+                            "Standardize datasets to a uniform 0.04° × 0.04° grid."
+                        ],
+                        tag: "Data Eng",
+                        path: "src/ingest/",
+                        fileLink: "../src/ingest/"
+                    },
+                    {
+                        id: 2,
+                        title: "Viewing Geometry & Angle Calculation",
+                        desc: "Compute pixel-level Satellite Viewing Zenith Angle (VZA), Viewing Azimuth Angle (VAA), and Solar Zenith Angle (SZA) for every INSAT-3DR scene from orbital state vectors.",
+                        deliverables: [
+                            "Implement orbit vector geometry models.",
+                            "Map grid-level VZA, VAA, and SZA for the entire domain.",
+                            "Verify VZA bounds (15°-25° Western Ghats, 30°-40° Himalayas)."
+                        ],
+                        tag: "Geometry",
+                        path: "src/geometry/",
+                        fileLink: "../src/geometry/"
+                    },
+                    {
+                        id: 3,
+                        title: "Geocentric ECEF Transformation Engine",
+                        desc: "Implement forward and inverse transforms between geodetic (latitude, longitude, height) and WGS84 Earth-Centered, Earth-Fixed (ECEF) [x, y, z] coordinates.",
+                        deliverables: [
+                            "Code base transformation equations in Python.",
+                            "Integrate ellipsoidal coordinate math.",
+                            "Unit-test converter accuracy against pyproj benchmark (target delta < 1m)."
+                        ],
+                        tag: "Geometry",
+                        path: "src/geometry/",
+                        fileLink: "../src/geometry/"
+                    },
+                    {
+                        id: 4,
+                        title: "Cloud-Top Height Ingestion & Fallback Module",
+                        desc: "Integrate MOSDAC INSAT-3DR Sounder CTH products. Design a thermal-profile lookup using hourly ERA5 pressure/temperature profiles: where satellite CTH is missing, match TIR1 brightness temperature to the profile to compute fallback CTH.",
+                        deliverables: [
+                            "Implement INSAT CTH netCDF grid parser.",
+                            "Build ERA5 vertical profile interpolation helper.",
+                            "Set fallback height logic: H_CTH = z(T_B)."
+                        ],
+                        tag: "Data Eng",
+                        path: "src/geometry/",
+                        fileLink: "../src/geometry/"
+                    }
+                ]
+            },
+            {
+                month: "Month 2",
+                title: "Ray-Tracing Engine, Terrain Integration & Resampling",
+                weeks: [
+                    {
+                        id: 5,
+                        title: "Analytical Ellipsoid Ray-Tracing Solver",
+                        desc: "Implement the quadratic ellipsoid solver for t_cloud, finding the precise 3D ECEF intersection vector C of the satellite line-of-sight and the elevated cloud top.",
+                        deliverables: [
+                            "Code the quadratic intersection formula for WGS84 + H_CTH.",
+                            "Vectorize with NumPy.",
+                            "Optimize with Numba or PyCUDA (target < 2s for 1000x1000 disk frame)."
+                        ],
+                        tag: "Geometry",
+                        path: "src/geometry/",
+                        fileLink: "../src/geometry/"
+                    },
+                    {
+                        id: 6,
+                        title: "SRTM Topographic Relief Integration",
+                        desc: "Bring high-resolution SRTM elevation into the projection loop to capture slope geometry along the Western Ghats escarpment and Himalayan ridges.",
+                        deliverables: [
+                            "Aggregate SRTM DEM tiles to the standard 0.04° grid.",
+                            "Compute intersection projection on the H_terrain topography surface.",
+                            "Generate shift maps showing magnitude of corrections as a function of CTH."
+                        ],
+                        tag: "Geometry",
+                        path: "src/geometry/",
+                        fileLink: "../src/geometry/"
+                    },
+                    {
+                        id: 7,
+                        title: "BucketResampler & Gridding Strategy",
+                        desc: "Build a customized BucketResampler destination-grid allocator to handle pixel shifting distortions.",
+                        deliverables: [
+                            "Implement forward mapping algorithm (BucketResampler).",
+                            "Handle occlusion overlapping pixels (max CTH height wins).",
+                            "Fill gaps/holes using inverse-distance weighting (IDW) along local wind vector."
+                        ],
+                        tag: "Resampling",
+                        path: "src/resample/",
+                        fileLink: "../src/resample/"
+                    },
+                    {
+                        id: 8,
+                        title: "Pipeline Automation & Batch Processing",
+                        desc: "Connect ingestion, Viewing angles, CTH-filling, ray-tracing solver, and resampling into a single automated pipeline execution script.",
+                        deliverables: [
+                            "Create master execution orchestration script.",
+                            "Support batch mode outputs in NetCDF and GeoTIFF formats.",
+                            "Run full batch run on 100 benchmark monsoon storm scenes."
+                        ],
+                        tag: "Automation",
+                        path: "src/",
+                        fileLink: "../src/"
+                    }
+                ]
+            },
+            {
+                month: "Month 3",
+                title: "Multi-Sensor Validation & Quantitative Alignment Analysis",
+                weeks: [
+                    {
+                        id: 9,
+                        title: "Spaceborne Radar (GPM DPR) Cross-Alignment",
+                        desc: "Colocate uncorrected and corrected INSAT-3DR scenes with overlapping GPM DPR orbits within a ±10 minute coincidence window.",
+                        deliverables: [
+                            "Implement Orbit-to-Grid spatial colocation routines.",
+                            "Filter by GPM precipitation overpasses.",
+                            "Compute spatial cross-correlation and mutual info (TIR1 vs. 18 dBZ echo-tops)."
+                        ],
+                        tag: "Validation",
+                        path: "src/validation/",
+                        fileLink: "../src/validation/"
+                    },
+                    {
+                        id: 10,
+                        title: "Ground Radar (IMD DWR) Validation",
+                        desc: "Extract 3D volume scans from IMD DWR stations at Mumbai, Goa, Kochi (Western Ghats) and Agartala (Northeast India).",
+                        deliverables: [
+                            "Parse IMD DWR radar files.",
+                            "Compute Intersection-over-Union (IoU) between INSAT deep convective core masks (T_B < 220K) and DWR 35 dBZ cores.",
+                            "Verify alignment enhancement post-correction."
+                        ],
+                        tag: "Validation",
+                        path: "src/validation/",
+                        fileLink: "../src/validation/"
+                    },
+                    {
+                        id: 11,
+                        title: "Regional Statistical Dissection",
+                        desc: "Partition validation results by topographic regime: Western Ghats (high relief, lower altitude), Himalayan Foothills (high zenith angles, maximum elevation), and Central India (flat control).",
+                        deliverables: [
+                            "Compile summary statistics for each region.",
+                            "Confirm direction of shift vectors (e.g. S-SW shift in Himalayas).",
+                            "Verify mean shift distances (4.2 km Ghats / 8.6 km Himalayas)."
+                        ],
+                        tag: "Validation",
+                        path: "src/validation/",
+                        fileLink: "../src/validation/"
+                    },
+                    {
+                        id: 12,
+                        title: "Sensitivity & Error Budget Analysis",
+                        desc: "Perform Monte Carlo simulations by introducing artificial CTH perturbation errors to model horizontal correction uncertainty.",
+                        deliverables: [
+                            "Implement Monte Carlo sensitivity script.",
+                            "Perturb CTH by ±1 km and ±2 km.",
+                            "Log horizontal shift uncertainty bounds."
+                        ],
+                        tag: "Validation",
+                        path: "src/validation/",
+                        fileLink: "../src/validation/"
+                    }
+                ]
+            },
+            {
+                month: "Month 4",
+                title: "Downstream Model Evaluation, Manuscript & Code Release",
+                weeks: [
+                    {
+                        id: 13,
+                        title: "Impact Assessment on Deep Learning Segmentation",
+                        desc: "Train two identical 8-channel U-Net precipitation classification models to quantify how correcting spatial labels affects model convergence.",
+                        deliverables: [
+                            "Train Model A (uncorrected INSAT inputs + GPM DPR labels).",
+                            "Train Model B (corrected INSAT inputs + GPM DPR labels).",
+                            "Evaluate and plot boundary edge precision (target: +17% edge precision)."
+                        ],
+                        tag: "DL Eval",
+                        path: "06_deep_learning/",
+                        fileLink: "../06_deep_learning/"
+                    },
+                    {
+                        id: 14,
+                        title: "Manuscript Structuring & Figure Generation",
+                        desc: "Draft manuscript structure and prepare high-fidelity visuals showing ray-tracing calculations and shift corrections.",
+                        deliverables: [
+                            "Outline introduction, methodology, and multi-sensor validation sections.",
+                            "Generate 3D ray-tracing schematics and satellite-radar overlay plots.",
+                            "Compile results tables for Ghats, Himalayas, and Central India."
+                        ],
+                        tag: "Manuscript",
+                        path: "07_figures/",
+                        fileLink: "../07_figures/"
+                    },
+                    {
+                        id: 15,
+                        title: "Manuscript Writing & Peer Review",
+                        desc: "Write the full research article in LaTeX and conduct self-review of mathematical proofs and validation metrics.",
+                        deliverables: [
+                            "Write LaTeX source pages and format mathematical equations.",
+                            "Compile bibliography and reference citations.",
+                            "Conduct internal peer review and proofreading."
+                        ],
+                        tag: "Manuscript",
+                        path: "08_manuscript/",
+                        fileLink: "../08_manuscript/"
+                    },
+                    {
+                        id: 16,
+                        title: "Code Packaging & Submission",
+                        desc: "Package the PyGeoParallax-IN code as an open-source library, release it on GitHub with tutorials, and submit the paper.",
+                        deliverables: [
+                            "Clean and document modules inside src/.",
+                            "Create demonstration Jupyter notebooks in notebooks/.",
+                            "Package Python library and submit the research paper to the target journal."
+                        ],
+                        tag: "Release",
+                        path: "src/",
+                        fileLink: "../src/"
+                    }
+                ]
+            }
+        ];
+
+        // Targets metrics configuration
+        const targetMetrics = [
+            {
+                id: "gpm-iou",
+                name: "GPM DPR Echo-Top Boundary IoU",
+                baseline: 0.45,
+                target: 0.72,
+                unit: "",
+                desc: "Measures spatial overlap (Intersection over Union) with spaceborne precipitation radar echo-tops. Higher is better.",
+                min: 0.3,
+                max: 1.0,
+                step: 0.01
+            },
+            {
+                id: "imd-corr",
+                name: "IMD DWR Core Cross-Correlation",
+                baseline: 0.51,
+                target: 0.82,
+                unit: "",
+                desc: "Cross-correlation factor of precipitation cells between INSAT geostationary observations and IMD ground radar reflectivity.",
+                min: 0.4,
+                max: 1.0,
+                step: 0.01
+            },
+            {
+                id: "shift-dist",
+                name: "Mean Geolocation Shift Distance",
+                baseline: 0.0,
+                target: 8.6,
+                unit: " km",
+                desc: "Average distance correction applied to restore true physical geolocation over high VZA areas (Himalayan benchmark).",
+                min: 0.0,
+                max: 15.0,
+                step: 0.1
+            },
+            {
+                id: "unet-prec",
+                name: "Downstream U-Net Edge Precision",
+                baseline: 0.45,
+                target: 0.62,
+                unit: "",
+                desc: "Boundary edge accuracy scores for deep learning precip models trained on correctly aligned labels.",
+                min: 0.3,
+                max: 0.9,
+                step: 0.01
+            }
+        ];
+
+        // Architecture mapping details
+        const archMap = [
+            {
+                dir: "00_Documentation/",
+                desc: "Houses the core reference materials, research papers, access logins, and timeline tracking utilities.",
+                inputs: "User configuration files, developer notebooks, and research literature.",
+                scripts: "None (documentation repository)."
+            },
+            {
+                dir: "01_raw_data/",
+                desc: "Aggregates raw datasets from various data providers prior to standard grid resampling.",
+                inputs: "HDF5/L1C imager files (MOSDAC), L2 CTH grids, ERA5 GRIB files, NASA orbits, IMD radar scans, SRTM tiles.",
+                scripts: "src/ingest/ download helpers."
+            },
+            {
+                dir: "02_standardized_grid/",
+                desc: "Stores standardized resampled grids (0.04-degree) representing INSAT, ERA5, and SRTM coordinates.",
+                inputs: "Raw datasets from 01_raw_data/.",
+                scripts: "src/ingest/ standardizing parsers."
+            },
+            {
+                dir: "03_intermediate/",
+                desc: "Contains intermediate coordinate transforms, filled cloud-top heights, and ECEF coordinates.",
+                inputs: "02_standardized_grid/ files.",
+                scripts: "src/geometry/ viewing angles compute & CTH fallback estimators."
+            },
+            {
+                dir: "04_corrected_output/",
+                desc: "The final output repository holding parallax-corrected products in NetCDF and GeoTIFF formats.",
+                inputs: "ECEF coordinates & intermediate grids.",
+                scripts: "src/geometry/ ray-tracer solver & src/resample/ BucketResampler."
+            },
+            {
+                dir: "05_validation/",
+                desc: "Holds quantitative analysis output files comparing corrected grids with GPM radar and ground radar references.",
+                inputs: "04_corrected_output/ files + raw reference validation files.",
+                scripts: "src/validation/ colocation scripts & Monte Carlo sensitivites."
+            },
+            {
+                dir: "06_deep_learning/",
+                desc: "Contains the deep learning experiments training UNet segmentation models on corrected vs. uncorrected images.",
+                inputs: "04_corrected_output/ dataset variables.",
+                scripts: "Keras/PyTorch training and evaluation notebook scripts."
+            },
+            {
+                dir: "src/",
+                desc: "The root modules folder containing the core algorithm components of the PyGeoParallax-IN package.",
+                inputs: "Python packages, packages libraries.",
+                scripts: "ingest/, geometry/, resample/, and validation/ libraries."
+            }
+        ];
+
+        // State Management
+        let completedWeeks = [];
+        let metricValues = {};
+        let selectedWeekId = null;
+
+        // Initialize App
+        document.addEventListener("DOMContentLoaded", () => {
+            loadState();
+            renderRoadmap();
+            renderMetrics();
+            renderArchitecture();
+            updateProgress();
+        });
+
+        // Tab switcher
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+            
+            // Find click target button
+            const clickedBtn = Array.from(document.querySelectorAll(".tab-btn")).find(btn => btn.textContent.toLowerCase().includes(tabId));
+            if (clickedBtn) clickedBtn.classList.add("active");
+            
+            const targetContent = document.getElementById(`${tabId}-tab`);
+            if (targetContent) targetContent.classList.add("active");
+        }
+
+        // Render Roadmap Timeline
+        function renderRoadmap() {
+            const container = document.getElementById("roadmap-container");
+            container.innerHTML = "";
+
+            projectData.forEach(month => {
+                const section = document.createElement("div");
+                section.className = "month-section";
+
+                const header = document.createElement("div");
+                header.className = "month-header";
+                header.innerHTML = `
+                    <span class="month-badge">${month.month}</span>
+                    <span class="month-title">${month.title}</span>
+                `;
+                section.appendChild(header);
+
+                const grid = document.createElement("div");
+                grid.className = "weeks-grid";
+
+                month.weeks.forEach(week => {
+                    const isCompleted = completedWeeks.includes(week.id);
+                    const isActive = getActiveWeekId() === week.id;
+                    
+                    const card = document.createElement("div");
+                    card.className = `week-card ${isCompleted ? 'completed' : ''} ${isActive ? 'active-week' : ''}`;
+                    card.id = `week-card-${week.id}`;
+                    card.onclick = (e) => {
+                        // Prevent click event when toggle is checkbox
+                        if (e.target.closest('.week-checkbox')) return;
+                        openSidebar(week.id);
+                    };
+
+                    card.innerHTML = `
+                        <div class="week-card-header">
+                            <span class="week-num">${isActive ? '⚡ Active Now' : isCompleted ? '✓ Complete' : `Week ${week.id}`}</span>
+                            <div class="week-checkbox" onclick="toggleWeek(${week.id})">
+                                <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                            </div>
+                        </div>
+                        <div class="week-title">${week.title}</div>
+                        <div class="week-desc">${week.desc.substring(0, 100)}...</div>
+                        <div class="week-footer">
+                            <span class="week-tag">${week.tag}</span>
+                            <span style="font-family: monospace;">${week.path}</span>
+                        </div>
+                    `;
+
+                    grid.appendChild(card);
+                });
+
+                section.appendChild(grid);
+                container.appendChild(section);
+            });
+        }
+
+        // Get currently active week ID (first incomplete week)
+        function getActiveWeekId() {
+            for (let i = 1; i <= 16; i++) {
+                if (!completedWeeks.includes(i)) {
+                    return i;
+                }
+            }
+            return 16; // default to last week if all complete
+        }
+
+        // Render Performance Metrics
+        function renderMetrics() {
+            const container = document.getElementById("metrics-container");
+            container.innerHTML = "";
+
+            targetMetrics.forEach(metric => {
+                const currentVal = metricValues[metric.id] !== undefined ? metricValues[metric.id] : metric.baseline;
+                const ratio = Math.min(100, Math.max(0, ((currentVal - metric.min) / (metric.max - metric.min)) * 100));
+                const targetRatio = Math.min(100, Math.max(0, ((metric.target - metric.min) / (metric.max - metric.min)) * 100));
+                
+                // Color formatting
+                let statusBadgeColor = "rgba(75, 85, 99, 0.15)";
+                let statusBadgeText = "In Progress";
+                let statusTextColor = "var(--text-secondary)";
+                
+                if (currentVal >= metric.target) {
+                    statusBadgeColor = "rgba(16, 185, 129, 0.15)";
+                    statusBadgeText = "Target Met";
+                    statusTextColor = "var(--color-completed)";
+                }
+
+                const card = document.createElement("div");
+                card.className = "metric-card";
+                card.innerHTML = `
+                    <div class="metric-card-header">
+                        <div class="metric-name">${metric.name}</div>
+                        <div class="metric-badge" style="background:${statusBadgeColor}; color:${statusTextColor};">${statusBadgeText}</div>
+                    </div>
+                    <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">${metric.desc}</p>
+                    <div class="metric-target-info">
+                        <div class="metric-val-box">
+                            <span>Baseline</span>
+                            <strong>${metric.baseline}${metric.unit}</strong>
+                        </div>
+                        <div class="metric-val-box">
+                            <span>Current</span>
+                            <strong id="metric-current-val-${metric.id}" style="color:${currentVal >= metric.target ? 'var(--color-completed)' : 'var(--color-inprogress)'}">${currentVal}${metric.unit}</strong>
+                        </div>
+                        <div class="metric-val-box">
+                            <span>Target</span>
+                            <strong style="color:#c084fc;">${metric.target}${metric.unit}</strong>
+                        </div>
+                    </div>
+                    <div class="metric-visualizer">
+                        <input type="range" class="metric-slider" id="slider-${metric.id}" 
+                            min="${metric.min}" max="${metric.max}" step="${metric.step}" value="${currentVal}"
+                            oninput="updateMetric('${metric.id}', parseFloat(this.value))">
+                        <div class="metric-progress-track">
+                            <div class="metric-progress-fill" id="fill-${metric.id}" style="width: ${ratio}%"></div>
+                        </div>
+                        <div class="metric-label-pos">
+                            <span>Min: ${metric.min}</span>
+                            <span>Max: ${metric.max}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Render Workspace Architecture Map
+        function renderArchitecture() {
+            const treeContainer = document.getElementById("arch-tree-container");
+            treeContainer.innerHTML = "";
+
+            archMap.forEach((comp, idx) => {
+                const item = document.createElement("div");
+                item.className = `arch-tree-item ${idx === 0 ? 'active' : ''}`;
+                item.innerHTML = `
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <span>${comp.dir}</span>
+                `;
+                item.onclick = () => selectArchComponent(idx, item);
+                treeContainer.appendChild(item);
+                
+                // Show first component details by default
+                if (idx === 0) {
+                    showArchDetails(comp);
+                }
+            });
+        }
+
+        function selectArchComponent(idx, element) {
+            document.querySelectorAll(".arch-tree-item").forEach(item => item.classList.remove("active"));
+            element.classList.add("active");
+            showArchDetails(archMap[idx]);
+        }
+
+        function showArchDetails(comp) {
+            document.getElementById("arch-detail-title").textContent = comp.dir;
+            document.getElementById("arch-detail-desc").textContent = comp.desc;
+            document.getElementById("arch-meta-inputs").textContent = comp.inputs;
+            document.getElementById("arch-meta-scripts").textContent = comp.scripts;
+            document.getElementById("arch-detail-meta").style.display = "grid";
+        }
+
+        // Update single metric value
+        function updateMetric(id, value) {
+            metricValues[id] = value;
+            document.getElementById(`metric-current-val-${id}`).textContent = value + (targetMetrics.find(m => m.id === id).unit || "");
+            
+            const metric = targetMetrics.find(m => m.id === id);
+            const ratio = ((value - metric.min) / (metric.max - metric.min)) * 100;
+            document.getElementById(`fill-${id}`).style.width = `${ratio}%`;
+            
+            // Update Card badge
+            const badge = document.getElementById(`slider-${id}`).closest('.metric-card').querySelector('.metric-badge');
+            if (value >= metric.target) {
+                badge.style.background = "rgba(16, 185, 129, 0.15)";
+                badge.style.color = "var(--color-completed)";
+                badge.textContent = "Target Met";
+                document.getElementById(`metric-current-val-${id}`).style.color = "var(--color-completed)";
+            } else {
+                badge.style.background = "rgba(75, 85, 99, 0.15)";
+                badge.style.color = "var(--text-secondary)";
+                badge.textContent = "In Progress";
+                document.getElementById(`metric-current-val-${id}`).style.color = "var(--color-inprogress)";
+            }
+            saveState();
+        }
+
+        // Toggle week complete/incomplete
+        function toggleWeek(weekId) {
+            const index = completedWeeks.indexOf(weekId);
+            if (index > -1) {
+                completedWeeks.splice(index, 1);
+            } else {
+                completedWeeks.push(weekId);
+            }
+            completedWeeks.sort((a,b) => a-b);
+            saveState();
+            
+            // Re-render components to adjust styling
+            renderRoadmap();
+            updateProgress();
+            
+            // Adjust detail panel button text if panel is open for this week
+            if (selectedWeekId === weekId) {
+                updateSidebarButtonState(weekId);
+            }
+        }
+
+        // Update top-level metrics gauges
+        function updateProgress() {
+            const totalWeeks = 16;
+            const completedCount = completedWeeks.length;
+            const pct = Math.round((completedCount / totalWeeks) * 100);
+
+            // Circle ring updates
+            const ring = document.getElementById("main-progress-ring");
+            const circumference = 2 * Math.PI * 56; // 351.8
+            const offset = circumference - (pct / 100) * circumference;
+            ring.style.strokeDashoffset = offset;
+
+            // Values
+            document.getElementById("main-progress-text").textContent = `${pct}%`;
+            document.getElementById("main-progress-bar").style.width = `${pct}%`;
+            document.getElementById("completed-stat").textContent = `${completedCount} / 16`;
+            document.getElementById("completion-badge").textContent = `${pct}% Done`;
+            
+            // Update Active display
+            const activeWeekId = getActiveWeekId();
+            document.getElementById("active-week-display").textContent = `Week ${activeWeekId}`;
+            
+            // Find week name
+            let activeName = "Complete!";
+            projectData.forEach(month => {
+                month.weeks.forEach(w => {
+                    if (w.id === activeWeekId) {
+                        activeName = w.title;
+                    }
+                });
+            });
+            document.getElementById("active-week-name").textContent = activeName;
+        }
+
+        // Sidebar Operations
+        function openSidebar(weekId) {
+            selectedWeekId = weekId;
+            let week = null;
+            
+            // Find week data
+            projectData.forEach(m => {
+                m.weeks.forEach(w => {
+                    if (w.id === weekId) week = w;
+                });
+            });
+
+            if (!week) return;
+
+            document.getElementById("panel-week-id").textContent = `Week ${week.id}`;
+            document.getElementById("panel-week-title").textContent = week.title;
+            document.getElementById("panel-week-desc").textContent = week.desc;
+
+            // Deliverables list
+            const delList = document.getElementById("panel-week-deliverables");
+            delList.innerHTML = "";
+            week.deliverables.forEach(d => {
+                const li = document.createElement("li");
+                li.textContent = d;
+                li.style.marginBottom = "8px";
+                delList.appendChild(li);
+            });
+
+            // Files links
+            const filesBox = document.getElementById("panel-week-files");
+            filesBox.innerHTML = `
+                <a href="${week.fileLink}" class="file-link" target="_blank">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    ${week.path}
+                </a>
+            `;
+
+            updateSidebarButtonState(weekId);
+
+            // Open views
+            document.getElementById("detail-panel").classList.add("open");
+            document.getElementById("panel-overlay").classList.add("open");
+        }
+
+        function updateSidebarButtonState(weekId) {
+            const btn = document.getElementById("panel-toggle-complete-btn");
+            const isCompleted = completedWeeks.includes(weekId);
+            
+            if (isCompleted) {
+                btn.textContent = "Mark Week Incomplete";
+                btn.style.background = "rgba(220, 38, 38, 0.2)";
+                btn.style.border = "1px solid rgba(220, 38, 38, 0.4)";
+                btn.style.color = "#fca5a5";
+                btn.style.boxShadow = "none";
+            } else {
+                btn.textContent = "Mark Week Completed";
+                btn.style.background = "var(--grad-primary)";
+                btn.style.border = "none";
+                btn.style.color = "white";
+                btn.style.boxShadow = "0 4px 12px rgba(139, 92, 246, 0.25)";
+            }
+
+            btn.onclick = () => {
+                toggleWeek(weekId);
+            };
+        }
+
+        function closeSidebar() {
+            document.getElementById("detail-panel").classList.remove("open");
+            document.getElementById("panel-overlay").classList.remove("open");
+            selectedWeekId = null;
+        }
+
+        // Local Storage State Management
+        function saveState() {
+            localStorage.setItem("pygeoparallax_completed_weeks", JSON.stringify(completedWeeks));
+            localStorage.setItem("pygeoparallax_metrics", JSON.stringify(metricValues));
+        }
+
+        function loadState() {
+            const savedWeeks = localStorage.getItem("pygeoparallax_completed_weeks");
+            const savedMetrics = localStorage.getItem("pygeoparallax_metrics");
+            
+            if (savedWeeks) {
+                completedWeeks = JSON.parse(savedWeeks);
+            } else {
+                completedWeeks = [];
+            }
+
+            if (savedMetrics) {
+                metricValues = JSON.parse(savedMetrics);
+            } else {
+                // Initialize default
+                metricValues = {};
+                targetMetrics.forEach(m => {
+                    metricValues[m.id] = m.baseline;
+                });
+            }
+        }
+
+        // Reset all states
+        document.getElementById("reset-btn").onclick = () => {
+            if (confirm("Are you sure you want to reset all timeline progress and metric sliders?")) {
+                completedWeeks = [];
+                targetMetrics.forEach(m => {
+                    metricValues[m.id] = m.baseline;
+                });
+                saveState();
+                
+                // Re-render
+                renderRoadmap();
+                renderMetrics();
+                updateProgress();
+                closeSidebar();
+            }
+        };
+    </script>
+</body>
+</html>
