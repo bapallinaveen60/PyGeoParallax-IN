@@ -11,6 +11,8 @@ Contains background literature, project indices, data access logs, API configura
 *   **[related_papers/](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/related_papers)**: Core reference papers on satellite parallax shift corrections (e.g., Vicente et al. 2002, Bieliński 2020).
 *   **[reading_tracker.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/related_papers/reading_tracker.md)**: Tabulated literature review tracking method details, project relevance, and study status.
 *   **[data_access_notes.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/data_access_notes.md)**: Developer credentials, login steps, download scripts, and rate limits for IMD, MOSDAC, Copernicus (ERA5), and NASA EarthData.
+*   **[project_tracker.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/project_tracker.md)**: Master timeline progress tracker for all 16 implementation weeks.
+
 
 ### [01_raw_data](file:///D:/Projects/PyGeoParallax-IN/01_raw_data)
 Raw geospatial data organized by source and time periods (June-September monsoon seasons: JJAS).
