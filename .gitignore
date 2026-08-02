@@ -1,0 +1,70 @@
+# --- Python & Jupyter ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Environments & Distribution ---
+.venv/
+venv/
+env/
+.env
+build/
+dist/
+*.egg-info/
+
+# --- IDEs & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Large Geospatial & Source Datasets ---
+# We keep the folder structure via .gitkeep, but ignore actual raw/processed/intermediate data files.
+01_raw_data/**/*
+!01_raw_data/**/.gitkeep
+
+02_standardized_grid/**/*
+!02_standardized_grid/**/.gitkeep
+
+03_intermediate/**/*
+!03_intermediate/**/.gitkeep
+
+04_corrected_output/**/*
+!04_corrected_output/**/.gitkeep
+
+05_validation/**/*
+!05_validation/**/.gitkeep
+
+06_deep_learning/**/*
+!06_deep_learning/**/.gitkeep
+
+07_figures/**/*
+!07_figures/**/.gitkeep
+
+# Ignore general geospatial data formats if they happen to be in other places
+*.nc
+*.nc4
+*.hdf5
+*.h5
+*.tif
+*.tiff
+*.grib
+*.grb
+*.dem
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+
+# --- LaTeX Auxiliary Files ---
+08_manuscript/latex_source/*.aux
+08_manuscript/latex_source/*.log
+08_manuscript/latex_source/*.out
+08_manuscript/latex_source/*.toc
+08_manuscript/latex_source/*.synctex.gz
+08_manuscript/latex_source/*.pdf
