@@ -5,7 +5,6 @@ __pycache__/
 *.pyd
 .pytest_cache/
 .ipynb_checkpoints/
-*.ipynb
 
 # --- Environments & Distribution ---
 .venv/
@@ -23,26 +22,34 @@ dist/
 Thumbs.db
 
 # --- Large Geospatial & Source Datasets ---
-# We keep the folder structure via .gitkeep, but ignore actual raw/processed/intermediate data files.
-01_raw_data/**/*
+# Keep the folder structure via .gitkeep, but ignore actual raw/processed/intermediate data files.
+# Directories must be re-included (`!dir/**/`) or git never looks inside them for .gitkeep.
+01_raw_data/**
+!01_raw_data/**/
 !01_raw_data/**/.gitkeep
 
-02_standardized_grid/**/*
+02_standardized_grid/**
+!02_standardized_grid/**/
 !02_standardized_grid/**/.gitkeep
 
-03_intermediate/**/*
+03_intermediate/**
+!03_intermediate/**/
 !03_intermediate/**/.gitkeep
 
-04_corrected_output/**/*
+04_corrected_output/**
+!04_corrected_output/**/
 !04_corrected_output/**/.gitkeep
 
-05_validation/**/*
+05_validation/**
+!05_validation/**/
 !05_validation/**/.gitkeep
 
-06_deep_learning/**/*
+06_deep_learning/**
+!06_deep_learning/**/
 !06_deep_learning/**/.gitkeep
 
-07_figures/**/*
+07_figures/**
+!07_figures/**/
 !07_figures/**/.gitkeep
 
 # Ignore general geospatial data formats if they happen to be in other places

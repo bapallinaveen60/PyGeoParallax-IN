@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygeoparallax-in"
+description = "Cloud parallax correction for INSAT-3DR geostationary imagery over the Indian subcontinent"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Naveen Bapalli" }]
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+    "numpy>=1.22",
+    "scipy>=1.8",
+    "pandas>=1.4",
+    "xarray>=2022.03",
+    "netcdf4>=1.5.8",
+    "h5py>=3.6",
+    "pyproj>=3.3",
+    "numba>=0.56",
+]
+
+[project.optional-dependencies]
+geo = ["rioxarray>=0.11", "geopandas>=0.10", "cartopy>=0.20"]
+download = ["cdsapi>=0.5.1", "requests>=2.28"]
+plot = ["matplotlib>=3.5"]
+dev = ["pytest>=7.0", "ipykernel>=6.9"]
+
+[project.urls]
+Repository = "https://github.com/bapallinaveen60/PyGeoParallax-IN"
+
+[tool.setuptools.dynamic]
+version = { attr = "pygeoparallax.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

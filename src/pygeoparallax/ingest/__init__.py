@@ -1,0 +1,1 @@
+"""Readers for INSAT-3DR L1C/CTH (HDF5), ERA5 (NetCDF/GRIB), GPM 2A.DPR and SRTM."""

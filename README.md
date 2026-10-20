@@ -17,6 +17,7 @@ PyGeoParallax-IN/
 │   ├── PROJECT_INDEX.md             # Guide to directory roles & workflow
 │   ├── project_tracker.md           # 16-week project implementation tracker
 │   ├── project_dashboard.html       # Interactive visual roadmap & metrics dashboard
+│   ├── events/                      # GPM overpass candidates for validation
 │   ├── related_papers/              # Core literature papers
 │   │   ├── vicente_2002.pdf         # Vicente et al. (2002) foundational paper
 │   │   ├── bielinski_2020.pdf       # Bieliński (2020) modern implementation
@@ -62,15 +63,18 @@ PyGeoParallax-IN/
 │   ├── latex_source/
 │   └── submission_versions/
 │
-├── src/                             # Core codebase
+├── src/pygeoparallax/               # Installable Python package
 │   ├── ingest/                      # Data parsers (HDF5, NetCDF, GRIB)
 │   ├── geometry/                    # Ray-tracers, coordinate converters, solvers
 │   ├── resample/                    # Regridding and interpolation algorithms
-│   ├── validation/                  # Colocation and statistical computations
-│   └── tests/                       # Unit tests
+│   └── validation/                  # Colocation and statistical computations
 │
+├── tests/                           # Unit tests (pytest)
+├── scripts/                         # Standalone utilities (e.g. GPM overpass finder)
 ├── notebooks/                       # Exploratory Jupyter Notebooks
 │
+├── pyproject.toml                   # Package metadata and dependencies
+├── LICENSE                          # MIT License
 ├── environment.yml                  # Conda environment definition
 └── README.md                        # Project readme (this file)
 ```
@@ -86,14 +90,26 @@ PyGeoParallax-IN/
    conda env create -f environment.yml
    conda activate pygeoparallax_in
    ```
+   Without conda, a plain virtual environment works too:
+   ```bash
+   python -m venv .venv
+   pip install -e ".[geo,download,plot,dev]"
+   ```
+   Run the tests with `pytest`.
 3. **Register Credentials**:
-   Follow instructions in [data_access_notes.md](file:///D:/Projects/PyGeoParallax-IN/00_Documentation/data_access_notes.md) to set up CDSAPI keys, NASA Earthdata logins, and MOSDAC logins.
+   Follow instructions in [data_access_notes.md](00_Documentation/data_access_notes.md) to set up CDSAPI keys, NASA Earthdata logins, and MOSDAC logins.
 
 ---
 
 ## Basic Workflow
 
-1. **Ingest Raw Data**: Standardize datasets to the 0.04-degree grid using the ingest scripts under `src/ingest/`.
-2. **Compute Geometry & Fallbacks**: Calculate satellite viewing angles and perform ERA5 vertical interpolation for missing cloud heights under `src/geometry/`.
+1. **Ingest Raw Data**: Standardize datasets to the 0.04-degree grid using the ingest scripts under `src/pygeoparallax/ingest/`.
+2. **Compute Geometry & Fallbacks**: Calculate satellite viewing angles and perform ERA5 vertical interpolation for missing cloud heights under `src/pygeoparallax/geometry/`.
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
 4. **Validation & Assessment**: Evaluate corrected outputs against IMD DWR and GPM radar overpasses using validation modules.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
