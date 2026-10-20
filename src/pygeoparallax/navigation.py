@@ -86,7 +86,7 @@ def _corr(a, b):
     return float((a * b).sum() / den) if den > 0 else np.nan
 
 
-def measure_window(lat, lon, image, interp, sign=1.0, clear=None, max_km=20.0, coarse_km=2.0,
+def measure_window(lat, lon, image, interp, sign=1.0, clear=None, max_km=30.0, coarse_km=2.0,
                    fine_km=0.5, min_pixels=300, min_side=50):
     """Best coastline shift for one window.
 
@@ -198,7 +198,7 @@ class NavigationCorrection:
             raise ValueError("a navigation correction needs at least one measured point")
 
     @classmethod
-    def from_matches(cls, matches, min_r=0.5, power=2.0):
+    def from_matches(cls, matches, min_r=0.6, power=2.0):
         """Build from :func:`measure_scan` results (one or several scans).
 
         Weak (r < ``min_r``) and edge-of-search matches are dropped. Several

@@ -115,8 +115,8 @@ pygeoparallax correct scene.nc out.nc --nav-correction 05_validation/nav_correct
 In Python, `read_insat_l1c(path, position_offset_km=NavigationCorrection.from_json(...))` applies it per pixel.
 
 - **How the field is built:**
-  - Each window's offset is measured with a 2 km coarse search refined to 0.5 km.
-  - Weak (r < 0.5) and edge-of-search matches are dropped.
+  - Each window's offset is measured with a 2 km coarse search over ±30 km, refined to 0.5 km.
+  - Weak (r < 0.6) and edge-of-search matches are dropped. r < 0.6 matches in cloudy monsoon scenes produced implausible offsets, e.g. +24.5 km E and +28.5 km N in Kerala on 15 Jul 2022.
   - Matches for the same window from several scans are combined by median.
   - Between windows the correction is inverse-distance weighted (power 2).
 - **How well it works (re-using the matches in this document):**
@@ -133,3 +133,39 @@ In Python, `read_insat_l1c(path, position_offset_km=NavigationCorrection.from_js
   - Between coasts it roughly halves it.
   - A field from another period can make things much worse.
 - **Example (15 Feb 2023):** the correction is E −3.5 km at Mumbai, −9.8 km at Kochi and −13.5 km at Agartala. Kochi and Agartala are interpolated, since Kerala and the Northeast had no usable window that day. North components were −2.5 to −7 km.
+
+## Timeline: Jun 2022 – Dec 2024 (third run)
+
+Four more 06:15 UTC scans were downloaded: 15 Jul 2022, 15 Aug 2022, 15 Dec 2023 and 15 Dec 2024. Corrections were measured with `pygeoparallax navigation` (±30 km search, r ≥ 0.6) and saved to `05_validation/nav_corrections/` (git-ignored).
+
+| Date | Confidence | East correction by window [km] | Reading |
+| :--- | :--- | :--- | :--- |
+| 6 Jun 2022 | good (r 0.67–0.79) | Kutch +3, Saurashtra +2, Konkan 0, Rakhine −2/−3 | ≈ 0 everywhere |
+| 15 Jul 2022 | **none**: monsoon cloud, no window reached r 0.6 | — | unknown |
+| 15 Aug 2022 | poor: 2 windows that disagree, implausible N +14 | Odisha −6, Rakhine +8 | unknown |
+| 30 Sep 2022 – 15 Feb 2023 | good | Konkan/Goa ≈ 0; Kutch/Saurashtra −8; Sri Lanka/Chennai/Andhra/Rakhine −9 … −12; Odisha −15 | west correction, growing away from ~73–74°E |
+| 15 Dec 2023 | good (r 0.70–0.88) | Goa +4.5, Kutch −5, Saurashtra −4.5, Rakhine −6.5, Odisha −12 | same pattern, **~4 km smaller** in the west |
+| 15 Dec 2024 | good (r 0.79–0.91) | Goa 0, Konkan −2.5, Saurashtra −9.5, Kutch −10.5, Odisha −20 | same pattern as Dec 2022, **as large or larger** |
+
+North corrections are −1 to −6.5 km in the winter scans. They are larger than in the first runs, partly because of the finer 0.5 km refinement.
+
+### Findings
+
+1. **The error persists.** The same spatial pattern appears in every clear scan from Sep 2022 to Dec 2024: ~0 near Konkan–Goa, a westward correction growing to the west (Kutch) and especially to the east (Odisha). It is not a one-off glitch.
+2. **Its size changes.** Dec 2023 is ~4 km smaller in the west than Dec 2022 or Dec 2024. Odisha ranges from −12 to −20 km.
+3. **When it started is still unknown.** The two monsoon scans (Jul, Aug 2022) are too cloudy. June 2022 was ≈ 0. Two explanations remain:
+   - a **step change** in navigation/processing between Jun and Sep 2022, or
+   - a **seasonal** effect (near zero in summer, large in winter).
+
+   The data so far cannot tell these apart.
+4. **For processing:** always measure a same-day correction. In the monsoon season, clear coastlines may be too scarce for one, so plan validation cases with that in mind or use the nearest clear day.
+
+### Next download to separate "step change" from "seasonal"
+
+Clear pre-monsoon and post-monsoon months (06:15 UTC, `3RIMG_<date>_0615_L1C_SGP_V01R00.h5`):
+
+| Date | Why |
+| :--- | :--- |
+| 15 MAR 2022, 15 APR 2022, 15 MAY 2022 | Before June 2022. If these are ≈ 0, a step change after June is likely. |
+| 15 APR 2023, 15 MAY 2023 | The same season a year later. If they are also ≈ 0, the effect is seasonal. |
+| 15 OCT 2023 | Post-monsoon, completes the seasonal cycle |

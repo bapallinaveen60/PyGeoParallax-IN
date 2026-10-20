@@ -207,7 +207,7 @@ def main(argv=None):
     p.add_argument("--land", default="01_raw_data/natural_earth/ne_10m_land.geojson",
                    help="land polygons GeoJSON (Natural Earth 10 m land)")
     p.add_argument("--windows", nargs="+", help="coastal windows to use (default: all)")
-    p.add_argument("--min-r", type=float, default=0.5, help="reject matches weaker than this")
+    p.add_argument("--min-r", type=float, default=0.6, help="reject matches weaker than this")
     p.set_defaults(func=_cmd_navigation)
 
     args = parser.parse_args(argv)
