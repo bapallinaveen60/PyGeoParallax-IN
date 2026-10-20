@@ -25,8 +25,8 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 2 — Ray-Tracing Engine, Terrain Integration & Resampling
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[ ]` | **Week 5** | Analytical Ellipsoid Ray-Tracing Solver | • Quadratic ellipsoid solver in `src/geometry/`.<br>• Numba/PyCUDA acceleration (< 2s per full disk frame). | |
-| `[ ]` | **Week 6** | SRTM Topographic Relief Integration | • Integrate SRTM elevation into projection loop.<br>• Generate local parallax displacement maps (km). | |
+| `[~]` | **Week 5** | Analytical Ellipsoid Ray-Tracing Solver | • Quadratic ellipsoid solver in `src/geometry/`.<br>• Numba/PyCUDA acceleration (< 2s per full disk frame). | `geometry/parallax.py` done: enlarged ellipsoid plus Newton step, exact to < 1 mm; agrees with satpy within 25 m. Speed: ~9 s full disk / ~1 s India box in numpy, so the Numba speed-up is still to do. |
+| `[~]` | **Week 6** | SRTM Topographic Relief Integration | • Integrate SRTM elevation into projection loop.<br>• Generate local parallax displacement maps (km). | `parallax_correct_terrain` done (clamps clouds to the ground, corrects clear-sky terrain parallax, fixed-point DEM lookup). SRTM ingest still to do. |
 | `[ ]` | **Week 7** | BucketResampler & Gridding Strategy | • `BucketResampler` module in `src/resample/`.<br>• Max-CTH occlusion logic and IDW spatial interpolation. | |
 | `[ ]` | **Week 8** | Pipeline Automation & Batch Processing | • End-to-end orchestration pipeline runner script.<br>• Batch execution on 100 benchmark monsoon storm scenes. | |
 
