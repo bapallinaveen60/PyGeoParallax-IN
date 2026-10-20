@@ -181,5 +181,8 @@ def parallax_shift(lat, lon, lat_c, lon_c):
     """Distance [m] and azimuth [degrees from north] from apparent to corrected position."""
     shape = np.broadcast(lat, lon, lat_c, lon_c).shape
     args = [np.broadcast_to(np.asarray(v, float), shape).ravel() for v in (lon, lat, lon_c, lat_c)]
+    if args[0].size == 1:
+        # pyproj < 3.8 converts 1-element arrays with float(), which NumPy deprecates.
+        args = [float(a[0]) for a in args]
     az, _, dist = _GEOD.inv(*args)
     return np.reshape(dist, shape), np.reshape(np.asarray(az) % 360.0, shape)
