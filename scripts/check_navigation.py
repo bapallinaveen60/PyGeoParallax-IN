@@ -6,7 +6,7 @@ For each coastal window and each scan:
    INSAT pixel footprint, giving each pixel an expected land fraction.
 2. Keep clear-sky pixels only (daytime: low VIS albedo or warm TIR1;
    night: warm TIR1).
-3. Shift the coastline by trial offsets (east/north, 1 km steps) and correlate
+3. Shift the coastline by trial offsets (2 km steps, refined to 0.5 km) and correlate
    the INSAT image with the expected land fraction. Land is brighter in VIS and
    warmer in daytime TIR1, but colder at night, so the sign is set by sun angle.
 4. The best-matching offset is the geolocation error. It is reported as the
@@ -24,91 +24,24 @@ import json
 from pathlib import Path
 
 import numpy as np
-import shapely
-from scipy.interpolate import RegularGridInterpolator
-from scipy.ndimage import uniform_filter
-from shapely.geometry import box, shape
 
 from pygeoparallax.geometry import solar_angles
 from pygeoparallax.ingest import read_insat_l1c
-
-#: Coastal windows (lat_min, lat_max, lon_min, lon_max) with long, simple coastlines.
-WINDOWS = {
-    "saurashtra": (20.0, 23.0, 68.5, 71.8),
-    "konkan": (17.5, 20.5, 71.5, 74.0),
-    "goa_karnataka": (13.5, 16.5, 72.5, 75.5),
-    "kerala": (8.0, 11.5, 74.5, 77.5),
-    "sri_lanka": (5.8, 10.0, 79.0, 82.2),
-    "andhra": (15.0, 17.8, 80.0, 83.0),
-    "odisha": (19.0, 22.0, 85.0, 88.0),
-    "kutch": (22.0, 23.8, 68.3, 70.8),
-    "chennai": (12.0, 14.5, 79.0, 81.0),
-    "andaman": (10.5, 13.8, 92.0, 93.6),
-    "rakhine": (16.5, 20.5, 92.5, 95.5),
-}
-FINE = 0.005  # deg, coastline raster
-PIXEL_KM = 4.0
-MAX_KM = 20
-KM_PER_DEG = 111.2
-
-
-def land_fraction_interpolator(land, bbox, pad=0.5):
-    lat_min, lat_max, lon_min, lon_max = bbox
-    lats = np.arange(lat_min - pad, lat_max + pad, FINE)
-    lons = np.arange(lon_min - pad, lon_max + pad, FINE)
-    region = shapely.intersection(land, box(lons[0], lats[0], lons[-1], lats[-1]))
-    shapely.prepare(region)
-    glon, glat = np.meshgrid(lons, lats)
-    mask = shapely.contains_xy(region, glon, glat).astype(float)
-    size = max(1, int(round(PIXEL_KM / KM_PER_DEG / FINE)))
-    frac = uniform_filter(mask, size=size, mode="nearest")
-    return RegularGridInterpolator((lats, lons), frac, bounds_error=False, fill_value=np.nan)
-
-
-def corr(a, b):
-    a = a - a.mean()
-    b = b - b.mean()
-    den = np.sqrt((a * a).sum() * (b * b).sum())
-    return float((a * b).sum() / den) if den > 0 else np.nan
+from pygeoparallax.navigation import WINDOWS, land_fraction_interpolator, load_land, measure_window
 
 
 def match_window(ds, interp, day):
-    lat = ds["lat"].values
-    lon = ds["lon"].values
     tir = ds["TIR1"].values
     vis = ds["VIS"].values if "VIS" in ds else None
     if day and vis is not None:
-        clear = (vis < 30.0) & (tir > 285.0)
-        img, sign = vis, 1.0
+        res = measure_window(ds["lat"].values, ds["lon"].values, vis, interp, 1.0, (vis < 30.0) & (tir > 285.0))
+        channel = "VIS"
     else:
-        clear = tir > 285.0
-        img, sign = tir, (1.0 if day else -1.0)
-    clear &= np.isfinite(img)
-    ref0 = interp(np.stack([lat[clear], lon[clear]], -1))
-    ok = np.isfinite(ref0)
-    n_land = int((ref0[ok] > 0.9).sum())
-    n_sea = int((ref0[ok] < 0.1).sum())
-    if ok.sum() < 300 or n_land < 50 or n_sea < 50:
-        return None
-    la, lo, v = lat[clear][ok], lon[clear][ok], sign * img[clear][ok]
-    coslat = np.cos(np.radians(la.mean()))
-    offsets = np.arange(-MAX_KM, MAX_KM + 1, 1.0)
-    surface = np.full((offsets.size, offsets.size), np.nan)
-    for i, dn in enumerate(offsets):
-        for j, de in enumerate(offsets):
-            # True position = INSAT position + (de, dn): sample the coastline there.
-            ref = interp(np.stack([la + dn / KM_PER_DEG, lo + de / (KM_PER_DEG * coslat)], -1))
-            good = np.isfinite(ref)
-            surface[i, j] = corr(v[good], ref[good])
-    i, j = np.unravel_index(np.nanargmax(surface), surface.shape)
-    zero = surface[MAX_KM, MAX_KM]
-    return {
-        "east_km": float(offsets[j]), "north_km": float(offsets[i]),
-        "r_best": float(surface[i, j]), "r_zero": float(zero),
-        "on_edge": bool(i in (0, offsets.size - 1) or j in (0, offsets.size - 1)),
-        "clear_pixels": int(ok.sum()), "land": n_land, "sea": n_sea,
-        "channel": "VIS" if (day and vis is not None) else "TIR1",
-    }
+        res = measure_window(ds["lat"].values, ds["lon"].values, tir, interp, 1.0 if day else -1.0, tir > 285.0)
+        channel = "TIR1"
+    if res is not None:
+        res["channel"] = channel
+    return res
 
 
 def main(argv=None):
@@ -123,8 +56,7 @@ def main(argv=None):
     ap.add_argument("--windows", nargs="+", choices=list(WINDOWS), help="only these windows")
     args = ap.parse_args(argv)
 
-    features = json.loads(Path(args.land).read_text())["features"]
-    land = shapely.union_all([shape(f["geometry"]) for f in features])
+    land = load_land(args.land)
     windows = {k: v for k, v in WINDOWS.items() if not args.windows or k in args.windows}
     interps = {name: land_fraction_interpolator(land, bbox) for name, bbox in windows.items()}
 
@@ -146,7 +78,7 @@ def main(argv=None):
             rows.append(res)
             flag = "" if res["r_best"] >= args.min_r and not res["on_edge"] else "  (weak/edge, ignored)"
             print(f"{res['scan']:28s} {name:14s} {res['channel']:4s} "
-                  f"E {res['east_km']:+5.0f} km  N {res['north_km']:+5.0f} km  "
+                  f"E {res['east_km']:+6.1f} km  N {res['north_km']:+6.1f} km  "
                   f"r {res['r_zero']:.2f} -> {res['r_best']:.2f}  n={res['clear_pixels']}{flag}")
 
     good = [r for r in rows if r["r_best"] >= args.min_r and not r["on_edge"]]

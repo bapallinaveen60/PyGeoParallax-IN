@@ -69,7 +69,9 @@ PyGeoParallax-IN/
 │   ├── ingest/                      # Data parsers (HDF5, NetCDF, GRIB)
 │   ├── geometry/                    # Ray-tracers, coordinate converters, solvers
 │   ├── resample/                    # Regridding and interpolation algorithms
-│   └── validation/                  # Colocation and statistical computations
+│   ├── validation/                  # Colocation, metrics and sensitivity analysis
+│   ├── cloudheight.py               # Cloud-top height from BT / pressure
+│   └── navigation.py                # Coastline-based geolocation correction
 │
 ├── tests/                           # Unit tests (pytest)
 ├── scripts/                         # Standalone utilities (e.g. GPM overpass finder)
@@ -130,6 +132,15 @@ pygeoparallax correct scene.nc scene_corrected.nc --dem srtm_0p04deg.nc
 pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_output/netcdf -j 8
 pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_output/uncorrected --no-correction
 ```
+
+INSAT-3DR L1C geolocation can be off by up to ~15 km, varying by date and region (see `00_Documentation/navigation_check.md`). Measure a same-day correction from coastlines and apply it:
+
+```bash
+pygeoparallax navigation "datasets/3RIMG_15FEB2023_*_L1C_SGP_V01R00.h5" -o nav_15FEB2023.json
+pygeoparallax correct scene.nc scene_corrected.nc --nav-correction nav_15FEB2023.json
+```
+
+This needs the Natural Earth 10 m land polygons at `01_raw_data/natural_earth/ne_10m_land.geojson` ([download](https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_land.geojson), public domain).
 
 Validation helpers live in `pygeoparallax.validation`: `compare` (IoU, correlation, mutual information, residual offset), `points_to_grid`, `range_mask`, `nearest_time`, `regional_stats`, `monte_carlo_shift` and `bias_sweep`.
 

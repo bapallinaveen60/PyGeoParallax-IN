@@ -19,6 +19,7 @@ dependencies = [
     "h5py>=3.6",
     "pyproj>=3.3",
     "numba>=0.56",
+    "shapely>=2.0",
 ]
 
 [project.optional-dependencies]

@@ -100,3 +100,36 @@ North corrections are small: median −1 km, mostly within ±5 km.
 | 30 SEP 2022 | 1315 | Replace the truncated file |
 
 Minimum set: 15 DEC 2022 and 15 FEB 2023 at 0415 and 0815.
+
+## Automatic per-scan correction (`pygeoparallax.navigation`)
+
+The coastline matching is now part of the package:
+
+```bash
+# 1. Measure: one correction per day, from all of that day's scans (~7 s per scan)
+pygeoparallax navigation "datasets/insat_nav/3RIMG_15FEB2023_*_L1C_SGP_V01R00.h5" -o 05_validation/nav_corrections/15FEB2023.json
+# 2. Apply: when processing standard scenes
+pygeoparallax correct scene.nc out.nc --nav-correction 05_validation/nav_corrections/15FEB2023.json
+```
+
+In Python, `read_insat_l1c(path, position_offset_km=NavigationCorrection.from_json(...))` applies it per pixel.
+
+- **How the field is built:**
+  - Each window's offset is measured with a 2 km coarse search refined to 0.5 km.
+  - Weak (r < 0.5) and edge-of-search matches are dropped.
+  - Matches for the same window from several scans are combined by median.
+  - Between windows the correction is inverse-distance weighted (power 2).
+- **How well it works (re-using the matches in this document):**
+
+  | Test | Median error after correction | Uncorrected |
+  | :--- | :---: | :---: |
+  | Same day, window left out and predicted from the others (n = 50) | **4.3 km** (p90 9.3) | 8.8 km |
+  | Previous month's field applied (Nov→Dec, Dec→Jan, Jan→Feb) | 3.5–4.8 km | 8.1–10.7 km |
+  | Sep→Nov (Sep field had no east-coast windows) | 7.9 km | 8.2 km |
+  | **Wrong period:** Feb 2023 field applied to 6 Jun 2022 | **15.1 km** | 4.2 km |
+
+- **Use a same-day correction whenever possible.**
+  - At measured coasts it removes the error almost entirely (residual ~1 km).
+  - Between coasts it roughly halves it.
+  - A field from another period can make things much worse.
+- **Example (15 Feb 2023):** the correction is E −3.5 km at Mumbai, −9.8 km at Kochi and −13.5 km at Agartala. Kochi and Agartala are interpolated, since Kerala and the Northeast had no usable window that day. North components were −2.5 to −7 km.

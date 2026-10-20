@@ -17,6 +17,7 @@ dependencies:
   - matplotlib>=3.5
   - cdsapi>=0.5.1
   - numba>=0.56
+  - shapely>=2.0
   - requests>=2.28
   - pytest>=7.0
   - pyorbital>=1.8

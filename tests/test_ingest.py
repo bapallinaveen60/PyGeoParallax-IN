@@ -162,3 +162,21 @@ def test_insat_position_offset(tmp_path):
     assert moved.attrs["position_offset_km"] == [-8.0, 3.0]
     np.testing.assert_array_equal(moved["TIR1"].values, base["TIR1"].values)  # only positions change
     assert "position_offset_km" not in base.attrs
+
+
+def test_insat_position_correction_callable(tmp_path):
+    from pygeoparallax.geometry import parallax_shift
+
+    path = tmp_path / "3RIMG_TEST_L1C_SGP.h5"
+    _write_insat(path)
+    base = read_insat_l1c(path, channels=("TIR1",))
+
+    def field(lat, lon):  # correction grows eastwards: 0 at 75E, -10 km at ~79E
+        east = -10.0 * (lon - 75.0) / 4.0
+        return east, np.zeros_like(east)
+
+    moved = read_insat_l1c(path, channels=("TIR1",), position_offset_km=field)
+    dist, _ = parallax_shift(base["lat"].values, base["lon"].values, moved["lat"].values, moved["lon"].values)
+    expected = np.abs(field(base["lat"].values, base["lon"].values)[0]) * 1000.0
+    np.testing.assert_allclose(dist, expected, rtol=1e-6, atol=1e-3)
+    assert moved.attrs["navigation_correction"] == "position-dependent"

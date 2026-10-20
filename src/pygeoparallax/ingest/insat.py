@@ -77,20 +77,20 @@ def _index_range(coord, lo, hi):
 
 
 def shift_positions(lat, lon, east_km, north_km):
-    """Move positions by a fixed ground distance (geodesic on WGS84).
+    """Move positions by a ground distance (geodesic on WGS84).
 
-    Returns new ``lat, lon`` arrays, displaced ``east_km`` east and
-    ``north_km`` north of the input.
+    ``east_km`` and ``north_km`` may be scalars or arrays matching ``lat``.
+    Returns new ``lat, lon`` arrays.
     """
     lat = np.asarray(lat, float)
     lon = np.asarray(lon, float)
-    dist = np.hypot(east_km, north_km) * 1000.0
-    if dist == 0.0:
+    east = np.broadcast_to(np.asarray(east_km, float), lat.shape)
+    north = np.broadcast_to(np.asarray(north_km, float), lat.shape)
+    dist = np.hypot(east, north) * 1000.0
+    if not np.any(dist):
         return lat.copy(), lon.copy()
-    az = np.degrees(np.arctan2(east_km, north_km))
-    new_lon, new_lat, _ = Geod(ellps="WGS84").fwd(
-        lon.ravel(), lat.ravel(), np.full(lat.size, az), np.full(lat.size, dist)
-    )
+    az = np.degrees(np.arctan2(east, north))
+    new_lon, new_lat, _ = Geod(ellps="WGS84").fwd(lon.ravel(), lat.ravel(), az.ravel(), dist.ravel())
     return np.reshape(new_lat, lat.shape), np.reshape(new_lon, lon.shape)
 
 
@@ -109,10 +109,12 @@ def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=Non
         Read only this region. Only that part of the file is decoded, which is
         much faster than reading the whole sector. The box selects in the
         file's own (uncorrected) coordinates.
-    position_offset_km : (east, north), optional
-        Navigation correction to add to every pixel position [km]. This is the
-        quantity ``scripts/check_navigation.py`` measures, e.g. ``(-8, 0)`` moves
-        all pixels 8 km west. It is recorded in the ``position_offset_km`` attribute.
+    position_offset_km : (east, north) or callable, optional
+        Navigation correction to add to pixel positions [km]. Either a fixed
+        pair, e.g. ``(-8, 0)`` to move every pixel 8 km west, or a
+        position-dependent correction ``f(lat, lon) -> (east, north)`` such as a
+        :class:`pygeoparallax.navigation.NavigationCorrection`. It is recorded in
+        the ``position_offset_km`` attribute (the mean shift, for a callable).
 
     Returns
     -------
@@ -178,9 +180,14 @@ def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=Non
 
     lat2d, lon2d = np.meshgrid(lat_1d, lon_1d, indexing="ij")
     if position_offset_km is not None:
-        east, north = (float(v) for v in position_offset_km)
+        if callable(position_offset_km):
+            east, north = position_offset_km(lat2d, lon2d)
+            attrs["position_offset_km"] = [float(np.mean(east)), float(np.mean(north))]
+            attrs["navigation_correction"] = "position-dependent"
+        else:
+            east, north = (float(v) for v in position_offset_km)
+            attrs["position_offset_km"] = [east, north]
         lat2d, lon2d = shift_positions(lat2d, lon2d, east, north)
-        attrs["position_offset_km"] = [east, north]
     ds = xr.Dataset(data_vars, coords={"lat": (("y", "x"), lat2d), "lon": (("y", "x"), lon2d)}, attrs=attrs)
     ds["lat"].attrs = {"units": "degrees_north", "standard_name": "latitude"}
     ds["lon"].attrs = {"units": "degrees_east", "standard_name": "longitude"}

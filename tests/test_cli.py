@@ -71,3 +71,24 @@ def test_batch_command(tmp_path, capsys):
     # A second run skips finished scenes.
     assert main(args) == 0
     assert capsys.readouterr().out.count("skip") == 3
+
+
+def test_correct_with_navigation_correction(tmp_path):
+    from pygeoparallax.navigation import NavigationCorrection
+
+    src = tmp_path / "scene.nc"
+    _write_scene(src)
+    nav = tmp_path / "nav.json"
+    NavigationCorrection([31.0], [77.0], [-20.0], [0.0]).to_json(nav)  # 20 km west everywhere
+
+    plain, shifted = tmp_path / "plain.nc", tmp_path / "shifted.nc"
+    main(["correct", str(src), str(plain), "--no-correction", *GRID_ARGS])
+    main(["correct", str(src), str(shifted), "--no-correction", "--nav-correction", str(nav), *GRID_ARGS])
+    with xr.open_dataset(plain) as a, xr.open_dataset(shifted) as b:
+        assert b.attrs["navigation_correction"] == "nav.json"
+        cold_a = a["TIR1"].values < 250.0
+        cold_b = b["TIR1"].values < 250.0
+        cols = np.arange(a.sizes["lon"])
+        # The cold cloud moves ~20 km (about 5 cells of 0.04 deg) west.
+        shift_cells = (cols * cold_a).sum() / cold_a.sum() - (cols * cold_b).sum() / cold_b.sum()
+        assert 4.0 < shift_cells < 6.5
