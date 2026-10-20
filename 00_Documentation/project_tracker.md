@@ -17,7 +17,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 1 — Pipeline Setup, Data Engineering & Spatial Transformations
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[ ]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | Package set up; 570 GPM overpasses listed (`00_Documentation/events/`). INSAT ingest waits on MOSDAC data. |
+| `[ ]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | Package set up; 570 GPM overpasses listed (`00_Documentation/events/`). **Readers done:** `read_insat_l1c` (L1C sector, BT/albedo via LUTs) and `read_gpm_2a` (2A Ku/DPR). Still to do: SRTM, ERA5 and INSAT CTH readers. See `sample_data_notes.md`. |
 | `[~]` | **Week 2** | Viewing Geometry & Angle Calculation | • VZA, VAA, and SZA angle maps per INSAT scene.<br>• Verify VZA ranges across regions. | `satellite_view_angles` / `solar_angles` done, within 0.01° of pyorbital. Per-scene maps need the INSAT grid. |
 | `[x]` | **Week 3** | Geocentric ECEF Transformation Engine | • Bidirectional coordinate converter module (`src/geometry/`).<br>• Unit tests matching `pyproj` (< 1m delta). | Done: `geometry/ecef.py`, matches pyproj to < 1 mm. |
 | `[ ]` | **Week 4** | Cloud-Top Height Ingestion & Fallback Module | • CTH grid ingestion parser.<br>• Thermal profile lookup using ERA5 profiles when CTH is NaN. | |

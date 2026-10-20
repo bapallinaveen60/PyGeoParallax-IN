@@ -75,3 +75,6 @@ Thumbs.db
 08_manuscript/latex_source/*.toc
 08_manuscript/latex_source/*.synctex.gz
 08_manuscript/latex_source/*.pdf
+
+# --- Local sample downloads (never commit) ---
+datasets/
