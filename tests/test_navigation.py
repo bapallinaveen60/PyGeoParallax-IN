@@ -63,3 +63,19 @@ def test_navigation_correction_field(tmp_path):
 
     with pytest.raises(ValueError):
         NavigationCorrection.from_matches([_match("x", 0, 0, 1, 1, r=0.1)])
+
+
+def test_from_matches_quality_rules():
+    matches = [
+        _match("kutch", 23.0, 69.5, 4.0, 2.0, scan="0415"),
+        _match("kutch", 23.0, 69.5, 6.0, 3.0, scan="0615"),  # agrees within 5 km: kept (median 5, 2.5)
+        _match("andhra", 16.4, 81.5, 0.0, 2.0, scan="0415"),
+        _match("andhra", 16.4, 81.5, -9.0, 12.0, scan="0615"),  # disagrees: window dropped
+        _match("chennai", 13.2, 80.0, 3.0, 1.0, r=0.70),  # single scan, r < 0.75: dropped
+        _match("sri_lanka", 7.9, 80.6, 2.0, 1.0, r=0.80),  # single scan, strong: kept
+        _match("rakhine", 18.5, 94.0, 26.5, 28.0, r=0.71, scan="0415"),  # implausible: dropped
+    ]
+    corr = NavigationCorrection.from_matches(matches)
+    assert corr.meta["windows"] == ["kutch", "sri_lanka"]
+    np.testing.assert_allclose(corr.east_km, [5.0, 2.0])
+    np.testing.assert_allclose(corr.north_km, [2.5, 1.0])

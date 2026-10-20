@@ -198,28 +198,44 @@ class NavigationCorrection:
             raise ValueError("a navigation correction needs at least one measured point")
 
     @classmethod
-    def from_matches(cls, matches, min_r=0.6, power=2.0):
+    def from_matches(cls, matches, min_r=0.6, power=2.0, max_offset_km=25.0, agree_km=5.0, single_min_r=0.75):
         """Build from :func:`measure_scan` results (one or several scans).
 
-        Weak (r < ``min_r``) and edge-of-search matches are dropped. Several
-        matches for the same window (e.g. from several scans of a day) are
-        combined by their median.
+        A window's matches are kept only if they pass all of these:
+
+        * r >= ``min_r``, not at the search edge, and both components within
+          ``max_offset_km`` (larger values came only from cloud-contaminated
+          monsoon scenes).
+        * If the window was matched in two or more scans (e.g. 04:15 and
+          06:15 of one day), they must agree within ``agree_km`` in both
+          components. A real navigation offset is the same in both scans; a
+          cloud artefact usually is not. The median of the matches is used.
+        * If the window was matched in only one scan, it needs
+          r >= ``single_min_r``.
         """
-        good = [m for m in matches if m["r_best"] >= min_r and not m["on_edge"]]
         by_window = {}
-        for m in good:
-            by_window.setdefault(m["window"], []).append(m)
-        if not by_window:
-            raise ValueError("no usable coastline matches (all weak, at the search edge, or cloudy)")
-        rows = [
-            (np.median([m["lat"] for m in ms]), np.median([m["lon"] for m in ms]),
-             np.median([m["east_km"] for m in ms]), np.median([m["north_km"] for m in ms]), name, len(ms))
-            for name, ms in sorted(by_window.items())
-        ]
+        for m in matches:
+            if m["r_best"] >= min_r and not m["on_edge"] and max(abs(m["east_km"]), abs(m["north_km"])) <= max_offset_km:
+                by_window.setdefault(m["window"], []).append(m)
+        rows = []
+        for name, ms in sorted(by_window.items()):
+            e = [m["east_km"] for m in ms]
+            n = [m["north_km"] for m in ms]
+            if len(ms) >= 2:
+                if max(e) - min(e) > agree_km or max(n) - min(n) > agree_km:
+                    continue
+            elif ms[0]["r_best"] < single_min_r:
+                continue
+            rows.append((np.median([m["lat"] for m in ms]), np.median([m["lon"] for m in ms]),
+                         np.median(e), np.median(n), name, len(ms)))
+        if not rows:
+            raise ValueError("no usable coastline matches (weak, inconsistent between scans, or cloudy)")
         lat, lon, e, n, names, counts = zip(*rows)
+        used = {name for *_, name, _ in rows}
         return cls(lat, lon, e, n, power=power,
                    meta={"windows": list(names), "matches_per_window": list(counts), "min_r": min_r,
-                         "scans": sorted({m["scan"] for m in good})})
+                         "agree_km": agree_km, "single_min_r": single_min_r, "max_offset_km": max_offset_km,
+                         "scans": sorted({m["scan"] for m in matches if m["window"] in used})})
 
     def __call__(self, lat, lon):
         """Correction (east_km, north_km) at the given positions."""

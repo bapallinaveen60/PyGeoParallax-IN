@@ -1,6 +1,8 @@
 # INSAT-3DR L1C Navigation Check (20 Oct 2026)
 
-> **Latest (fourth run, 6 more scans): the error is seasonal.** It switches between two states around the equinoxes, consistent with INSAT's twice-yearly yaw flip. Late Sep to mid Mar: a 7–20 km **west** correction. Mid Apr to Jun: ~0 to +10 km **east**. Konkan–Goa stays ≈ 0 throughout. See *Seasonal pattern* at the end.
+> **Monsoon check (fifth run, 14 scans, Jun–Sep 2023/2024):** errors during the monsoon are small. Median **+1.8 km E, +4.8 km N** (max 12.5 km) over 15 reliable window measurements. A same-day correction was possible on 5 of 7 days; July had none in either year.
+>
+> **Fourth run (6 more scans): the error is seasonal.** It switches between two states around the equinoxes, consistent with INSAT's twice-yearly yaw flip. Late Sep to mid Mar: a 7–20 km **west** correction. Mid Apr to Jun: ~0 to +10 km **east**. Konkan–Goa stays ≈ 0 throughout. See *Seasonal pattern* at the end.
 >
 > **Update (second run, 12 more scans):** the error is **time-dependent and region-dependent**. On 6 Jun 2022 it was ~0 (±3 km) everywhere. From 30 Sep 2022 to 15 Feb 2023 it was a stable west correction of 8–15 km in most regions, but ~0 along the Konkan–Goa coast. See *Second run* below. The first-run text is kept for the record.
 
@@ -210,3 +212,36 @@ North corrections are mostly within ±5 km. Larger values come from noisy, cloud
 
 - **Pin down the switch dates:** scans just before and after each equinox, e.g. 15 SEP 2022, 25 SEP 2022, 15 MAR 2023 and 31 MAR 2023 (all 0615).
 - **Read the equinox sections of the IMD SatMet SOP** for the operational yaw-flip dates.
+
+## Monsoon season check (fifth run)
+
+Fourteen scans at 04:15 and 06:15 UTC: 15 Jun 2024; 15 Jul, 15 Aug and 15 Sep 2023; 15 Jul, 15 Aug and 15 Sep 2024. Both scans of each day were measured together.
+
+**Stricter acceptance rules, now the default in `NavigationCorrection.from_matches`.** Monsoon cloud produced matches with r ≥ 0.6 but impossible offsets: Rakhine +26.5 E / +28 N on 15 Aug 2023, Goa N +28.5, Kerala E −13 / N +12.5. A window is now kept only if:
+- both components are ≤ 25 km;
+- when matched in two or more scans, they agree within 5 km (a real navigation offset is the same at 04:15 and 06:15);
+- when matched in only one scan, r ≥ 0.75.
+
+| Day | Reliable windows (east, north km) |
+| :--- | :--- |
+| 15 Jun 2024 | Kutch (+3.5, +2.0), Saurashtra (+6.0, −2.0) |
+| 15 Jul 2023 | none (cloud) |
+| 15 Jul 2024 | none (cloud) |
+| 15 Aug 2023 | Chennai (0.0, +0.5), Goa (−6.8, +2.0), Odisha (+1.0, −1.5) |
+| 15 Aug 2024 | Andhra (+4.2, +11.8), Chennai (+5.5, −0.5), Goa (−1.5, +12.0) |
+| 15 Sep 2023 | Andhra (+0.5, +6.2), Konkan (−2.8, +5.0), Kutch (+5.5, +5.0), Rakhine (+1.0, +0.8) |
+| 15 Sep 2024 | Chennai (+3.2, +4.8), Saurashtra (+1.8, +7.5), Sri Lanka (+4.2, +8.0) |
+
+Over all 15 reliable measurements: **median E +1.8 km (IQR +0.2 to +4.2), median N +4.8 km (IQR +0.6 to +6.9)**, maximum 12.5 km.
+
+### Conclusions for the study
+
+1. **Errors during the monsoon (Jun – mid Sep) are small**, as the yaw-flip pattern predicted. A typical 2–5 km error is mostly **northward** (the winter state is mostly westward). It is about one INSAT pixel: smaller than the Agartala/Himalaya parallax shifts (8–11 km), but not negligible next to Kochi-type shifts (~4 km).
+2. **A same-day correction is often possible:** 5 of 7 days, using the 04:15 and 06:15 scans together. **July is the exception** (no reliable window in 2023 or 2024).
+3. **Processing rule for monsoon cases:**
+   - Measure a same-day correction from that day's morning scans.
+   - If none is possible (e.g. July), use the nearest monsoon day that has one, or treat the case as having an uncorrected navigation uncertainty of ~5 km and report it.
+   - Never use a winter-state correction.
+4. Some windows (Andhra, Goa) show north offsets of +12 km even when both scans agree. This may be real, or the effect of turbid monsoon coastal water on the land–sea edge. Treat those windows with caution.
+
+Corrections for each measured day are in `05_validation/nav_corrections/<DDMONYYYY>.json` (git-ignored). Days measured before this run used the earlier, laxer rules; re-run `pygeoparallax navigation` on them to regenerate.
