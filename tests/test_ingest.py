@@ -147,3 +147,18 @@ def test_real_sample_files():
         ds = read_gpm_2a(p, bbox=(5.0, 37.0, 66.0, 98.0))
         assert set(np.unique(ds["precip_type"].values)) <= {-1, 0, 1, 2, 3}
         assert np.nanmax(ds["storm_top_height"].values) < 25000.0
+
+
+def test_insat_position_offset(tmp_path):
+    from pygeoparallax.geometry import parallax_shift
+
+    path = tmp_path / "3RIMG_TEST_L1C_SGP.h5"
+    _write_insat(path)
+    base = read_insat_l1c(path, channels=("TIR1",))
+    moved = read_insat_l1c(path, channels=("TIR1",), position_offset_km=(-8.0, 3.0))
+    dist, az = parallax_shift(base["lat"].values, base["lon"].values, moved["lat"].values, moved["lon"].values)
+    np.testing.assert_allclose(dist, np.hypot(8.0, 3.0) * 1000.0, rtol=1e-6)
+    np.testing.assert_allclose(az, np.degrees(np.arctan2(-8.0, 3.0)) % 360.0, atol=1e-3)
+    assert moved.attrs["position_offset_km"] == [-8.0, 3.0]
+    np.testing.assert_array_equal(moved["TIR1"].values, base["TIR1"].values)  # only positions change
+    assert "position_offset_km" not in base.attrs

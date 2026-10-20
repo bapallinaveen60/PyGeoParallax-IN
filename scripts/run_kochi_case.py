@@ -79,8 +79,9 @@ def gpm_on_grid(path):
     }
 
 
-def process_scan(data, scan):
-    l1c = read_insat_l1c(find(data, f"3RIMG_06JUN2022_{scan}_L1C_SGP*.h5"), channels=("TIR1", "WV"), bbox=BBOX)
+def process_scan(data, scan, nav_offset=None):
+    l1c = read_insat_l1c(find(data, f"3RIMG_06JUN2022_{scan}_L1C_SGP*.h5"), channels=("TIR1", "WV"), bbox=BBOX,
+                         position_offset_km=nav_offset)
     ctp_path = find(data, f"3RIMG_06JUN2022_{scan}_L2B_CTP*.h5")
     csbt = read_insat_csbt(ctp_path)
     ctp = read_insat_ctp(ctp_path)
@@ -165,16 +166,20 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data", default="datasets")
     ap.add_argument("--out", default=".")
+    ap.add_argument("--nav-offset", nargs=2, type=float, metavar=("EAST_KM", "NORTH_KM"),
+                    help="INSAT navigation correction to apply (see scripts/check_navigation.py)")
     args = ap.parse_args(argv)
     out = Path(args.out)
+    tag = "" if args.nav_offset is None else f"_nav{args.nav_offset[0]:+g}e{args.nav_offset[1]:+g}n"
 
     gpm = gpm_on_grid(find(args.data, f"2A.GPM.Ku.*.{GPM_ORBIT}.*.HDF5"))
-    results = {s: process_scan(args.data, s) for s in SCANS}
+    results = {s: process_scan(args.data, s, args.nav_offset) for s in SCANS}
 
     vza, vaa = satellite_view_angles(*KOCHI, SAT_LON)
     summary = {
         "case": "2022-06-06 Kochi",
         "gpm_orbit": GPM_ORBIT,
+        "insat_position_offset_km": args.nav_offset,
         "gpm_time_near_kochi": gpm["time"],
         "kochi_vza_deg": float(vza),
         "kochi_vaa_deg": float(vaa),
@@ -194,8 +199,8 @@ def main(argv=None):
         }
         nc = out / "04_corrected_output" / "netcdf"
         nc.mkdir(parents=True, exist_ok=True)
-        cor.to_netcdf(nc / f"kochi_20220606_{s}_corrected.nc")
-        raw.to_netcdf(nc / f"kochi_20220606_{s}_uncorrected.nc")
+        cor.to_netcdf(nc / f"kochi_20220606_{s}{tag}_corrected.nc")
+        raw.to_netcdf(nc / f"kochi_20220606_{s}{tag}_uncorrected.nc")
 
     # Storm motion between the two scans (uncorrected grids), in cells of GRID.res degrees.
     dy, dx, r = best_displacement(results["1645"]["raw"]["TIR1"].values, results["1715"]["raw"]["TIR1"].values, max_lag=15)
@@ -207,10 +212,10 @@ def main(argv=None):
         "displacement_km_in_13_min": float(speed * 13.0),
     }
 
-    js = out / "05_validation" / "gpm_colocation" / "kochi_20220606.json"
+    js = out / "05_validation" / "gpm_colocation" / f"kochi_20220606{tag}.json"
     js.parent.mkdir(parents=True, exist_ok=True)
     js.write_text(json.dumps(summary, indent=2))
-    figure(results, gpm, out / "07_figures" / "kochi_20220606.png")
+    figure(results, gpm, out / "07_figures" / f"kochi_20220606{tag}.png")
     print(json.dumps(summary, indent=2))
 
 

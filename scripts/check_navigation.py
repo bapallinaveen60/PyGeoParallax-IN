@@ -113,18 +113,23 @@ def main(argv=None):
     ap.add_argument("--land", default="01_raw_data/natural_earth/ne_10m_land.geojson")
     ap.add_argument("--out", default="05_validation/navigation_check.json")
     ap.add_argument("--min-r", type=float, default=0.5, help="ignore matches weaker than this")
+    ap.add_argument("--offset", nargs=2, type=float, metavar=("EAST_KM", "NORTH_KM"),
+                    help="apply this position correction first; the result is then the residual error")
+    ap.add_argument("--files", default="3RIMG_*_L1C_SGP_*.h5", help="glob for L1C files under --data")
+    ap.add_argument("--windows", nargs="+", choices=list(WINDOWS), help="only these windows")
     args = ap.parse_args(argv)
 
     features = json.loads(Path(args.land).read_text())["features"]
     land = shapely.union_all([shape(f["geometry"]) for f in features])
-    interps = {name: land_fraction_interpolator(land, bbox) for name, bbox in WINDOWS.items()}
+    windows = {k: v for k, v in WINDOWS.items() if not args.windows or k in args.windows}
+    interps = {name: land_fraction_interpolator(land, bbox) for name, bbox in windows.items()}
 
-    files = sorted(glob.glob(str(Path(args.data) / "**" / "3RIMG_*_L1C_SGP_*.h5"), recursive=True))
+    files = sorted(glob.glob(str(Path(args.data) / "**" / args.files), recursive=True))
     rows = []
     for path in files:
-        for name, bbox in WINDOWS.items():
+        for name, bbox in windows.items():
             try:
-                ds = read_insat_l1c(path, channels=("TIR1", "VIS"), bbox=bbox)
+                ds = read_insat_l1c(path, channels=("TIR1", "VIS"), bbox=bbox, position_offset_km=args.offset)
             except OSError as exc:  # e.g. a truncated download
                 print(f"skip {Path(path).name}: {exc}")
                 break

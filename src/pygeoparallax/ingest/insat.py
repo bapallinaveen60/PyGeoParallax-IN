@@ -12,6 +12,9 @@ Two caveats, found while checking the sample files:
   geometry calculation by about 1 degree. At the sub-satellite point they give
   an elevation above 90 degrees, which is impossible. The reader therefore does
   not load them; use :func:`pygeoparallax.geometry.satellite_view_angles`.
+* A coastline check (``scripts/check_navigation.py``) found the L1C positions
+  ~7-9 km too far east over Saurashtra and Sri Lanka on 30 Sep 2022. Use
+  ``position_offset_km`` in :func:`read_insat_l1c` to apply a measured shift.
 * The ``X``/``Y`` coordinates are taken as pixel centres. The first and last
   values coincide with the product's corner coordinates, so if ISRO intended
   them as edges, positions are off by at most half a pixel (2 km).
@@ -24,7 +27,7 @@ from pathlib import Path
 import h5py
 import numpy as np
 import xarray as xr
-from pyproj import CRS, Transformer
+from pyproj import CRS, Geod, Transformer
 
 #: Channel name -> (count dataset, lookup-table dataset, physical quantity, units)
 CHANNELS = {
@@ -73,7 +76,26 @@ def _index_range(coord, lo, hi):
     return slice(int(idx[0]), int(idx[-1]) + 1)
 
 
-def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=None) -> xr.Dataset:
+def shift_positions(lat, lon, east_km, north_km):
+    """Move positions by a fixed ground distance (geodesic on WGS84).
+
+    Returns new ``lat, lon`` arrays, displaced ``east_km`` east and
+    ``north_km`` north of the input.
+    """
+    lat = np.asarray(lat, float)
+    lon = np.asarray(lon, float)
+    dist = np.hypot(east_km, north_km) * 1000.0
+    if dist == 0.0:
+        return lat.copy(), lon.copy()
+    az = np.degrees(np.arctan2(east_km, north_km))
+    new_lon, new_lat, _ = Geod(ellps="WGS84").fwd(
+        lon.ravel(), lat.ravel(), np.full(lat.size, az), np.full(lat.size, dist)
+    )
+    return np.reshape(new_lat, lat.shape), np.reshape(new_lon, lon.shape)
+
+
+def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=None,
+                   position_offset_km=None) -> xr.Dataset:
     """Read an INSAT-3DR Imager L1C sector file.
 
     Parameters
@@ -85,7 +107,12 @@ def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=Non
         [K], VIS as albedo [%], SWIR as radiance.
     bbox : (lat_min, lat_max, lon_min, lon_max), optional
         Read only this region. Only that part of the file is decoded, which is
-        much faster than reading the whole sector.
+        much faster than reading the whole sector. The box selects in the
+        file's own (uncorrected) coordinates.
+    position_offset_km : (east, north), optional
+        Navigation correction to add to every pixel position [km]. This is the
+        quantity ``scripts/check_navigation.py`` measures, e.g. ``(-8, 0)`` moves
+        all pixels 8 km west. It is recorded in the ``position_offset_km`` attribute.
 
     Returns
     -------
@@ -150,6 +177,10 @@ def read_insat_l1c(path, channels=("TIR1", "TIR2", "WV", "MIR", "VIS"), bbox=Non
         }
 
     lat2d, lon2d = np.meshgrid(lat_1d, lon_1d, indexing="ij")
+    if position_offset_km is not None:
+        east, north = (float(v) for v in position_offset_km)
+        lat2d, lon2d = shift_positions(lat2d, lon2d, east, north)
+        attrs["position_offset_km"] = [east, north]
     ds = xr.Dataset(data_vars, coords={"lat": (("y", "x"), lat2d), "lon": (("y", "x"), lon2d)}, attrs=attrs)
     ds["lat"].attrs = {"units": "degrees_north", "standard_name": "latitude"}
     ds["lon"].attrs = {"units": "degrees_east", "standard_name": "longitude"}

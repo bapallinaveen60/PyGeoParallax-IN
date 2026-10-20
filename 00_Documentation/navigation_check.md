@@ -36,6 +36,26 @@ Overall (34 matches): median correction **E −7 km, N +1 km** (IQR E −9 … �
 
 1. Validation numbers depend on this. An uncorrected ~8 km east error is larger than the Kochi parallax shift. It does not cancel in an uncorrected-vs-corrected comparison: it biases both versions equally, but it changes which version matches radar better.
 2. Before running validation cases, either:
-   - estimate the offset per scan with this coastline match and apply it (needs a reader option to shift positions), or
+   - estimate the offset per scan with this coastline match and apply it with `position_offset_km` (see below), or
    - restrict validation to regions whose local offset has been measured.
 3. To pin down the pattern, run this check on more clear-sky days (e.g. Oct–Mar, when India is mostly cloud-free) and more windows, including the Northeast and Bay of Bengal coasts used for high-VZA validation.
+
+## Applying a measured offset (added 20 Oct 2026)
+
+- `read_insat_l1c(..., position_offset_km=(east, north))` shifts every pixel by a measured correction, using geodesic displacement on WGS84.
+  - `scripts/check_navigation.py --offset E N` reports the **residual** error after applying it.
+  - `scripts/run_kochi_case.py --nav-offset E N` re-runs the case with it.
+- **Sign check:** with `--offset -8 0` on the 04:15–07:45 scans, Saurashtra and Sri Lanka leave a residual of **E −1 km, N 0 km** (12 matches). The convention is confirmed: the offset is added to INSAT positions.
+- **Kochi with −8 km east applied:** every metric got slightly worse. IoU fell 0.005–0.011 in both scans, corrected and uncorrected. So the 30 Sep Saurashtra/Sri Lanka offset should **not** be assumed for Kerala in June. The Kerala window was scattered (median −5.5 km), and the offset may change with region or season. A clear-sky check on scans from the same days is needed (see the download list below).
+
+## Scans to download for the next check
+
+`3RIMG_<DDMONYYYY>_<HHMM>_L1C_SGP_V01R00.h5`, into `datasets/insat_nav/`:
+
+| Date | Times (UTC) | Purpose |
+| :--- | :--- | :--- |
+| 15 NOV 2022, 15 DEC 2022, 15 JAN 2023, 15 FEB 2023 | 0415, 0615, 0815 | Clear winter days: is the offset stable across months, within a day, and across regions (incl. the Northeast and Bay of Bengal coasts)? |
+| 06 JUN 2022 | 0515, 0715 | Same day as the Kochi case |
+| 30 SEP 2022 | 1315 | Replace the truncated file |
+
+Minimum set: 15 DEC 2022 and 15 FEB 2023 at 0415 and 0815.
