@@ -108,6 +108,20 @@ PyGeoParallax-IN/
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
 4. **Validation & Assessment**: Evaluate corrected outputs against IMD DWR and GPM radar overpasses using validation modules.
 
+### Quick example
+
+```python
+from pygeoparallax import correct_scene
+
+# lat, lon: navigated pixel positions; tir1: brightness temperature [K];
+# cth: cloud-top height above the ellipsoid [m], NaN for clear sky.
+corrected = correct_scene(lat, lon, {"TIR1": tir1}, cth, surface_height=srtm_lookup)
+uncorrected = correct_scene(lat, lon, {"TIR1": tir1}, cth, correct=False)  # same grid, no shift
+corrected.to_netcdf("04_corrected_output/netcdf/scene.nc")
+```
+
+Each output has a `fill_flag` per cell: 0 = observed, 1 = interpolated from neighbours, 2 = empty (ground hidden behind a cloud). It also has `shift_km`, the parallax displacement.
+
 ---
 
 ## License
