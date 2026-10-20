@@ -11,6 +11,7 @@ Contains background literature, project indices, data access logs, API configura
 *   **[related_papers/](related_papers)**: Core reference papers on satellite parallax shift corrections (e.g., Vicente et al. 2002, Bieliński 2020).
 *   **[reading_tracker.md](related_papers/reading_tracker.md)**: Tabulated literature review tracking method details, project relevance, and study status.
 *   **[data_access_notes.md](data_access_notes.md)**: Developer credentials, login steps, download scripts, and rate limits for IMD, MOSDAC, Copernicus (ERA5), and NASA EarthData.
+*   **[validation_cases.md](validation_cases.md)**: High-VZA GPM validation cases (Northeast India, Himalaya) with INSAT scans within 2 min, and the files to download.
 *   **[navigation_check.md](navigation_check.md)**: Coastline check of INSAT-3DR L1C geolocation (~7–9 km eastward error in the most reliable windows).
 *   **[case_kochi_20220606.md](case_kochi_20220606.md)**: First real-data case study (INSAT-3DR + ISRO CTP + GPM over Kochi) and its lessons.
 *   **[sample_data_notes.md](sample_data_notes.md)**: What the local sample INSAT/GPM files contain, the matching scans to download, and data-quality findings.
