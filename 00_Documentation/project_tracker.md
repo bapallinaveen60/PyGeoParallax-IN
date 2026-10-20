@@ -6,8 +6,8 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🏁 Initialization & Data Engineering (Month 1)
-*   **Completed Tasks**: 🟢 2 / 16 Weeks
-*   **Overall Progress**: `██░░░░░░░░░░░░░░░░░░ 13%`
+*   **Completed Tasks**: 🟢 3 / 16 Weeks (code for Weeks 8–12 ready, waiting on data)
+*   **Overall Progress**: `████░░░░░░░░░░░░░░░░ 19%`
 *   **Next Milestone**: Week 1 - INSAT-3DR ingest (waiting on MOSDAC data)
 
 ---
@@ -25,18 +25,18 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 2 — Ray-Tracing Engine, Terrain Integration & Resampling
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[~]` | **Week 5** | Analytical Ellipsoid Ray-Tracing Solver | • Quadratic ellipsoid solver in `src/geometry/`.<br>• Numba/PyCUDA acceleration (< 2s per full disk frame). | `geometry/parallax.py` done: enlarged ellipsoid plus Newton step, exact to < 1 mm; agrees with satpy within 25 m. Speed: ~9 s full disk / ~1 s India box in numpy, so the Numba speed-up is still to do. |
+| `[x]` | **Week 5** | Analytical Ellipsoid Ray-Tracing Solver | • Quadratic ellipsoid solver in `src/geometry/`.<br>• Numba/PyCUDA acceleration (< 2s per full disk frame). | Done: `geometry/parallax.py` (enlarged ellipsoid plus Newton step, < 1 mm; within 25 m of satpy). Numba kernel: **0.5 s per full disk** (numpy ~9 s). |
 | `[~]` | **Week 6** | SRTM Topographic Relief Integration | • Integrate SRTM elevation into projection loop.<br>• Generate local parallax displacement maps (km). | `parallax_correct_terrain` done (clamps clouds to the ground, corrects clear-sky terrain parallax, fixed-point DEM lookup). SRTM ingest still to do. |
 | `[x]` | **Week 7** | BucketResampler & Gridding Strategy | • `BucketResampler` module in `src/resample/`.<br>• Max-CTH occlusion logic and IDW spatial interpolation. | Done: `resample/bucket.py` (highest-wins, IDW fill of small gaps, `fill_flag` 0/1/2) plus `correct_scene()`, which runs the whole pipeline (~2 s for a 1M-pixel India scene). `correct=False` gives the uncorrected Model A grid. |
-| `[ ]` | **Week 8** | Pipeline Automation & Batch Processing | • End-to-end orchestration pipeline runner script.<br>• Batch execution on 100 benchmark monsoon storm scenes. | |
+| `[~]` | **Week 8** | Pipeline Automation & Batch Processing | • End-to-end orchestration pipeline runner script.<br>• Batch execution on 100 benchmark monsoon storm scenes. | `pygeoparallax correct` / `batch` CLI done (parallel, skips finished scenes). Benchmark on 100 storm scenes waits on data. |
 
 ### Month 3 — Multi-Sensor Validation & Quantitative Alignment Analysis
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[ ]` | **Week 9** | Spaceborne Radar (GPM DPR) Cross-Alignment | • Colocation module between INSAT TIR1 and GPM DPR orbit tracks.<br>• Compute spatial cross-correlation & mutual information. | |
-| `[ ]` | **Week 10** | Ground Radar (IMD DWR) Validation | • Volume scan extractor for Mumbai, Goa, Kochi, Agartala.<br>• Compute Intersection-over-Union (IoU) with DWR cores. | |
-| `[ ]` | **Week 11** | Regional Statistical Dissection | • Detailed statistics tables partitioned by regime.<br>• Validation of shift direction and distance trends. | |
-| `[ ]` | **Week 12** | Sensitivity & Error Budget Analysis | • Monte Carlo simulation script perturbing CTH (+/- 1-2 km).<br>• Error propagation bounds. | |
+| `[~]` | **Week 9** | Spaceborne Radar (GPM DPR) Cross-Alignment | • Colocation module between INSAT TIR1 and GPM DPR orbit tracks.<br>• Compute spatial cross-correlation & mutual information. | Code ready: `validation.points_to_grid`, `nearest_time`, `compare` (IoU, Pearson, normalized MI, best-lag offset). Waits on GPM data. |
+| `[~]` | **Week 10** | Ground Radar (IMD DWR) Validation | • Volume scan extractor for Mumbai, Goa, Kochi, Agartala.<br>• Compute Intersection-over-Union (IoU) with DWR cores. | Code ready: `range_mask` and `compare` for IoU with DWR cores. Waits on IMD data and a DWR reader. |
+| `[~]` | **Week 11** | Regional Statistical Dissection | • Detailed statistics tables partitioned by regime.<br>• Validation of shift direction and distance trends. | Code ready: `regional_stats` with approximate boxes for the Ghats, Himalayas, Northeast and Central India; refine the boxes before final numbers. |
+| `[~]` | **Week 12** | Sensitivity & Error Budget Analysis | • Monte Carlo simulation script perturbing CTH (+/- 1-2 km).<br>• Error propagation bounds. | Code ready: `monte_carlo_shift` and `bias_sweep`. Error ≈ ΔCTH × tan(VZA), e.g. ~0.4 km per km of CTH error at Mumbai and ~0.7 km at Agartala. |
 
 ### Month 4 — Downstream Model Evaluation, Manuscript & Code Release
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |

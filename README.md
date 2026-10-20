@@ -1,5 +1,7 @@
 # PyGeoParallax-IN
 
+[![tests](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml/badge.svg)](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml)
+
 PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. By combining high-resolution Cloud-Top Height (CTH) datasets, ERA5 atmospheric reanalysis profiles, and the Shuttle Radar Topography Mission (SRTM) Digital Elevation Model (DEM), this toolkit performs precise ray-tracing and ellipsoid calculations to shift cloud-influenced observations back to their true geographical coordinates.
 
 The corrected output is validated against ground-based Doppler Weather Radar (DWR) from the Indian Meteorological Department (IMD) and spaceborne Precipitation Radar (PR) overpasses from the Global Precipitation Measurement (GPM) mission.
@@ -71,6 +73,7 @@ PyGeoParallax-IN/
 │
 ├── tests/                           # Unit tests (pytest)
 ├── scripts/                         # Standalone utilities (e.g. GPM overpass finder)
+├── .github/workflows/               # CI: tests on every push
 ├── notebooks/                       # Exploratory Jupyter Notebooks
 │
 ├── pyproject.toml                   # Package metadata and dependencies
@@ -119,6 +122,16 @@ corrected = correct_scene(lat, lon, {"TIR1": tir1}, cth, surface_height=srtm_loo
 uncorrected = correct_scene(lat, lon, {"TIR1": tir1}, cth, correct=False)  # same grid, no shift
 corrected.to_netcdf("04_corrected_output/netcdf/scene.nc")
 ```
+
+From the command line, using *standard scene* NetCDF files (2-D `lat`, `lon`, `cth` and channel variables, written by the ingest step):
+
+```bash
+pygeoparallax correct scene.nc scene_corrected.nc --dem srtm_0p04deg.nc
+pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_output/netcdf -j 8
+pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_output/uncorrected --no-correction
+```
+
+Validation helpers live in `pygeoparallax.validation`: `compare` (IoU, correlation, mutual information, residual offset), `points_to_grid`, `range_mask`, `nearest_time`, `regional_stats`, `monte_carlo_shift` and `bias_sweep`.
 
 Each output has a `fill_flag` per cell: 0 = observed, 1 = interpolated from neighbours, 2 = empty (ground hidden behind a cloud). It also has `shift_km`, the parallax displacement.
 

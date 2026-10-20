@@ -27,6 +27,9 @@ download = ["cdsapi>=0.5.1", "requests>=2.28"]
 plot = ["matplotlib>=3.5"]
 dev = ["pytest>=7.0", "pyorbital>=1.8", "satpy>=0.50", "ipykernel>=6.9"]
 
+[project.scripts]
+pygeoparallax = "pygeoparallax.cli:main"
+
 [project.urls]
 Repository = "https://github.com/bapallinaveen60/PyGeoParallax-IN"
 

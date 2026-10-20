@@ -112,3 +112,16 @@ def test_matches_satpy_within_spherical_earth_error():
     theirs, _ = parallax_shift(lat, lon, np.asarray(lat_s), np.asarray(lon_s))
     # Same physics; satpy's spherical Earth differs by ~25 m (0.3%) on an 8 km shift.
     np.testing.assert_allclose(ours, theirs, rtol=0.01)
+
+
+def test_numba_and_numpy_backends_agree():
+    lat = np.append(LAT, [0.0, 10.0])
+    lon = np.append(LON, [SAT_LON + 120.0, SAT_LON])  # one invisible point
+    h = np.append(H, [10000.0, np.nan])  # one NaN height
+    a = parallax_correct(lat, lon, h, SAT_LON, backend="numpy")
+    b = parallax_correct(lat, lon, h, SAT_LON, backend="numba")
+    for x, y in zip(a, b):
+        np.testing.assert_array_equal(np.isnan(x), np.isnan(y))
+        np.testing.assert_allclose(x, y, atol=1e-10, equal_nan=True)
+    with pytest.raises(ValueError):
+        parallax_correct(lat, lon, h, SAT_LON, backend="cuda")
