@@ -38,5 +38,6 @@ For 30 Sep 2022, the only GPM pass near a radar site in the overpass list is orb
 
 ## Still to check
 
-- **Navigation accuracy.** Satpy's docs say INSAT-3D navigation is "still off". A quick coastline check on the 30 Sep scans was inconclusive (mostly cloudy). Do a proper check against a coastline dataset on clear-sky scenes.
+- **Navigation accuracy:** checked (see `navigation_check.md`). Positions are ~7–9 km too far east in the most reliable windows, and the error may vary by region.
+- `3RIMG_30SEP2022_1315_L1C_SGP_V01R00.h5` is a truncated download (30 MB of 88 MB); re-download it if needed.
 - Whether `X`/`Y` are pixel centres or edges. Assumed centres; the difference is at most 2 km.

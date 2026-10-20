@@ -52,11 +52,11 @@ Compensating for storm motion (shifting each scan to the GPM time) also changed 
 
 1. **Storm motion is larger than the shift.** Between the scans the storm moved south-west at ~27 km/h south and ~22 km/h west, about 7.5 km in the 14–16 min between each scan and GPM. That is twice the parallax shift, and in nearly the same direction (towards the satellite).
 2. **The fields don't measure the same thing.** Most GPM "convective" footprints near Kochi are shallow and warm-topped (median storm top 3.9 km), so they never appear cold in TIR1. Meanwhile the big storm's cold anvil extends well beyond its convective core. IoU stays around 0.1 regardless of alignment.
-3. **An unexplained north-east preference.** Every alignment search, with or without correction or motion compensation, prefers shifting INSAT north-east, often to the edge of the search range. This may be anvil asymmetry (convection sits on the storm's eastern side) or an INSAT navigation error. **It needs a proper navigation check before any validation numbers are trusted.**
+3. **A north-east preference.** Every alignment search, with or without correction or motion compensation, prefers shifting INSAT north-east, often to the edge of the search range. The navigation check (`navigation_check.md`) found the opposite direction for INSAT's geolocation error (~7–9 km too far **east**), so this preference is not navigation. It most likely comes from the storm's structure (convection on the anvil's eastern side). The navigation error still matters for validation in its own right.
 
 ## What this means for the study
 
 - Kochi is a weak test case for the method: low VZA means a small shift. Prefer high-VZA sites, where 8–11 km shifts exceed motion errors: Agartala / Northeast India (VZA 34°) and the Himalayas (VZA ~36°).
 - Match times more closely. Either pick GPM passes within ~5 min of the INSAT scan time at that latitude, or use motion compensation, as tried here.
 - Validate with fields that relate more directly: e.g. INSAT deep cores vs GPM storm tops above 10 km, rather than BT vs near-surface reflectivity.
-- Check INSAT navigation against a coastline dataset on a clear-sky scene. This comes first.
+- Done: the INSAT navigation check is in `navigation_check.md`. Correct or account for the ~8 km eastward error before validating.
