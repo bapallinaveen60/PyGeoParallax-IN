@@ -1,5 +1,7 @@
 # INSAT-3DR L1C Navigation Check (20 Oct 2026)
 
+> **Latest (fourth run, 6 more scans): the error is seasonal.** It switches between two states around the equinoxes, consistent with INSAT's twice-yearly yaw flip. Late Sep to mid Mar: a 7–20 km **west** correction. Mid Apr to Jun: ~0 to +10 km **east**. Konkan–Goa stays ≈ 0 throughout. See *Seasonal pattern* at the end.
+>
 > **Update (second run, 12 more scans):** the error is **time-dependent and region-dependent**. On 6 Jun 2022 it was ~0 (±3 km) everywhere. From 30 Sep 2022 to 15 Feb 2023 it was a stable west correction of 8–15 km in most regions, but ~0 along the Konkan–Goa coast. See *Second run* below. The first-run text is kept for the record.
 
 Reproduce with `python scripts/check_navigation.py`. Results are in `05_validation/navigation_check.json` (git-ignored).
@@ -169,3 +171,42 @@ Clear pre-monsoon and post-monsoon months (06:15 UTC, `3RIMG_<date>_0615_L1C_SGP
 | 15 MAR 2022, 15 APR 2022, 15 MAY 2022 | Before June 2022. If these are ≈ 0, a step change after June is likely. |
 | 15 APR 2023, 15 MAY 2023 | The same season a year later. If they are also ≈ 0, the effect is seasonal. |
 | 15 OCT 2023 | Post-monsoon, completes the seasonal cycle |
+
+## Seasonal pattern (fourth run)
+
+Six more 06:15 UTC scans: 15 Mar, 15 Apr and 15 May 2022; 15 Apr, 15 May and 15 Oct 2023. Same method (±30 km, r ≥ 0.6). East correction [km]:
+
+| Date | Kutch | Saurashtra | Konkan | East coast (Andhra / Chennai / Odisha) | Rakhine |
+| :--- | ---: | ---: | ---: | :--- | ---: |
+| 15 Mar 2022 | −15 | −14 | −7 | −16.5 / −15.5 / −20.5 | −14 |
+| **15 Apr 2022** | **+9.5** | **+9** | −0.5 | +1 / +6 / . | **+10** |
+| 15 May 2022 | +3.5 | +2.5 | (noisy) | +0.5 / −6 / −6 | . |
+| 6 Jun 2022 | +3 | +2 | 0 | . | −2 |
+| 30 Sep 2022 – 15 Feb 2023 | −5 … −11 | −4 … −10 | ≈ 0 | −8 … −19 | −8 … −14 |
+| **15 Apr 2023** | **+10** | **+9.5** | 0 | +3 / +4.5 / +5 | . |
+| 15 May 2023 | +1.5 | +1 | (noisy) | (noisy) | . |
+| 15 Oct 2023 | −8 | −7.5 | +2.5 | −9 / −9.5 / −14.5 | −12 |
+| 15 Dec 2023 | −5 | −4.5 | . | . / . / −12 | −6.5 |
+| 15 Dec 2024 | −10.5 | −9.5 | −2.5 | . / . / −20 | . |
+
+North corrections are mostly within ±5 km. Larger values come from noisy, cloud-limited windows.
+
+### Findings
+
+1. **It is seasonal, not a one-time change.** Spring 2022 and spring 2023 agree (Kutch/Saurashtra +9 to +10 km in mid April), and so do autumn 2022 and autumn 2023 (−7.5 to −8 km in Oct). The sign flips between 15 Mar (−15) and 15 Apr (+10).
+2. **Two states that switch around the equinoxes:**
+   - **"Winter" state**, from late Sep (after the ~23 Sep equinox) to mid Mar: west correction of 7–20 km, largest over Odisha.
+   - **"Summer" state**, from mid Apr (after the ~20 Mar equinox) to at least early Jun: east correction of up to ~10 km in mid Apr, shrinking to ~0–3 km by May–June.
+   - Konkan–Goa is close to zero in both states.
+3. **A likely cause is the yaw flip** that INSAT-3D-series satellites perform around the equinoxes. ISRO's INSAT-3D evaluation compares data before and after the yaw flip ([ISPRS 2014](https://isprs-archives.copernicus.org/articles/XL-8/299/2014/isprsarchives-XL-8-299-2014.pdf)), and IMD's INSAT-3DR/3DS procedures treat the Sep→Mar and Mar→Sep equinox transitions separately ([IMD SatMet SOP](https://mausam.imd.gov.in/imd_latest/contents/pdf/satmet_sop.pdf)). This is a hypothesis: the flip dates and any navigation updates have not been confirmed from ISRO documentation.
+
+### Consequences for the monsoon (JJAS) study
+
+- **June to about 20 September is in the summer state,** where errors are small (~0–3 km in May–June). Jul–Aug could not be measured (cloud), but they lie in the same state.
+- **The last week of September is in the winter state** (−8 km or more). Treat monsoon cases after the September equinox separately and always correct them.
+- **Keep measuring a same-day correction** where coasts are clear. When they aren't, use the nearest clear day **in the same yaw-flip state**, never one from the other half of the year.
+
+### Optional checks
+
+- **Pin down the switch dates:** scans just before and after each equinox, e.g. 15 SEP 2022, 25 SEP 2022, 15 MAR 2023 and 31 MAR 2023 (all 0615).
+- **Read the equinox sections of the IMD SatMet SOP** for the operational yaw-flip dates.
