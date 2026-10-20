@@ -2,6 +2,7 @@
 
 from .bucket import EMPTY, INTERPOLATED, OBSERVED, bucket_max_height, idw_fill, resample
 from .grid import SOUTH_ASIA_0P04, Grid
+from .nearest import sample_nearest
 
 __all__ = [
     "EMPTY",
@@ -12,4 +13,5 @@ __all__ = [
     "bucket_max_height",
     "idw_fill",
     "resample",
+    "sample_nearest",
 ]

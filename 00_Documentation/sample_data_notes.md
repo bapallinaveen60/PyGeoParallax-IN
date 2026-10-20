@@ -32,7 +32,7 @@ For 30 Sep 2022, the only GPM pass near a radar site in the overpass list is orb
   - TIR1, TIR2, WV and MIR → brightness temperature [K]
   - VIS → albedo [%]
   - SWIR → radiance
-- **No cloud-top height in L1C.** It needs the separate L2 product (MOSDAC `3RIMG_L2B_CTP`; check whether it gives height or only pressure/temperature) or the ERA5 fallback.
+- **No cloud-top height in L1C.** ISRO's `3RIMG_L2B_CTP` was checked on 6 Jun 2022 and has **no height either**. It gives CTP [hPa, 25 hPa steps], CTT and emissivity on ~37 km boxes, plus clear-sky BTs. Its `Nominal_Central_Point` attribute says 82E, which is wrong: its lat/lon arrays are centred on 74E. The pipeline derives height per pixel from TIR1 BT instead (see `case_kochi_20220606.md`).
 - **ISRO's angle fields are offset.** `Sat_Elevation`/`Sat_Azimuth` disagree with our geometry by ~1° VZA and ~1.1° azimuth. At the sub-satellite point they give elevation 90.86°, which is impossible. Our angles agree with pyorbital to 0.01°, so the reader ignores ISRO's angle fields.
 - `Sun_Elevation`/`Sun_Azimuth` also differ by up to several degrees from a single-time solar calculation. Part of this is the ~27-minute scan time, which the reader does not model per row yet.
 
