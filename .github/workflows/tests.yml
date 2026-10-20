@@ -17,8 +17,8 @@ jobs:
           - os: windows-latest
             python-version: "3.12"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
@@ -27,4 +27,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
       - name: Test
-        run: pytest -q
+        run: pytest -q --junitxml=pytest-report.xml
+      - name: Annotate failures
+        if: failure()
+        shell: python
+        run: |
+          import xml.etree.ElementTree as ET
+          for case in ET.parse("pytest-report.xml").iter("testcase"):
+              for bad in list(case.iter("failure")) + list(case.iter("error")):
+                  text = (bad.get("message", "") + "\n" + (bad.text or ""))[-3000:]
+                  text = text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
+                  print(f"::error title={case.get('classname')}.{case.get('name')}::{text}")

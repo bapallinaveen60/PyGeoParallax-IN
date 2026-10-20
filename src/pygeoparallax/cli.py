@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import glob
+import multiprocessing
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -111,7 +112,10 @@ def _cmd_batch(args):
     opts = _options(args)
     failures = 0
     start = time.perf_counter()
-    with ProcessPoolExecutor(max_workers=args.workers) as pool:
+    # "spawn", not fork: forking after Numba's parallel kernels have started a
+    # thread pool can crash the workers on Linux.
+    ctx = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(max_workers=args.workers, mp_context=ctx) as pool:
         futures = {pool.submit(process_file, path, out, **opts): path for path, out in jobs.items()}
         for fut in as_completed(futures):
             path = futures[fut]
