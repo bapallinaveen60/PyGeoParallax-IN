@@ -6,9 +6,9 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🏁 Initialization & Data Engineering (Month 1)
-*   **Completed Tasks**: 🟢 0 / 16 Weeks
-*   **Overall Progress**: `░░░░░░░░░░░░░░░░░░░░ 0%`
-*   **Next Milestone**: Week 1 - Data Ingestion & Standardization
+*   **Completed Tasks**: 🟢 1 / 16 Weeks
+*   **Overall Progress**: `█░░░░░░░░░░░░░░░░░░░ 6%`
+*   **Next Milestone**: Week 1 - INSAT-3DR ingest (waiting on MOSDAC data)
 
 ---
 
@@ -17,9 +17,9 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 1 — Pipeline Setup, Data Engineering & Spatial Transformations
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[ ]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | |
-| `[ ]` | **Week 2** | Viewing Geometry & Angle Calculation | • VZA, VAA, and SZA angle maps per INSAT scene.<br>• Verify VZA ranges across regions. | |
-| `[ ]` | **Week 3** | Geocentric ECEF Transformation Engine | • Bidirectional coordinate converter module (`src/geometry/`).<br>• Unit tests matching `pyproj` (< 1m delta). | |
+| `[ ]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | Package set up; 570 GPM overpasses listed (`00_Documentation/events/`). INSAT ingest waits on MOSDAC data. |
+| `[~]` | **Week 2** | Viewing Geometry & Angle Calculation | • VZA, VAA, and SZA angle maps per INSAT scene.<br>• Verify VZA ranges across regions. | `satellite_view_angles` / `solar_angles` done, within 0.01° of pyorbital. Per-scene maps need the INSAT grid. |
+| `[x]` | **Week 3** | Geocentric ECEF Transformation Engine | • Bidirectional coordinate converter module (`src/geometry/`).<br>• Unit tests matching `pyproj` (< 1m delta). | Done: `geometry/ecef.py`, matches pyproj to < 1 mm. |
 | `[ ]` | **Week 4** | Cloud-Top Height Ingestion & Fallback Module | • CTH grid ingestion parser.<br>• Thermal profile lookup using ERA5 profiles when CTH is NaN. | |
 
 ### Month 2 — Ray-Tracing Engine, Terrain Integration & Resampling
@@ -45,6 +45,21 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | `[ ]` | **Week 14** | Manuscript Structuring & Figure Generation | • Outline manuscript sections.<br>• Render 3D ray-tracing diagrams and displacement vector plots. | |
 | `[ ]` | **Week 15** | Manuscript Writing & Peer Review | • Compile LaTeX source file.<br>• Mathematical proof verification and self-review. | |
 | `[ ]` | **Week 16** | Code Packaging & Submission | • Python library packaging.<br>• Release code on GitHub and submit paper to journal. | |
+
+---
+
+## 📐 Reference: INSAT-3DR Viewing Geometry at Validation Sites
+
+Computed with `pygeoparallax.geometry.satellite_view_angles` (satellite at 74.0°E). The shift is the approximate cloud displacement, h × tan(VZA). Clouds appear displaced *away* from the satellite, roughly northward over India.
+
+| Site | VZA (3DR) | VAA (3DR) | Shift, 12 km top | Shift, 16 km top | VZA (3DS, 82°E) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Kochi | 12.0° | 193° | 2.6 km | 3.4 km | 13.5° |
+| Goa | 18.2° | 179° | 3.9 km | 5.3 km | 20.5° |
+| Mumbai | 22.5° | 177° | 5.0 km | 6.6 km | 24.7° |
+| Agartala | 34.0° | 217° | 8.1 km | 10.8 km | 29.8° |
+| Himalaya (Shimla) | 36.4° | 186° | 8.8 km | 11.8 km | 36.6° |
+| Himalaya (Sikkim) | 35.9° | 209° | 8.7 km | 11.6 km | 32.9° |
 
 ---
 
