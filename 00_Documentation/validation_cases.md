@@ -1,5 +1,7 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
+> **Status:** case 1 (Northeast, 18 Aug 2024) is done. Correction cut the INSAT–GPM offset near the storm from ~12 km to ~4 km; see `case_northeast_20240818.md`. Run further cases with `scripts/run_validation_case.py`.
+
 Generated with:
 
 ```bash
