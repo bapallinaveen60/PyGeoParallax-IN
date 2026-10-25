@@ -6,7 +6,8 @@ Steps:
    correction (JSON from ``pygeoparallax navigation``).
 2. Cloud-top height per pixel: TIR1 BT through the AFGL tropical profile.
    ISRO's clear-sky BT (from the matching CTP file) is the cloud-mask
-   reference, and ISRO's CTP height is reported as a check.
+   reference, and ISRO's CTP height is reported as a check. Without a CTP
+   file, the cloud mask is BT < 270 K and the check is skipped.
 3. Parallax-correct and regrid to ``--res`` degrees, along with an uncorrected
    copy on the same grid.
 4. Rasterise the GPM footprints (nearest within 3.5 km) and compare:
@@ -36,7 +37,7 @@ from pygeoparallax.geometry import parallax_correct, parallax_shift, satellite_v
 from pygeoparallax.ingest import read_gpm_2a, read_insat_csbt, read_insat_ctp, read_insat_l1c
 from pygeoparallax.navigation import NavigationCorrection
 from pygeoparallax.resample import Grid, sample_nearest
-from pygeoparallax.validation import compare, iou
+from pygeoparallax.validation import compare, iou, range_mask
 
 SAT_LON = 74.0
 COLD_BT, DEEP_BT, ECHO_DBZ, DEEP_TOP_M = 235.0, 220.0, 25.0, 8000.0
@@ -87,29 +88,54 @@ def metrics(ds, gpm, max_lag):
     return {k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else int(v)) for k, v in m.items()}
 
 
+def near_metrics(ds, gpm, grid, centre, radius_km, max_lag):
+    """Metrics inside ``radius_km`` of the GPM convection centre, with the offset in km."""
+    bt = ds["TIR1"].values
+    valid = gpm["covered"] & np.isfinite(bt) & range_mask(grid, centre[0], centre[1], radius_km)
+    m = compare(bt, gpm["z"], COLD_BT, ECHO_DBZ, valid=valid, max_lag=max_lag)
+    km_s = m["lag_dy"] * grid.res * 111.2
+    km_e = m["lag_dx"] * grid.res * 111.2 * np.cos(np.radians(centre[0]))
+    return {
+        "iou": round(float(m["iou"]), 4), "pearson": round(float(m["pearson"]), 4),
+        "lag_cells_s_e": [int(m["lag_dy"]), int(m["lag_dx"])],
+        "offset_km": round(float(np.hypot(km_s, km_e)), 1),
+        "iou_deep_vs_deep_echo": round(float(iou(bt < DEEP_BT, gpm["deep"], valid)), 4),
+    }
+
+
 def run(args, nav):
     grid = Grid(*args.bbox, res=args.res)
     pad = (args.bbox[0] - 1, args.bbox[1] + 1, args.bbox[2] - 1, args.bbox[3] + 1)
     l1c = read_insat_l1c(find(args.dir, f"3RIMG_{args.scan}_L1C_SGP*.h5"), channels=("TIR1", "WV"), bbox=pad,
                          position_offset_km=nav)
-    ctp_path = find(args.dir, f"3RIMG_{args.scan}_L2B_CTP*.h5")
-    csbt, ctp = read_insat_csbt(ctp_path), read_insat_ctp(ctp_path)
     lat, lon, bt = l1c["lat"].values, l1c["lon"].values, l1c["TIR1"].values
-    clear_bt = sample_nearest(csbt["lat"].values, csbt["lon"].values, csbt["clear_sky_bt"].values, lat, lon, 40.0)
-    cth = cloud_top_height(bt, clear_bt, TROPICAL)
-    ctp_h = sample_nearest(ctp["lat"].values, ctp["lon"].values, height_from_pressure(ctp["ctp"].values), lat, lon, 30.0)
-    both = np.isfinite(cth) & np.isfinite(ctp_h)
-    deep = both & (bt < DEEP_BT)
+    try:
+        ctp_path = find(args.dir, f"3RIMG_{args.scan}_L2B_CTP*.h5")
+    except FileNotFoundError:
+        ctp_path = None
+    if ctp_path is None:
+        # No ISRO CTP file: fixed-threshold cloud mask (BT < 270 K) and no CTP check.
+        cth = cloud_top_height(bt, None, TROPICAL)
+        ctp_h = np.full(bt.shape, np.nan)
+        check = {"ctp_file": "missing; cloud mask = BT < 270 K"}
+    else:
+        csbt, ctp = read_insat_csbt(ctp_path), read_insat_ctp(ctp_path)
+        clear_bt = sample_nearest(csbt["lat"].values, csbt["lon"].values, csbt["clear_sky_bt"].values, lat, lon, 40.0)
+        cth = cloud_top_height(bt, clear_bt, TROPICAL)
+        ctp_h = sample_nearest(ctp["lat"].values, ctp["lon"].values, height_from_pressure(ctp["ctp"].values), lat, lon, 30.0)
+        both = np.isfinite(cth) & np.isfinite(ctp_h)
+        deep = both & (bt < DEEP_BT)
+        check = {
+            "pixels_compared": int(both.sum()),
+            "corr_bt_vs_ctp_height": round(float(np.corrcoef(cth[both], ctp_h[both])[0, 1]), 3) if both.sum() > 2 else None,
+            "bias_km_bt_minus_ctp": round(float(np.mean(cth[both] - ctp_h[both]) / 1000), 2) if both.any() else None,
+            "deep_core_bt_height_km": round(float(np.median(cth[deep]) / 1000), 2) if deep.any() else None,
+            "deep_core_ctp_height_km": round(float(np.median(ctp_h[deep]) / 1000), 2) if deep.any() else None,
+        }
     channels = {"TIR1": bt, "WV": l1c["WV"].values}
     cor = correct_scene(lat, lon, channels, cth, sat_lon=SAT_LON, grid=grid)
     raw = correct_scene(lat, lon, channels, cth, sat_lon=SAT_LON, grid=grid, correct=False)
-    return l1c, cth, ctp_h, cor, raw, {
-        "pixels_compared": int(both.sum()),
-        "corr_bt_vs_ctp_height": round(float(np.corrcoef(cth[both], ctp_h[both])[0, 1]), 3) if both.sum() > 2 else None,
-        "bias_km_bt_minus_ctp": round(float(np.mean(cth[both] - ctp_h[both]) / 1000), 2) if both.any() else None,
-        "deep_core_bt_height_km": round(float(np.median(cth[deep]) / 1000), 2) if deep.any() else None,
-        "deep_core_ctp_height_km": round(float(np.median(ctp_h[deep]) / 1000), 2) if deep.any() else None,
-    }
+    return l1c, cth, ctp_h, cor, raw, check
 
 
 def figure(cor, raw, gpm, grid, centre, out_png, title):
@@ -185,6 +211,12 @@ def main(argv=None):
             "uncorrected": metrics(raw, gpm, args.max_lag),
             "corrected": metrics(cor, gpm, args.max_lag),
         }
+        if gpm["conv_centre"]:
+            for radius in (150, 250):
+                summary["runs"][tag][f"near_{radius}km"] = {
+                    kind: near_metrics(ds, gpm, grid, gpm["conv_centre"], radius, 10)
+                    for kind, ds in (("uncorrected", raw), ("corrected", cor))
+                }
         nc = out / "04_corrected_output" / "netcdf"
         nc.mkdir(parents=True, exist_ok=True)
         cor.to_netcdf(nc / f"{args.case}_{tag}_corrected.nc")

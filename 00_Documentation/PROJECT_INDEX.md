@@ -11,6 +11,7 @@ Contains background literature, project indices, data access logs, API configura
 *   **[related_papers/](related_papers)**: Core reference papers on satellite parallax shift corrections (e.g., Vicente et al. 2002, Bieliński 2020).
 *   **[reading_tracker.md](related_papers/reading_tracker.md)**: Tabulated literature review tracking method details, project relevance, and study status.
 *   **[data_access_notes.md](data_access_notes.md)**: Developer credentials, login steps, download scripts, and rate limits for IMD, MOSDAC, Copernicus (ERA5), and NASA EarthData.
+*   **[validation_summary.md](validation_summary.md)**: All GPM validation cases so far: what improved, what didn't, and why.
 *   **[case_northeast_20240818.md](case_northeast_20240818.md)**: First high-VZA GPM case. Correction removes ~2/3 of the INSAT–GPM offset near the storm.
 *   **[validation_cases.md](validation_cases.md)**: High-VZA GPM validation cases (Northeast India, Himalaya) with INSAT scans within 2 min, and the files to download.
 *   **[navigation_check.md](navigation_check.md)**: Coastline check of INSAT-3DR L1C geolocation (~7–9 km eastward error in the most reliable windows).

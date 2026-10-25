@@ -1,6 +1,12 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
-> **Status:** case 1 (Northeast, 18 Aug 2024) is done. Correction cut the INSAT–GPM offset near the storm from ~12 km to ~4 km; see `case_northeast_20240818.md`. Run further cases with `scripts/run_validation_case.py`.
+> **Status (4 cases):**
+> - Northeast 18 Aug 2024: improves.
+> - Himalaya 30 Jun 2023: neutral; navigation-dominated.
+> - Northeast 13 Sep 2022: no convection in the swath.
+> - Himalaya 4 Sep 2024: case scan missing.
+>
+> See `validation_summary.md`.
 
 Generated with:
 
