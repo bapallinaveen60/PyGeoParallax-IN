@@ -96,6 +96,11 @@ def tabulate(cases, skipped, out):
             for rad in (150, 250):
                 n = r[f"near_{rad}km"]
                 at_edge |= any(max(abs(v) for v in n[k]["lag_cells_s_e"]) >= 9.5 for k in ("uncorrected", "corrected"))
+                if "top" in n["uncorrected"]:
+                    tb, tcb = split(n["uncorrected"]["top"]["offset_km_s_e"], float(vaa))
+                    ta, tca = split(n["corrected"]["top"]["offset_km_s_e"], float(vaa))
+                    row.update({f"top_along{rad}_before": round(tb, 1), f"top_along{rad}_after": round(ta, 1),
+                                f"top_cross{rad}_before": round(tcb, 1), f"top_cross{rad}_after": round(tca, 1)})
                 ab, cb = split(n["uncorrected"]["offset_km_s_e"], float(vaa))
                 aa, ca = split(n["corrected"]["offset_km_s_e"], float(vaa))
                 row.update({

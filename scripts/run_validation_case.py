@@ -14,7 +14,9 @@ Steps:
    * cold cloud (BT < 235 K) vs echo (Z > 25 dBZ): IoU, correlation,
      mutual information, best-lag offset;
    * deep cores (BT < 220 K) vs GPM convective rain, and vs deep echoes
-     (storm top > 8 km): IoU.
+     (storm top > 8 km): IoU;
+   * near the storm, the offset is also measured against GPM storm-top
+     height, a second radar field that describes the same storm tops as TIR1.
 5. Report the INSAT scan time at the convection's latitude vs the GPM time.
 
 Usage:
@@ -37,7 +39,7 @@ from pygeoparallax.geometry import parallax_correct, parallax_shift, satellite_v
 from pygeoparallax.ingest import read_gpm_2a, read_insat_csbt, read_insat_ctp, read_insat_l1c
 from pygeoparallax.navigation import NavigationCorrection
 from pygeoparallax.resample import Grid, sample_nearest
-from pygeoparallax.validation import compare, iou, range_mask
+from pygeoparallax.validation import compare, iou, range_mask, subcell_displacement
 
 SAT_LON = 74.0
 COLD_BT, DEEP_BT, ECHO_DBZ, DEEP_TOP_M = 235.0, 220.0, 25.0, 8000.0
@@ -82,6 +84,7 @@ def gpm_on_grid(path, grid, bbox):
         "z": np.where(covered, near(np.nan_to_num(gpm["z_near_surface"].values, nan=0.0)), np.nan),
         "convective": near(ptype.astype(float)) == 2,
         "deep": near(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)) > DEEP_TOP_M,
+        "top": np.where(covered, near(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)), np.nan),
         "conv_centre": centre,
         "time_conv": str(t_conv)[:19],
         "n_convective": n_box,
@@ -112,7 +115,17 @@ def near_metrics(ds, gpm, grid, centre, radius_km, max_lag):
         "offset_km_s_e": [round(float(km_s), 1), round(float(km_e), 1)],
         "offset_km": round(float(np.hypot(km_s, km_e)), 1),
         "iou_deep_vs_deep_echo": round(float(iou(bt < DEEP_BT, gpm["deep"], valid)), 4),
+        "top": top_offset(bt, gpm, grid, centre, valid, max_lag),
     }
+
+
+def top_offset(bt, gpm, grid, centre, valid, max_lag):
+    """Offset of INSAT cloud tops against GPM storm-top height (a second, independent radar field)."""
+    dy, dx, r = subcell_displacement(-bt, gpm["top"], max_lag, valid)
+    km_s = dy * grid.res * 111.2
+    km_e = dx * grid.res * 111.2 * np.cos(np.radians(centre[0]))
+    return {"lag_cells_s_e": [round(float(dy), 2), round(float(dx), 2)],
+            "offset_km_s_e": [round(float(km_s), 1), round(float(km_e), 1)], "r": round(float(r), 4)}
 
 
 def run(args, nav):
