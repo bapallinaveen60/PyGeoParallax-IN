@@ -38,7 +38,7 @@ from pygeoparallax.navigation import (  # noqa: E402
     WINDOWS, NavigationCorrection, land_fraction_interpolator, load_land, measure_scan,
 )
 
-REGION_BOX = {"northeast": (21, 29, 88, 97), "himalaya": (24, 33, 74, 90)}
+REGION_BOX = {"northeast": (21, 29, 88, 97), "himalaya": (24, 33, 74, 90), "central": (18, 27, 75, 86), "south": (7, 18, 73, 82)}
 MIN_CLUSTER = 100  # convective footprints in the main cluster for a case to count
 # A field/window counts only if its best match lies inside the +/-10-cell search (no edge hit).
 # GPM storm-top height is the primary field (same storm tops as TIR1); rain intensity (Z) is secondary.

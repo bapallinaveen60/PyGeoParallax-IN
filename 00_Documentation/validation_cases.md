@@ -1,11 +1,10 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
-> **Status (24 case folders):**
-> - 10 usable. Correction shifts the line-of-sight offset by ~7 km (storm-top median 5.5 → 2.8 km; 6 of 8 improve); the cross-look offset is unchanged.
-> - 12 excluded: 9 with too little convection, 3 with no reliable match.
-> - 2 not run.
+> **Status (34 case folders, 4 regions):**
+> - 15 usable. Correction lowers the median line-of-sight offset from 5.4 to 3.5 km (storm top); the cross-look offset is unchanged.
+> - The uncorrected offset does **not** grow with viewing angle: a VZA-independent bias of ~+2 to +6 km exists (cause open).
 >
-> See `validation_summary.md`; screen GPM first with `scripts/screen_gpm_convection.py`.
+> See `validation_summary.md`.
 
 Generated with:
 

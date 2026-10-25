@@ -36,6 +36,8 @@ from pygeoparallax.geometry import satellite_view_angles  # noqa: E402
 REGIONS = {
     "northeast": (22.0, 29.0, 89.0, 97.0),  # Assam, Meghalaya, Tripura, Bangladesh east; VZA ~33-37
     "himalaya": (27.0, 33.0, 75.0, 89.0),  # Uttarakhand, Himachal, Nepal; VZA ~31-38
+    "central": (19.0, 26.0, 76.0, 85.0),  # Madhya Pradesh, Chhattisgarh, Vidarbha; VZA ~21-30
+    "south": (8.0, 17.0, 74.0, 80.5),  # Kerala, Karnataka, Tamil Nadu, Western Ghats; VZA ~9-20
 }
 SEASON = ("06-01T00:00:00Z", "09-20T23:59:59Z")  # summer yaw-flip state only
 SCAN_MIN = 26.9  # full-disk scan duration [min]

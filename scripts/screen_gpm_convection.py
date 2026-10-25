@@ -21,7 +21,7 @@ import pandas as pd
 
 from pygeoparallax.ingest import read_gpm_2a
 
-REGION_BOX = {"northeast": (21, 29, 88, 97), "himalaya": (24, 33, 74, 90)}
+REGION_BOX = {"northeast": (21, 29, 88, 97), "himalaya": (24, 33, 74, 90), "central": (18, 27, 75, 86), "south": (7, 18, 73, 82)}
 MIN_CLUSTER = 100
 
 
