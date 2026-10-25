@@ -1,0 +1,59 @@
+priority,case_folder,file,why,coasts_used,already_have
+A,central_20230907,3RIMG_07SEP2023_0315_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",True
+A,central_20230907,3RIMG_07SEP2023_0515_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",False
+A,central_20230907,3RIMG_07SEP2023_0815_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",False
+A,central_20230907,3RIMG_06SEP2023_0515_L1C_SGP_V01R00.h5,day before,"odisha, andhra, konkan, saurashtra",False
+A,central_20230907,3RIMG_08SEP2023_0515_L1C_SGP_V01R00.h5,day after,"odisha, andhra, konkan, saurashtra",False
+A,central_20240714,3RIMG_14JUL2024_0315_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",False
+A,central_20240714,3RIMG_14JUL2024_0515_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",False
+A,central_20240714,3RIMG_14JUL2024_0815_L1C_SGP_V01R00.h5,case day,"odisha, andhra, konkan, saurashtra",False
+A,central_20240714,3RIMG_13JUL2024_0515_L1C_SGP_V01R00.h5,day before,"odisha, andhra, konkan, saurashtra",False
+A,central_20240714,3RIMG_15JUL2024_0515_L1C_SGP_V01R00.h5,day after,"odisha, andhra, konkan, saurashtra",False
+B,himalaya_20230630,3RIMG_30JUN2023_0315_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20230630,3RIMG_30JUN2023_0515_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20230912,3RIMG_12SEP2023_0315_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20230912,3RIMG_12SEP2023_0515_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20230917,3RIMG_17SEP2023_0315_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20230917,3RIMG_17SEP2023_0515_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20240702,3RIMG_02JUL2024_0315_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+B,himalaya_20240702,3RIMG_02JUL2024_0515_L1C_SGP_V01R00.h5,case day,"kutch, saurashtra, sundarbans (no coast near the storm)",False
+A,northeast_20220607,3RIMG_07JUN2022_0315_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220607,3RIMG_07JUN2022_0515_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220607,3RIMG_07JUN2022_0815_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220607,3RIMG_06JUN2022_0515_L1C_SGP_V01R00.h5,day before,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220607,3RIMG_08JUN2022_0515_L1C_SGP_V01R00.h5,day after,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220720,3RIMG_20JUL2022_0315_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220720,3RIMG_20JUL2022_0515_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220720,3RIMG_20JUL2022_0815_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220720,3RIMG_19JUL2022_0515_L1C_SGP_V01R00.h5,day before,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20220720,3RIMG_21JUL2022_0515_L1C_SGP_V01R00.h5,day after,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20230613,3RIMG_13JUN2023_0315_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20230613,3RIMG_13JUN2023_0515_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20230613,3RIMG_13JUN2023_0815_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20230613,3RIMG_12JUN2023_0515_L1C_SGP_V01R00.h5,day before,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20230613,3RIMG_14JUN2023_0515_L1C_SGP_V01R00.h5,day after,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240608,3RIMG_08JUN2024_0315_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240608,3RIMG_08JUN2024_0515_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240608,3RIMG_08JUN2024_0815_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240608,3RIMG_07JUN2024_0515_L1C_SGP_V01R00.h5,day before,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240608,3RIMG_09JUN2024_0515_L1C_SGP_V01R00.h5,day after,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240818,3RIMG_18AUG2024_0315_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240818,3RIMG_18AUG2024_0515_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240818,3RIMG_18AUG2024_0815_L1C_SGP_V01R00.h5,case day,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240818,3RIMG_17AUG2024_0515_L1C_SGP_V01R00.h5,day before,"chittagong, sundarbans, rakhine, odisha",False
+A,northeast_20240818,3RIMG_19AUG2024_0515_L1C_SGP_V01R00.h5,day after,"chittagong, sundarbans, rakhine, odisha",False
+A,south_20220711,3RIMG_11JUL2022_0315_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220711,3RIMG_11JUL2022_0515_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220711,3RIMG_11JUL2022_0815_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220711,3RIMG_10JUL2022_0515_L1C_SGP_V01R00.h5,day before,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220711,3RIMG_12JUL2022_0515_L1C_SGP_V01R00.h5,day after,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220811,3RIMG_11AUG2022_0315_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220811,3RIMG_11AUG2022_0515_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220811,3RIMG_11AUG2022_0815_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220811,3RIMG_10AUG2022_0515_L1C_SGP_V01R00.h5,day before,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20220811,3RIMG_12AUG2022_0515_L1C_SGP_V01R00.h5,day after,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20230612,3RIMG_12JUN2023_0315_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20230612,3RIMG_12JUN2023_0515_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20230612,3RIMG_12JUN2023_0815_L1C_SGP_V01R00.h5,case day,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20230612,3RIMG_11JUN2023_0515_L1C_SGP_V01R00.h5,day before,"kerala, goa_karnataka, chennai, sri_lanka",False
+A,south_20230612,3RIMG_13JUN2023_0515_L1C_SGP_V01R00.h5,day after,"kerala, goa_karnataka, chennai, sri_lanka",False
