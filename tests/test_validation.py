@@ -130,3 +130,17 @@ def test_sensitivity_matches_tan_vza():
     sweep = bias_sweep(lat, lon, np.array([12000.0]), 74.0)
     assert sweep.loc[1000.0, "mean_km"] == pytest.approx(expected_km, rel=0.02)
     assert sweep.loc[-2000.0, "mean_km"] == pytest.approx(2 * expected_km, rel=0.02)
+
+
+def test_subcell_displacement_recovers_fractional_shift():
+    from scipy import ndimage
+
+    from pygeoparallax.validation import subcell_displacement
+
+    yy, xx = np.mgrid[0:80, 0:80]
+    field = np.exp(-((yy - 40) ** 2 + (xx - 38) ** 2) / 60.0) + 0.6 * np.exp(-((yy - 25) ** 2 + (xx - 55) ** 2) / 30.0)
+    target = ndimage.shift(field, (2.4, -1.3), order=3, mode="nearest")
+    dy, dx, r = subcell_displacement(field, target, max_lag=6)
+    assert dy == pytest.approx(2.4, abs=0.2)
+    assert dx == pytest.approx(-1.3, abs=0.2)
+    assert r > 0.99

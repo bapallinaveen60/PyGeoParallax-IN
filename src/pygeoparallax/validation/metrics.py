@@ -95,6 +95,37 @@ def best_displacement(a, b, max_lag=5, valid=None):
     return best
 
 
+def subcell_displacement(a, b, max_lag=5, valid=None):
+    """Like :func:`best_displacement`, refined to a fraction of a cell.
+
+    A parabola is fitted through the correlation at the best integer shift and
+    its two neighbours, separately along rows and columns. The vertex gives
+    the fractional shift. This resolves offsets smaller than one grid cell,
+    e.g. the 1-2 km left after parallax correction on a 2 km grid. At the edge
+    of the search, or where the peak is flat, the integer shift is returned.
+
+    Returns
+    -------
+    dy, dx, r : float, float, float
+    """
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    dy, dx, r0 = best_displacement(a, b, max_lag, valid)
+
+    def vertex(rm, rp):
+        den = rm - 2 * r0 + rp
+        if not (np.isfinite(rm) and np.isfinite(rp)) or den >= 0:
+            return 0.0
+        return float(np.clip(0.5 * (rm - rp) / den, -0.5, 0.5))
+
+    fy = fx = 0.0
+    if abs(dy) < max_lag:
+        fy = vertex(pearson(_shifted(a, dy - 1, dx), b, valid), pearson(_shifted(a, dy + 1, dx), b, valid))
+    if abs(dx) < max_lag:
+        fx = vertex(pearson(_shifted(a, dy, dx - 1), b, valid), pearson(_shifted(a, dy, dx + 1), b, valid))
+    return dy + fy, dx + fx, r0
+
+
 def compare(sat, radar, sat_threshold, radar_threshold, sat_below=True, valid=None,
             max_lag=5, bins=32):
     """All alignment metrics for one satellite/radar pair.
@@ -115,7 +146,8 @@ def compare(sat, radar, sat_threshold, radar_threshold, sat_below=True, valid=No
     -------
     dict
         ``iou``, ``pearson`` and ``mutual_info`` (normalized), plus ``lag_dy``,
-        ``lag_dx`` and ``lag_r`` from :func:`best_displacement`. Pearson and lag
+        ``lag_dx`` (whole cells), ``lag_dy_sub`` / ``lag_dx_sub`` (sub-cell, from
+        :func:`subcell_displacement`) and ``lag_r``. Pearson and lag
         use the negated satellite field when ``sat_below`` is True, so a good
         match is always a positive correlation.
     """
@@ -131,12 +163,14 @@ def compare(sat, radar, sat_threshold, radar_threshold, sat_below=True, valid=No
         common &= valid
 
     signed = -sat if sat_below else sat
-    dy, dx, r_lag = best_displacement(signed, radar, max_lag, common)
+    dy, dx, r_lag = subcell_displacement(signed, radar, max_lag, common)
     return {
         "iou": iou(sat_mask, radar_mask, common),
         "pearson": pearson(signed, radar, common),
         "mutual_info": mutual_information(sat, radar, bins, common, normalized=True),
-        "lag_dy": dy,
-        "lag_dx": dx,
+        "lag_dy": int(round(dy)),
+        "lag_dx": int(round(dx)),
+        "lag_dy_sub": round(float(dy), 2),
+        "lag_dx_sub": round(float(dx), 2),
         "lag_r": r_lag,
     }

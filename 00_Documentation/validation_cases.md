@@ -1,10 +1,10 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
-> **Status (4 cases):**
-> - Northeast 18 Aug 2024: improves.
-> - Himalaya 30 Jun 2023: neutral; navigation-dominated.
-> - Northeast 13 Sep 2022: no convection in the swath.
-> - Himalaya 4 Sep 2024: case scan missing.
+> **Status (5 cases):**
+> - Northeast 18 Aug 2024 and 8 Jun 2024: the line-of-sight offset drops 50–80 %.
+> - Himalaya 30 Jun 2023: overshoot of ~5 km.
+> - Northeast 13 Sep 2022: no convection.
+> - Himalaya 4 Sep 2024: case scan still missing.
 >
 > See `validation_summary.md`.
 

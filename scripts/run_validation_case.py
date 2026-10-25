@@ -93,11 +93,12 @@ def near_metrics(ds, gpm, grid, centre, radius_km, max_lag):
     bt = ds["TIR1"].values
     valid = gpm["covered"] & np.isfinite(bt) & range_mask(grid, centre[0], centre[1], radius_km)
     m = compare(bt, gpm["z"], COLD_BT, ECHO_DBZ, valid=valid, max_lag=max_lag)
-    km_s = m["lag_dy"] * grid.res * 111.2
-    km_e = m["lag_dx"] * grid.res * 111.2 * np.cos(np.radians(centre[0]))
+    km_s = m["lag_dy_sub"] * grid.res * 111.2
+    km_e = m["lag_dx_sub"] * grid.res * 111.2 * np.cos(np.radians(centre[0]))
     return {
         "iou": round(float(m["iou"]), 4), "pearson": round(float(m["pearson"]), 4),
-        "lag_cells_s_e": [int(m["lag_dy"]), int(m["lag_dx"])],
+        "lag_cells_s_e": [m["lag_dy_sub"], m["lag_dx_sub"]],
+        "offset_km_s_e": [round(float(km_s), 1), round(float(km_e), 1)],
         "offset_km": round(float(np.hypot(km_s, km_e)), 1),
         "iou_deep_vs_deep_echo": round(float(iou(bt < DEEP_BT, gpm["deep"], valid)), 4),
     }
