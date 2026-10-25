@@ -2,9 +2,26 @@
 
 [![tests](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml/badge.svg)](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml)
 
-PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. By combining high-resolution Cloud-Top Height (CTH) datasets, ERA5 atmospheric reanalysis profiles, and the Shuttle Radar Topography Mission (SRTM) Digital Elevation Model (DEM), this toolkit performs precise ray-tracing and ellipsoid calculations to shift cloud-influenced observations back to their true geographical coordinates.
+PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. It estimates cloud-top heights, traces each pixel's line of sight back to the cloud top on the WGS84 ellipsoid, and regrids the scene at the corrected positions. Optional terrain heights (DEM) and a coastline-based navigation correction are applied in the same pass.
 
-The corrected output is validated against ground-based Doppler Weather Radar (DWR) from the Indian Meteorological Department (IMD) and spaceborne Precipitation Radar (PR) overpasses from the Global Precipitation Measurement (GPM) mission.
+The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission, and later against ground-based Doppler Weather Radar (DWR) from the India Meteorological Department (IMD).
+
+## Status (v0.1.0)
+
+| Part | State |
+| :--- | :--- |
+| INSAT-3DR L1C SGP reader, L2 CTP / clear-sky BT reader, GPM 2A Ku/DPR reader | done |
+| Viewing and solar angles, ECEF transforms, ellipsoid ray-tracing solver (numpy and Numba; 0.5 s per full disk) | done |
+| Cloud-top height from TIR1 BT (AFGL tropical profile, 17 km cap) | done; ERA5 profiles planned |
+| Terrain-aware correction | done; SRTM reader planned |
+| Occlusion-aware bucket resampling with gap filling | done |
+| Coastline-based INSAT navigation correction | done |
+| CLI (`correct`, `batch`, `navigation`) | done |
+| Validation metrics (IoU, correlation, mutual information, sub-cell displacement) | done |
+
+**Validation against GPM** (34 monsoon cases 2022–2024, 14 usable, 4 regions): the correction moves features by the computed amount along the line of sight and lowers the median INSAT–GPM storm-top offset from 5.4 to 3.0 km (10 of 12 cases improve). In monsoon INSAT-3DR data a navigation error of ~3–4 km partly masks the parallax, so correct navigation and parallax together. Details: [validation_summary.md](00_Documentation/validation_summary.md).
+
+API overview: [api_reference.md](00_Documentation/api_reference.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
@@ -18,6 +35,9 @@ PyGeoParallax-IN/
 ├── 00_Documentation/
 │   ├── PROJECT_INDEX.md             # Guide to directory roles & workflow
 │   ├── project_tracker.md           # 16-week project implementation tracker
+│   ├── api_reference.md             # Public functions and CLI
+│   ├── validation_summary.md        # GPM validation results
+│   ├── navigation_check.md          # INSAT-3DR geolocation check
 │   ├── project_dashboard.html       # Interactive visual roadmap & metrics dashboard
 │   ├── events/                      # GPM overpass candidates for validation
 │   ├── related_papers/              # Core literature papers
@@ -80,6 +100,7 @@ PyGeoParallax-IN/
 │
 ├── pyproject.toml                   # Package metadata and dependencies
 ├── LICENSE                          # MIT License
+├── CHANGELOG.md                     # Release notes
 ├── environment.yml                  # Conda environment definition
 └── README.md                        # Project readme (this file)
 ```
@@ -113,7 +134,24 @@ PyGeoParallax-IN/
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
 4. **Validation & Assessment**: Evaluate corrected outputs against IMD DWR and GPM radar overpasses using validation modules.
 
-### Quick example
+### Quick example: one INSAT-3DR L1C file
+
+```python
+from pygeoparallax import correct_scene
+from pygeoparallax.cloudheight import cloud_top_height
+from pygeoparallax.ingest import read_insat_l1c
+from pygeoparallax.resample import Grid
+
+ds = read_insat_l1c("3RIMG_18AUG2024_2215_L1C_SGP_V01R00.h5", channels=("TIR1", "WV"),
+                    bbox=(21, 29, 88, 97))
+cth = cloud_top_height(ds["TIR1"].values)  # cloudy where BT < 270 K, NaN elsewhere
+grid = Grid(21, 29, 88, 97, res=0.02)
+channels = {"TIR1": ds["TIR1"].values, "WV": ds["WV"].values}
+corrected = correct_scene(ds["lat"].values, ds["lon"].values, channels, cth, grid=grid)
+uncorrected = correct_scene(ds["lat"].values, ds["lon"].values, channels, cth, grid=grid, correct=False)
+```
+
+### Lower-level example
 
 ```python
 from pygeoparallax import correct_scene
