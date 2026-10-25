@@ -40,9 +40,17 @@ from pygeoparallax.navigation import (  # noqa: E402
 
 REGION_BOX = {"northeast": (21, 29, 88, 97), "himalaya": (24, 33, 74, 90)}
 MIN_CLUSTER = 100  # convective footprints in the main cluster for a case to count
+# A field/window counts only if its best match lies inside the +/-10-cell search (no edge hit).
+# GPM storm-top height is the primary field (same storm tops as TIR1); rain intensity (Z) is secondary.
 
 
 def case_scan(folder):
+    """The INSAT case scan: the stamp of the CTP file if there is one (a case scan can be at
+    04:15 or 06:15), else the L1C that is not a 04:15/06:15 navigation scan."""
+    for p in sorted(glob.glob(str(Path(folder) / "3RIMG_*_L2B_CTP_V01R00.h5"))):
+        m = re.match(r"3RIMG_(\d{2}[A-Z]{3}\d{4}_\d{4})_L2B", Path(p).name)
+        if m and (Path(folder) / f"3RIMG_{m.group(1)}_L1C_SGP_V01R00.h5").exists():
+            return m.group(1)
     for p in sorted(glob.glob(str(Path(folder) / "3RIMG_*_L1C_SGP_V01R00.h5"))):
         m = re.match(r"3RIMG_(\d{2}[A-Z]{3}\d{4}_\d{4})_L1C", Path(p).name)
         if m and not m.group(1).endswith(("_0415", "_0615")):
@@ -92,30 +100,37 @@ def tabulate(cases, skipped, out):
                 "storm_top_max_km": round(d["gpm_storm_top_max_km"], 1), "vza": d.get("vza_at_convection_deg"),
                 "dt_min": r["minutes_gpm_minus_insat"], "deep_shift_km": r["shift_km_deep_cores_median"],
             }
-            at_edge = False
+            valid = {}
             for rad in (150, 250):
                 n = r[f"near_{rad}km"]
-                at_edge |= any(max(abs(v) for v in n[k]["lag_cells_s_e"]) >= 9.5 for k in ("uncorrected", "corrected"))
-                if "top" in n["uncorrected"]:
-                    tb, tcb = split(n["uncorrected"]["top"]["offset_km_s_e"], float(vaa))
-                    ta, tca = split(n["corrected"]["top"]["offset_km_s_e"], float(vaa))
-                    row.update({f"top_along{rad}_before": round(tb, 1), f"top_along{rad}_after": round(ta, 1),
-                                f"top_cross{rad}_before": round(tcb, 1), f"top_cross{rad}_after": round(tca, 1)})
+                edge = lambda key: any(  # noqa: E731
+                    max(abs(v) for v in (n[k][key]["lag_cells_s_e"] if key else n[k]["lag_cells_s_e"])) >= 9.5
+                    for k in ("uncorrected", "corrected"))
+                valid[f"z{rad}"] = not edge(None)
                 ab, cb = split(n["uncorrected"]["offset_km_s_e"], float(vaa))
                 aa, ca = split(n["corrected"]["offset_km_s_e"], float(vaa))
                 row.update({
+                    f"z_valid{rad}": valid[f"z{rad}"],
                     f"along{rad}_before": round(ab, 1), f"along{rad}_after": round(aa, 1),
                     f"cross{rad}_before": round(cb, 1), f"cross{rad}_after": round(ca, 1),
                     f"deepiou{rad}_before": n["uncorrected"]["iou_deep_vs_deep_echo"],
                     f"deepiou{rad}_after": n["corrected"]["iou_deep_vs_deep_echo"],
                     f"r{rad}_before": n["uncorrected"]["pearson"], f"r{rad}_after": n["corrected"]["pearson"],
                 })
+                if "top" in n["uncorrected"]:
+                    valid[f"top{rad}"] = not edge("top")
+                    tb, tcb = split(n["uncorrected"]["top"]["offset_km_s_e"], float(vaa))
+                    ta, tca = split(n["corrected"]["top"]["offset_km_s_e"], float(vaa))
+                    row.update({f"top_valid{rad}": valid[f"top{rad}"],
+                                f"top_along{rad}_before": round(tb, 1), f"top_along{rad}_after": round(ta, 1),
+                                f"top_cross{rad}_before": round(tcb, 1), f"top_cross{rad}_after": round(tca, 1),
+                                f"top_r{rad}_before": n["uncorrected"]["top"]["r"], f"top_r{rad}_after": n["corrected"]["top"]["r"]})
             if cluster < MIN_CLUSTER:
                 row["status"] = f"excluded: {cluster} convective footprints (< {MIN_CLUSTER})"
-            elif at_edge:
-                row["status"] = "excluded: offset at the search edge (no reliable match)"
+            elif not any(valid.values()):
+                row["status"] = "excluded: no reliable match in any field or window"
             else:
-                row["status"] = "usable"
+                row["status"] = "usable: " + ", ".join(k for k, ok in valid.items() if ok)
             rows.append(row)
     keys = sorted({k for r in rows for k in r}, key=lambda k: (k not in ("case", "nav", "status"), k))
     with out.open("w", newline="", encoding="utf-8") as fh:
@@ -137,9 +152,12 @@ def main(argv=None):
     cases, skipped = [], []
     land = interps = None
     for folder in folders:
-        case, region, scan = folder.name, folder.name.split("_")[0], case_scan(folder)
-        if region not in REGION_BOX or scan is None:
-            skipped.append((case, "skipped: no case scan" if scan is None else "skipped: unknown region"))
+        case, region = folder.name, folder.name.split("_")[0]
+        if region not in REGION_BOX:
+            continue  # not a case folder (e.g. gpm_screen)
+        scan = case_scan(folder)
+        if scan is None:
+            skipped.append((case, "skipped: no case scan"))
             print(f"{case}: {skipped[-1][1]}", flush=True)
             continue
         cases.append(case)

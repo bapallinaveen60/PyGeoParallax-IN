@@ -1,11 +1,11 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
-> **Status (11 case folders):**
-> - 5 usable. Correction cuts the line-of-sight offset from a mean of 6.6 to 3.1 km, with the cross-look offset unchanged.
-> - 5 excluded: too little convection (3) or no reliable match (2).
-> - 1 missing its case scan.
+> **Status (24 case folders):**
+> - 10 usable. Correction shifts the line-of-sight offset by ~7 km (storm-top median 5.5 → 2.8 km; 6 of 8 improve); the cross-look offset is unchanged.
+> - 12 excluded: 9 with too little convection, 3 with no reliable match.
+> - 2 not run.
 >
-> See `validation_summary.md`; reproduce with `scripts/run_all_cases.py`.
+> See `validation_summary.md`; screen GPM first with `scripts/screen_gpm_convection.py`.
 
 Generated with:
 
