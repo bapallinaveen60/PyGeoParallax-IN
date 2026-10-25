@@ -44,6 +44,7 @@ from pygeoparallax.validation import compare, iou, range_mask, subcell_displacem
 SAT_LON = 74.0
 COLD_BT, DEEP_BT, ECHO_DBZ, DEEP_TOP_M = 235.0, 220.0, 25.0, 8000.0
 SCAN_MIN, SCAN_LAT = 26.9, (81.0, -81.0)
+SLANT_TOPS = True  # place GPM storm tops on the slanted beam (see ingest.gpm.along_beam)
 
 
 def find(folder, pattern):
@@ -63,6 +64,14 @@ def gpm_on_grid(path, grid, bbox):
     glat, glon = np.meshgrid(grid.lats, grid.lons, indexing="ij")
     lat, lon = gpm["lat"].values, gpm["lon"].values
     near = lambda v: sample_nearest(lat, lon, v, glat, glon, max_distance_km=3.5)  # noqa: E731
+    # Storm tops sit on the slanted Ku beam, up to ~5 km from the surface footprint (GPM's
+    # own parallax). Place them there when the reader provides the beam positions.
+    if SLANT_TOPS and "top_lat" in gpm.coords:
+        tlat = np.where(np.isfinite(gpm["top_lat"].values), gpm["top_lat"].values, lat)
+        tlon = np.where(np.isfinite(gpm["top_lon"].values), gpm["top_lon"].values, lon)
+        near_top = lambda v: sample_nearest(tlat, tlon, v, glat, glon, max_distance_km=3.5)  # noqa: E731
+    else:
+        near_top = near
     covered = np.isfinite(near(np.ones(lat.shape)))
     ptype = gpm["precip_type"].values
     conv = ptype == 2
@@ -83,8 +92,8 @@ def gpm_on_grid(path, grid, bbox):
         "covered": covered,
         "z": np.where(covered, near(np.nan_to_num(gpm["z_near_surface"].values, nan=0.0)), np.nan),
         "convective": near(ptype.astype(float)) == 2,
-        "deep": near(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)) > DEEP_TOP_M,
-        "top": np.where(covered, near(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)), np.nan),
+        "deep": near_top(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)) > DEEP_TOP_M,
+        "top": np.where(covered, near_top(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)), np.nan),
         "conv_centre": centre,
         "time_conv": str(t_conv)[:19],
         "n_convective": n_box,

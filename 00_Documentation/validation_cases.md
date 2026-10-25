@@ -1,8 +1,8 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
 > **Status (34 case folders, 4 regions):**
-> - 15 usable. Correction lowers the median line-of-sight offset from 5.4 to 3.5 km (storm top); the cross-look offset is unchanged.
-> - The uncorrected offset does **not** grow with viewing angle: a VZA-independent bias of ~+2 to +6 km exists (cause open).
+> - 14 usable. Correction lowers the median line-of-sight offset from 5.4 to 3.0 km (storm top; 10 of 12 improve); the cross-look offset is unchanged.
+> - Parallax-only correction overshoots: cell cores go from −0.1 to −5.7 km. Correct navigation too.
 >
 > See `validation_summary.md`.
 

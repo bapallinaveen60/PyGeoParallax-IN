@@ -52,6 +52,18 @@ def offset_km(a, b, vaa):
     return de * np.sin(t) + dn * np.cos(t), de * np.cos(t) - dn * np.sin(t)
 
 
+def core_height(bt, glat, glon, lat0, lon0, search_km):
+    """BT-derived cloud-top height [m] of the cold core (median over its pixels)."""
+    from pygeoparallax.cloudheight import height_from_temperature
+
+    d = np.hypot(glat - lat0, (glon - lon0) * np.cos(np.radians(lat0))) * 111.2
+    near = (d <= search_km) & np.isfinite(bt)
+    if near.sum() < 10:
+        return np.nan, np.nan
+    core = near & (bt <= np.nanmin(bt[near]) + 3.0)
+    return float(np.median(height_from_temperature(bt[core]))), float(np.nanmin(bt[near]))
+
+
 def cold_core(bt, glat, glon, lat0, lon0, search_km):
     d = np.hypot(glat - lat0, (glon - lon0) * np.cos(np.radians(lat0))) * 111.2
     near = (d <= search_km) & np.isfinite(bt)
@@ -93,11 +105,19 @@ def main(argv=None):
             if f.exists():
                 bts[k] = xr.open_dataset(f)["TIR1"].values
         per = {k: [] for k in bts}
+        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}.json").read_text())
         for lab in range(1, n + 1):
             m = labels == lab
             if m.sum() < args.min_cells:
                 continue
             g = centroid(m, glat, glon)
+            h_ins, bt_min = core_height(bts["uncorrected"], glat, glon, g[0], g[1], args.search)
+            tops = np.nan_to_num(gpm["top"])[m]
+            cells_out.append({"case": case, "kind": "heights", "cell_lat": round(g[0], 3), "cell_lon": round(g[1], 3),
+                              "insat_core_height_km": round(h_ins / 1000, 2), "insat_core_bt_min": round(bt_min, 1),
+                              "gpm_top_max_km": round(float(tops.max()) / 1000, 2),
+                              "gpm_top_p90_km": round(float(np.percentile(tops, 90)) / 1000, 2),
+                              "vza": d.get("vza_at_convection_deg")})
             for kind, bt in bts.items():
                 c = cold_core(bt, glat, glon, g[0], g[1], args.search)
                 if np.isfinite(c[0]):

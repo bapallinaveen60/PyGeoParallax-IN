@@ -56,6 +56,35 @@ def scan_times(group, sel=slice(None)):
     )
 
 
+def along_beam(lat, lon, height, sc_xyz, iterations=3):
+    """Position of a point at ``height`` [m] on the radar beam from a surface footprint to the spacecraft.
+
+    GPM 2A gives each footprint's surface position, but an echo at height h
+    lies on the slanted beam, displaced towards the spacecraft by about
+    h * tan(local zenith angle): up to ~5 km for a 15 km storm top at the
+    edge of the Ku swath. ``sc_xyz`` is the spacecraft ECEF position [m],
+    broadcastable to ``lat`` (e.g. one row per scan). Returns ``lat, lon``.
+    """
+    from ..geometry.ecef import ecef_to_geodetic, enu_basis, geodetic_to_ecef
+
+    lat = np.asarray(lat, float)
+    lon = np.asarray(lon, float)
+    height = np.asarray(height, float)
+    p = np.stack(geodetic_to_ecef(lat, lon, 0.0), axis=-1)
+    d = np.asarray(sc_xyz, float) - p
+    d /= np.linalg.norm(d, axis=-1, keepdims=True)
+    up = np.stack(enu_basis(lat, lon)[2], axis=-1)
+    t = height / np.sum(d * up, axis=-1)  # flat-Earth first guess: h / cos(zenith)
+    for _ in range(iterations):
+        q = p + t[..., None] * d
+        qlat, qlon, qh = ecef_to_geodetic(q[..., 0], q[..., 1], q[..., 2])
+        qup = np.stack(enu_basis(qlat, qlon)[2], axis=-1)
+        t = t + (height - qh) / np.sum(d * qup, axis=-1)
+    q = p + t[..., None] * d
+    qlat, qlon, _ = ecef_to_geodetic(q[..., 0], q[..., 1], q[..., 2])
+    return qlat, qlon
+
+
 def read_gpm_2a(path, swath="FS", bbox=None) -> xr.Dataset:
     """Read a GPM 2A Ku or DPR file.
 
@@ -74,7 +103,9 @@ def read_gpm_2a(path, swath="FS", bbox=None) -> xr.Dataset:
     xarray.Dataset
         Dimensions ``(scan, ray)``, with ``lat``/``lon``/``time`` coordinates,
         the variables in :data:`VARIABLES`, and ``precip_type`` (0 none,
-        1 stratiform, 2 convective, 3 other, -1 missing).
+        1 stratiform, 2 convective, 3 other, -1 missing). If the file has the
+        spacecraft position (``navigation/scPos``), ``top_lat``/``top_lon`` give
+        where each storm top really is on the slanted beam (:func:`along_beam`).
     """
     path = Path(path)
     with h5py.File(path, "r") as f:
@@ -105,6 +136,16 @@ def read_gpm_2a(path, swath="FS", bbox=None) -> xr.Dataset:
             "flag_meanings": "missing no_rain stratiform convective other",
         })
         times = scan_times(g, sel)
+        top_lat = top_lon = None
+        if "navigation/scPos" in g and "storm_top_height" in data_vars:
+            sc = g["navigation/scPos"][sel].astype(float)
+            h = data_vars["storm_top_height"][1]
+            ok = np.isfinite(h) & np.isfinite(lat)
+            top_lat = np.full(lat.shape, np.nan)
+            top_lon = np.full(lat.shape, np.nan)
+            if ok.any():
+                sc_b = np.broadcast_to(sc[:, None, :], lat.shape + (3,))
+                top_lat[ok], top_lon[ok] = along_beam(lat[ok], lon[ok], h[ok], sc_b[ok])
         attrs = {
             "source_file": path.name,
             "swath": swath,
@@ -118,4 +159,9 @@ def read_gpm_2a(path, swath="FS", bbox=None) -> xr.Dataset:
     )
     ds["lat"].attrs = {"units": "degrees_north", "standard_name": "latitude"}
     ds["lon"].attrs = {"units": "degrees_east", "standard_name": "longitude"}
+    if top_lat is not None:
+        ds = ds.assign_coords(top_lat=(("scan", "ray"), top_lat.astype(np.float32)),
+                              top_lon=(("scan", "ray"), top_lon.astype(np.float32)))
+        ds["top_lat"].attrs = {"units": "degrees_north", "long_name": "storm-top position on the slanted beam"}
+        ds["top_lon"].attrs = {"units": "degrees_east", "long_name": "storm-top position on the slanted beam"}
     return ds

@@ -180,3 +180,20 @@ def test_insat_position_correction_callable(tmp_path):
     expected = np.abs(field(base["lat"].values, base["lon"].values)[0]) * 1000.0
     np.testing.assert_allclose(dist, expected, rtol=1e-6, atol=1e-3)
     assert moved.attrs["navigation_correction"] == "position-dependent"
+
+
+def test_along_beam_geometry():
+    from pygeoparallax.geometry import geodetic_to_ecef, parallax_shift
+    from pygeoparallax.ingest.gpm import along_beam
+
+    # Spacecraft 407 km straight above the footprint: no horizontal displacement.
+    sc = np.array(geodetic_to_ecef(20.0, 85.0, 407_000.0))
+    lat, lon = along_beam(np.array([20.0]), np.array([85.0]), np.array([15_000.0]), sc)
+    assert float(lat[0]) == pytest.approx(20.0, abs=1e-6) and float(lon[0]) == pytest.approx(85.0, abs=1e-6)
+
+    # Spacecraft above a point ~130 km east (zenith ~18 deg): a 15 km top moves ~4.9 km towards it.
+    sc = np.array(geodetic_to_ecef(20.0, 86.24, 407_000.0))
+    lat, lon = along_beam(np.array([20.0]), np.array([85.0]), np.array([15_000.0]), sc)
+    dist, az = parallax_shift(20.0, 85.0, float(lat[0]), float(lon[0]))
+    assert 4.3e3 < float(dist) < 5.5e3
+    assert float(az) == pytest.approx(90.0, abs=2.0)
