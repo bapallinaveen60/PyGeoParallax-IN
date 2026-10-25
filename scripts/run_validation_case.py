@@ -202,6 +202,7 @@ def main(argv=None):
     ap.add_argument("--bbox", nargs=4, type=float, required=True, metavar=("LAT_MIN", "LAT_MAX", "LON_MIN", "LON_MAX"))
     ap.add_argument("--res", type=float, default=0.02)
     ap.add_argument("--nav", help="navigation correction JSON; also runs without it for comparison")
+    ap.add_argument("--nav-only", action="store_true", help="with --nav, skip the run without navigation correction")
     ap.add_argument("--max-lag", type=int, default=8, help="lag search in grid cells")
     ap.add_argument("--out", default=".")
     args = ap.parse_args(argv)
@@ -221,7 +222,7 @@ def main(argv=None):
         d, _ = parallax_shift(*gpm["conv_centre"], lat_c, lon_c)
         summary["shift_km_for_15km_top"] = round(float(d) / 1000, 1)
 
-    variants = [("no_nav", None)]
+    variants = [] if (args.nav and args.nav_only) else [("no_nav", None)]
     if args.nav:
         variants.append(("nav", NavigationCorrection.from_json(args.nav)))
     for tag, nav in variants:

@@ -72,8 +72,32 @@ Positive = INSAT must move towards the satellite (south-west) to match GPM.
    So parallax correction alone leaves a small overshoot. The two cases that got worse (Northeast 20 Jul 2022, Himalaya 2 Jul 2024) already started with a negative offset, i.e. a larger navigation error on those days.
 3. **Rain intensity vs storm top:** the storm-top field matches more cases and correlates better with TIR1, and is the more appropriate validation field. Both fields give the same picture.
 
+## Test: parallax and navigation together
+
+`scripts/test_navigation_parallax.py` re-ran the usable cases with the monsoon median navigation correction (+1.8 km E, +4.8 km N), applied the same way to all of them, and compared four states. Results are in `05_validation/gpm_colocation/nav_parallax_test.csv`. Only field/windows where all four matches lie inside the search are counted.
+
+Line-of-sight offset, mean ± standard error (RMS), in km:
+
+| Field, window | Cases | Raw | Parallax only | Navigation only | Both |
+| :--- | ---: | :--- | :--- | :--- | :--- |
+| Storm top, 250 km | 8 | +3.8 ± 2.1 (6.7) | −3.0 ± 2.0 (6.1) | **+8.7 ± 2.0** (10.3) | **+1.7 ± 1.9** (5.4) |
+| Storm top, 150 km | 6 | +4.6 ± 2.1 (6.6) | −2.5 ± 1.6 (4.3) | **+9.6 ± 2.1** (10.7) | **+2.5 ± 1.6** (4.4) |
+| Rain Z, 250 km | 6 | +3.1 ± 2.6 (6.6) | −3.7 ± 2.3 (6.3) | **+8.1 ± 2.6** (10.0) | **+1.3 ± 2.2** (5.0) |
+| Rain Z, 150 km | 5 | +5.2 ± 2.2 (6.9) | −1.9 ± 1.7 (3.9) | **+10.3 ± 2.2** (11.3) | **+3.1 ± 1.6** (4.5) |
+
+What it shows:
+
+1. **The cancellation is real.** With navigation corrected and parallax not, the offset grows to **+8.1 to +10.3 km**, which matches the computed parallax shift (~10 km). Raw monsoon INSAT imagery looks closer to the radar than it really is, because its ~5 km navigation error (towards the satellite) hides about half of the parallax displacement.
+2. **Both corrections together** bring the mean to +1.3 to +3.1 km. Parallax only gives −1.9 to −3.7 km. The bias shrinks at 250 km but not at 150 km, and the RMS is similar (4.4–5.4 vs 3.9–6.3 km).
+3. **Neither variant is distinguishable from zero.** With 5–8 cases, each is within ~1.5 standard errors. The true navigation error on each day probably differs from the monsoon median, so the best estimate lies between the two.
+4. **Case-to-case scatter (SD 4–6 km) is now the limiting factor,** not the method. Tightening it needs more cases, and same-day navigation measurements near each storm.
+
+**For the paper:**
+- The parallax correction is verified: it shifts the offset by the expected ~7 km along the line of sight and leaves the cross-look offset unchanged.
+- In monsoon INSAT-3DR data, a ~5 km navigation error partly masks parallax. Correct both, and quote a residual uncertainty of a few km.
+
 ## Next
 
-- **Test finding 2 directly:** re-run the usable cases with parallax **and** a monsoon navigation correction (same-day where available, else the monsoon median +1.8 km E, +4.8 km N). The line-of-sight offset should then centre on zero.
+- **Reduce the scatter:** more usable cases (Central and South India too), and same-day navigation where clear coasts exist.
 - **Add Central India** (VZA ~23–27°) and **South India** (VZA ~10–16°) cases. The uncorrected offset should grow with tan(VZA); that trend is a further test.
 - **Paper figure:** per-case line-of-sight offset before/after, with the navigation-only expectation marked.
