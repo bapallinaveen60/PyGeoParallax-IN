@@ -1,12 +1,11 @@
 # GPM Validation Cases (high-VZA, monsoon)
 
-> **Status (5 cases):**
-> - Northeast 18 Aug 2024 and 8 Jun 2024: the line-of-sight offset drops 50–80 %.
-> - Himalaya 30 Jun 2023: overshoot of ~5 km.
-> - Northeast 13 Sep 2022: no convection.
-> - Himalaya 4 Sep 2024: case scan still missing.
+> **Status (11 case folders):**
+> - 5 usable. Correction cuts the line-of-sight offset from a mean of 6.6 to 3.1 km, with the cross-look offset unchanged.
+> - 5 excluded: too little convection (3) or no reliable match (2).
+> - 1 missing its case scan.
 >
-> See `validation_summary.md`.
+> See `validation_summary.md`; reproduce with `scripts/run_all_cases.py`.
 
 Generated with:
 

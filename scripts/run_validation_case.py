@@ -65,7 +65,17 @@ def gpm_on_grid(path, grid, bbox):
     ptype = gpm["precip_type"].values
     conv = ptype == 2
     rc, cc = np.where(conv & (lat >= bbox[0]) & (lat <= bbox[1]) & (lon >= bbox[2]) & (lon <= bbox[3]))
-    centre = (float(lat[rc, cc].mean()), float(lon[rc, cc].mean())) if rc.size else None
+    centre, n_box = None, int(rc.size)
+    if rc.size:
+        # Centre on the densest convective cluster (1-degree bins), not the mean of all
+        # convection, which can fall between two separate storms.
+        clat, clon = lat[rc, cc], lon[rc, cc]
+        counts, ey, ex = np.histogram2d(clat, clon, bins=[np.arange(bbox[0], bbox[1] + 1), np.arange(bbox[2], bbox[3] + 1)])
+        iy, ix = np.unravel_index(np.argmax(counts), counts.shape)
+        y0, x0 = (ey[iy] + ey[iy + 1]) / 2, (ex[ix] + ex[ix + 1]) / 2
+        in_cluster = np.hypot(clat - y0, (clon - x0) * np.cos(np.radians(y0))) < 1.35  # ~150 km
+        centre = (float(clat[in_cluster].mean()), float(clon[in_cluster].mean()))
+        rc, cc = rc[in_cluster], cc[in_cluster]
     t_conv = gpm["time"].values[int(np.median(rc))] if rc.size else gpm["time"].values[len(lat) // 2]
     return {
         "covered": covered,
@@ -74,7 +84,8 @@ def gpm_on_grid(path, grid, bbox):
         "deep": near(np.nan_to_num(gpm["storm_top_height"].values, nan=0.0)) > DEEP_TOP_M,
         "conv_centre": centre,
         "time_conv": str(t_conv)[:19],
-        "n_convective": int(rc.size),
+        "n_convective": n_box,
+        "n_convective_cluster": int(rc.size),
         "storm_top_max_km": float(np.nanmax(gpm["storm_top_height"].values[conv]) / 1000) if conv.any() else None,
     }
 
@@ -187,6 +198,7 @@ def main(argv=None):
     gpm = gpm_on_grid(find(args.dir, "2A.GPM.*"), grid, tuple(args.bbox))
     summary = {"case": args.case, "insat_scan": args.scan, "grid_res_deg": args.res,
                "gpm_time_at_convection": gpm["time_conv"], "gpm_convective_footprints": gpm["n_convective"],
+               "gpm_convective_cluster": gpm["n_convective_cluster"],
                "gpm_storm_top_max_km": gpm["storm_top_max_km"], "gpm_convection_centre": gpm["conv_centre"],
                "runs": {}}
     if gpm["conv_centre"]:
