@@ -115,3 +115,82 @@ def cloud_top_height(bt, clear_sky_bt=None, profile: Profile = TROPICAL, **mask_
     """Per-pixel cloud-top height [m] from TIR1 BT: profile lookup where cloudy, NaN elsewhere."""
     mask = cloud_mask(bt, clear_sky_bt, **mask_kwargs)
     return np.where(mask, height_from_temperature(bt, profile), np.nan)
+
+
+def height_from_temperature_profiles(temperature, profile_t, profile_z, min_pressure_index=None):
+    """Like :func:`height_from_temperature`, with a separate profile for each value.
+
+    Parameters
+    ----------
+    temperature : array_like, shape (n,)
+        Temperatures to look up [K].
+    profile_t, profile_z : array_like, shape (n, levels)
+        Temperature [K] and height [m] of each value's profile, ordered from
+        the surface upwards.
+    min_pressure_index : int, optional
+        Highest level allowed as the tropopause (e.g. the 70 hPa index), so a
+        warm stratosphere above is never searched. Defaults to all levels.
+
+    The lookup runs downwards from each profile's cold-point tropopause and
+    takes the first level at least as warm as the value, interpolating linearly
+    in between. Searching from the top keeps low-level inversions from
+    capturing high clouds. Colder than the cold point gives the cold-point
+    height; warmer than the lowest level gives that level's height.
+    """
+    t = np.asarray(temperature, float).ravel()
+    pt = np.asarray(profile_t, float)
+    pz = np.asarray(profile_z, float)
+    n_lev = pt.shape[1]
+    top = n_lev if min_pressure_index is None else min_pressure_index + 1
+    idx = np.arange(n_lev)
+    cold = np.argmin(np.where(idx < top, pt, np.inf), axis=1)
+    rows = np.arange(t.size)
+    # Highest level at or below the cold point that is at least as warm as the value.
+    warm = (pt >= t[:, None]) & (idx <= cold[:, None])
+    # Colder than the cold point: k is the cold point itself, so the height is the cold-point height.
+    k = n_lev - 1 - np.argmax(warm[:, ::-1], axis=1)
+    found = warm.any(axis=1)  # False only if warmer than every level
+    k = np.where(found, k, 0)
+    k1 = np.minimum(k + 1, cold)
+    t0, t1 = pt[rows, k], pt[rows, k1]
+    z0, z1 = pz[rows, k], pz[rows, k1]
+    with np.errstate(invalid="ignore", divide="ignore"):
+        frac = np.where(t0 > t1, (t0 - t) / (t0 - t1), 0.0)
+    out = z0 + np.clip(frac, 0.0, 1.0) * (z1 - z0)
+    out = np.where(found, out, pz[:, 0])  # warmer than every level
+    return np.where(np.isnan(t), np.nan, out).reshape(np.shape(temperature))
+
+
+def cloud_top_height_profiles(bt, lat, lon, profiles, clear_sky_bt=None, min_pressure=70.0, **mask_kwargs):
+    """Per-pixel cloud-top height [m] using gridded profiles, e.g. ERA5.
+
+    Parameters
+    ----------
+    bt, lat, lon : array_like
+        TIR1 brightness temperature [K] and pixel positions [degrees].
+    profiles : xarray.Dataset
+        ``temperature`` and ``height`` on ``(level, lat, lon)``, surface first,
+        as from :func:`pygeoparallax.ingest.read_era5_profiles`. Profiles are
+        interpolated bilinearly to each pixel.
+    clear_sky_bt, **mask_kwargs
+        Cloud mask, as in :func:`cloud_mask`.
+    min_pressure : float, optional
+        Highest pressure level [hPa] searched for the cold-point tropopause.
+    """
+    from scipy.interpolate import RegularGridInterpolator
+
+    bt = np.asarray(bt, float)
+    mask = cloud_mask(bt, clear_sky_bt, **mask_kwargs)
+    out = np.full(bt.shape, np.nan)
+    if not mask.any():
+        return out
+    levels = profiles["level"].values
+    top = int(np.flatnonzero(levels >= min_pressure).max())
+    grid = (profiles["lat"].values, profiles["lon"].values)
+    pts = np.stack([np.asarray(lat, float)[mask], np.asarray(lon, float)[mask]], -1)
+    prof = {}
+    for name in ("temperature", "height"):
+        values = np.moveaxis(profiles[name].values, 0, -1)  # (lat, lon, level)
+        prof[name] = RegularGridInterpolator(grid, values, bounds_error=False, fill_value=None)(pts)
+    out[mask] = height_from_temperature_profiles(bt[mask], prof["temperature"], prof["height"], top)
+    return out

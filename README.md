@@ -12,7 +12,7 @@ The corrected output is validated against spaceborne radar overpasses from the G
 | :--- | :--- |
 | INSAT-3DR L1C SGP reader, L2 CTP / clear-sky BT reader, GPM 2A Ku/DPR reader | done |
 | Viewing and solar angles, ECEF transforms, ellipsoid ray-tracing solver (numpy and Numba; 0.5 s per full disk) | done |
-| Cloud-top height from TIR1 BT (AFGL tropical profile, 17 km cap) | done; ERA5 profiles planned |
+| Cloud-top height from TIR1 BT (AFGL tropical profile or per-pixel ERA5 profiles) | done |
 | Terrain-aware correction | done; SRTM reader planned |
 | Occlusion-aware bucket resampling with gap filling | done |
 | Coastline-based INSAT navigation correction | done |

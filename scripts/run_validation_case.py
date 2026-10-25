@@ -4,8 +4,9 @@ Steps:
 
 1. Read the INSAT L1C case scan. Optionally apply a same-day navigation
    correction (JSON from ``pygeoparallax navigation``).
-2. Cloud-top height per pixel: TIR1 BT through the AFGL tropical profile.
-   ISRO's clear-sky BT (from the matching CTP file) is the cloud-mask
+2. Cloud-top height per pixel: TIR1 BT through the AFGL tropical profile, or
+   with ``--profile era5`` through the ERA5 profiles in the case folder
+   (``era5_pl_*.nc`` from ``download_era5.py``). ISRO's clear-sky BT (from the matching CTP file) is the cloud-mask
    reference, and ISRO's CTP height is reported as a check. Without a CTP
    file, the cloud mask is BT < 270 K and the check is skipped.
 3. Parallax-correct and regrid to ``--res`` degrees, along with an uncorrected
@@ -34,9 +35,9 @@ from pathlib import Path
 import numpy as np
 
 from pygeoparallax import correct_scene
-from pygeoparallax.cloudheight import TROPICAL, cloud_top_height, height_from_pressure
+from pygeoparallax.cloudheight import TROPICAL, cloud_top_height, cloud_top_height_profiles, height_from_pressure
 from pygeoparallax.geometry import parallax_correct, parallax_shift, satellite_view_angles
-from pygeoparallax.ingest import read_gpm_2a, read_insat_csbt, read_insat_ctp, read_insat_l1c
+from pygeoparallax.ingest import read_era5_profiles, read_gpm_2a, read_insat_csbt, read_insat_ctp, read_insat_l1c
 from pygeoparallax.navigation import NavigationCorrection
 from pygeoparallax.resample import Grid, sample_nearest
 from pygeoparallax.validation import compare, iou, range_mask, subcell_displacement
@@ -147,15 +148,20 @@ def run(args, nav):
         ctp_path = find(args.dir, f"3RIMG_{args.scan}_L2B_CTP*.h5")
     except FileNotFoundError:
         ctp_path = None
+    if args.profile == "era5":
+        era5 = read_era5_profiles(find(args.dir, "era5_pl_*.nc"))
+        height = lambda clear: cloud_top_height_profiles(bt, lat, lon, era5, clear)  # noqa: E731
+    else:
+        height = lambda clear: cloud_top_height(bt, clear, TROPICAL)  # noqa: E731
     if ctp_path is None:
         # No ISRO CTP file: fixed-threshold cloud mask (BT < 270 K) and no CTP check.
-        cth = cloud_top_height(bt, None, TROPICAL)
+        cth = height(None)
         ctp_h = np.full(bt.shape, np.nan)
         check = {"ctp_file": "missing; cloud mask = BT < 270 K"}
     else:
         csbt, ctp = read_insat_csbt(ctp_path), read_insat_ctp(ctp_path)
         clear_bt = sample_nearest(csbt["lat"].values, csbt["lon"].values, csbt["clear_sky_bt"].values, lat, lon, 40.0)
-        cth = cloud_top_height(bt, clear_bt, TROPICAL)
+        cth = height(clear_bt)
         ctp_h = sample_nearest(ctp["lat"].values, ctp["lon"].values, height_from_pressure(ctp["ctp"].values), lat, lon, 30.0)
         both = np.isfinite(cth) & np.isfinite(ctp_h)
         deep = both & (bt < DEEP_BT)
@@ -212,6 +218,8 @@ def main(argv=None):
     ap.add_argument("--res", type=float, default=0.02)
     ap.add_argument("--nav", help="navigation correction JSON; also runs without it for comparison")
     ap.add_argument("--nav-only", action="store_true", help="with --nav, skip the run without navigation correction")
+    ap.add_argument("--profile", choices=("afgl", "era5"), default="afgl",
+                    help="temperature profile for cloud-top height (era5 needs era5_pl_*.nc in --dir)")
     ap.add_argument("--max-lag", type=int, default=8, help="lag search in grid cells")
     ap.add_argument("--out", default=".")
     args = ap.parse_args(argv)
@@ -219,7 +227,7 @@ def main(argv=None):
 
     grid = Grid(*args.bbox, res=args.res)
     gpm = gpm_on_grid(find(args.dir, "2A.GPM.*"), grid, tuple(args.bbox))
-    summary = {"case": args.case, "insat_scan": args.scan, "grid_res_deg": args.res,
+    summary = {"case": args.case, "insat_scan": args.scan, "grid_res_deg": args.res, "profile": args.profile,
                "gpm_time_at_convection": gpm["time_conv"], "gpm_convective_footprints": gpm["n_convective"],
                "gpm_convective_cluster": gpm["n_convective_cluster"],
                "gpm_storm_top_max_km": gpm["storm_top_max_km"], "gpm_convection_centre": gpm["conv_centre"],

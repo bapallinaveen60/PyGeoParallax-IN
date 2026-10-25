@@ -16,6 +16,7 @@ cells, and the coldest pixels and the echo cores sit in different parts of it.
 
 Usage:
     python scripts/analyze_core_offsets.py --base <validation folder>
+    python scripts/analyze_core_offsets.py --base <validation folder> --suffix _era5   # ERA5-height runs
 """
 
 from __future__ import annotations
@@ -52,16 +53,16 @@ def offset_km(a, b, vaa):
     return de * np.sin(t) + dn * np.cos(t), de * np.cos(t) - dn * np.sin(t)
 
 
-def core_height(bt, glat, glon, lat0, lon0, search_km):
-    """BT-derived cloud-top height [m] of the cold core (median over its pixels)."""
-    from pygeoparallax.cloudheight import height_from_temperature
-
+def core_height(bt, cth, glat, glon, lat0, lon0, search_km):
+    """Cloud-top height [m] of the cold core (median of the gridded height over its pixels)."""
     d = np.hypot(glat - lat0, (glon - lon0) * np.cos(np.radians(lat0))) * 111.2
     near = (d <= search_km) & np.isfinite(bt)
     if near.sum() < 10:
         return np.nan, np.nan
-    core = near & (bt <= np.nanmin(bt[near]) + 3.0)
-    return float(np.median(height_from_temperature(bt[core]))), float(np.nanmin(bt[near]))
+    core = near & (bt <= np.nanmin(bt[near]) + 3.0) & np.isfinite(cth)
+    if not core.any():
+        return np.nan, float(np.nanmin(bt[near]))
+    return float(np.median(cth[core])), float(np.nanmin(bt[near]))
 
 
 def cold_core(bt, glat, glon, lat0, lon0, search_km):
@@ -81,6 +82,7 @@ def main(argv=None):
     ap.add_argument("--radius", type=float, default=250.0)
     ap.add_argument("--search", type=float, default=25.0, help="km around each GPM cell to look for the cold core")
     ap.add_argument("--min-cells", type=int, default=8, help="smallest deep-echo cell, in 0.02 deg grid cells")
+    ap.add_argument("--suffix", default="", help="case-name suffix of the runs to analyse, e.g. _era5")
     args = ap.parse_args(argv)
 
     table = pd.read_csv("05_validation/gpm_colocation/all_cases.csv")
@@ -93,25 +95,27 @@ def main(argv=None):
         gpm = rvc.gpm_on_grid(rvc.find(Path(args.base) / case, "2A.GPM.*"), grid, box)
         cen = gpm["conv_centre"]
         _, vaa = satellite_view_angles(*cen, 74.0)
-        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}.json").read_text())
+        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}{args.suffix}.json").read_text())
         glat, glon = np.meshgrid(grid.lats, grid.lons, indexing="ij")
         near = range_mask(grid, cen[0], cen[1], args.radius) & gpm["covered"]
         labels, n = ndimage.label((np.nan_to_num(gpm["top"]) > 10000) & near)
-        bts = {k: xr.open_dataset(f"04_corrected_output/netcdf/{case}_no_nav_{k}.nc")["TIR1"].values
-               for k in ("uncorrected", "corrected")}
+        grids = {k: xr.open_dataset(f"04_corrected_output/netcdf/{case}{args.suffix}_no_nav_{k}.nc")
+                 for k in ("uncorrected", "corrected")}
+        bts = {k: g["TIR1"].values for k, g in grids.items()}
+        raw_cth = grids["uncorrected"]["cth"].values
         # With the monsoon navigation correction (from test_navigation_parallax.py), if available.
         for k, src in (("nav_only", "uncorrected"), ("nav_parallax", "corrected")):
-            f = Path("04_corrected_output/netcdf") / f"{case}_mnav_nav_{src}.nc"
+            f = Path("04_corrected_output/netcdf") / f"{case}{args.suffix}_mnav_nav_{src}.nc"
             if f.exists():
                 bts[k] = xr.open_dataset(f)["TIR1"].values
         per = {k: [] for k in bts}
-        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}.json").read_text())
+        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}{args.suffix}.json").read_text())
         for lab in range(1, n + 1):
             m = labels == lab
             if m.sum() < args.min_cells:
                 continue
             g = centroid(m, glat, glon)
-            h_ins, bt_min = core_height(bts["uncorrected"], glat, glon, g[0], g[1], args.search)
+            h_ins, bt_min = core_height(bts["uncorrected"], raw_cth, glat, glon, g[0], g[1], args.search)
             tops = np.nan_to_num(gpm["top"])[m]
             cells_out.append({"case": case, "kind": "heights", "cell_lat": round(g[0], 3), "cell_lon": round(g[1], 3),
                               "insat_core_height_km": round(h_ins / 1000, 2), "insat_core_bt_min": round(bt_min, 1),
@@ -138,9 +142,10 @@ def main(argv=None):
         print(f"{case:20s} VZA {row['vza']:4.1f}  cells {row['cells']:3d}  along median: "
               + "  ".join(f"{k} {row.get(k + '_along_median', float('nan')):+6.1f}" for k in per), flush=True)
 
-    pd.DataFrame(rows).to_csv("05_validation/gpm_colocation/core_offsets.csv", index=False)
-    pd.DataFrame(cells_out).to_csv("05_validation/gpm_colocation/core_offsets_cells.csv", index=False)
-    print("wrote 05_validation/gpm_colocation/core_offsets.csv and core_offsets_cells.csv")
+    out = Path("05_validation/gpm_colocation")
+    pd.DataFrame(rows).to_csv(out / f"core_offsets{args.suffix}.csv", index=False)
+    pd.DataFrame(cells_out).to_csv(out / f"core_offsets{args.suffix}_cells.csv", index=False)
+    print(f"wrote {out}/core_offsets{args.suffix}.csv and core_offsets{args.suffix}_cells.csv")
 
 
 if __name__ == "__main__":

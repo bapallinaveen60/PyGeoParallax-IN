@@ -108,15 +108,35 @@ The two metrics differ by a steady 4–5 km. The field metric is driven by the c
 | **Cloud-top heights** | In 95 matched cells, INSAT cold-core height is 17.0 km (median; 52 % of cells at the 17 km cap, minimum BT ~193 K) against a GPM maximum echo top of 12.4 km: **+3.2 km**. Part of this is physical, since radar echo tops lie 1–3 km below IR cloud tops. At most it accounts for **~1.7 km** of extra shift. |
 | **Navigation** | The monsoon coastline measurements give ~5 km towards the satellite along the line of sight. That matches the remaining ~3–4 km. Applying it (cells: −5.7 → −3.3 km) moves the offset the right way. |
 
+## ERA5 profiles instead of the standard atmosphere
+
+Cloud-top heights were recomputed with ERA5 temperature and geopotential (hour nearest the case scan, 29 levels 1000–50 hPa, interpolated to each pixel; `scripts/download_era5.py`, `compare_era5_heights.py`). **ERA5 does not change the result.**
+
+| Measure | AFGL | ERA5 |
+| :--- | ---: | ---: |
+| INSAT cold-core height, median of 95 cells [km] | 16.9 | 16.75 |
+| GPM maximum echo top, same cells [km] | 12.45 | 12.45 |
+| Applied shift at deep cores, median [km] | 9.8 | 10.2 |
+| Field, storm top 250 km (12 cases): parallax only, mean / median absolute [km] | −0.9 / 3.1 | −1.4 / 3.2 |
+| Field, storm top 250 km: navigation + parallax, mean / median absolute [km] | +3.8 / 4.7 | +3.4 / 4.5 |
+| Cells: parallax only, median [km] | −5.7 | −5.9 |
+| Cells: navigation + parallax, median [km] | −3.3 | −3.2 |
+| Cases improved by parallax correction (250 km) | 10 of 12 | 10 of 12 |
+
+(AFGL medians differ by 0.1 km from the tables above because a case now counts only if both profiles give a valid match.)
+
+- **Deep cores:** the coldest tops are colder than the ERA5 cold-point tropopause too, so both profiles put them at about 17 km. The standard atmosphere's cap is therefore not the cause of the high INSAT heights.
+- **Mid-level clouds:** ERA5 puts them about 0.9 km higher than AFGL (Northeast 18 Aug 2024: bias against ISRO CTP −0.26 → +0.65 km). These do not drive the storm-core offsets.
+- **So** the ~4.4 km gap between IR cloud tops and GPM echo tops is physical (radar echo tops lie below the IR top) rather than a profile error. The navigation error stays the main remaining uncertainty.
+
 ## For the paper
 
 1. **Geometry verified:** pyproj, pyorbital and satpy agree. The correction moves features by the computed amount along the line of sight and leaves the cross-look offset unchanged, in every field, window and metric.
 2. **Agreement with GPM improves on average** (storm top: median 5.4 → 3.0 km, 10 of 12 cases).
 3. **In monsoon INSAT-3DR data the parallax displacement is partly masked by a navigation error of similar size.** Correct both; the absolute residual is uncertain by about ±3–4 km, and case scatter is 4–6 km.
-4. **BT-based heights for the coldest tops sit at the 17 km tropopause cap in half the cells.** ERA5 profiles, or an overshooting-top treatment, would refine them.
+4. **BT-based heights for the coldest tops sit at the tropopause, about 17 km, with either profile.** ERA5 instead of the standard atmosphere changes the offsets by under 0.5 km, so the IR–radar height gap is physical, not a profile error.
 
 ## Next
 
 - **Same-day navigation near each storm:** east–west coastlines on monsoon break days, the main remaining uncertainty.
-- **ERA5 profiles** in place of the standard atmosphere, for cloud-top heights above the cap.
 - **More South and Central India cases** (only 2–3 usable each).

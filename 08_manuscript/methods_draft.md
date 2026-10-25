@@ -25,7 +25,7 @@ GPM 2A gives each footprint's position at the surface. An echo at height $h$ lie
 ### 2.3 Ancillary data
 
 - **Coastlines:** Natural Earth 10 m land polygons (public domain) [ref], used for the navigation check (Section 3.6).
-- **Atmospheric profile:** AFGL tropical standard atmosphere [Anderson et al., 1986], 0–25 km at 1 km resolution.
+- **Atmospheric profiles:** AFGL tropical standard atmosphere [Anderson et al., 1986], 0–25 km at 1 km resolution; and ERA5 reanalysis [Hersbach et al., 2020] temperature and geopotential on 29 pressure levels (1000–50 hPa, 0.25°), at the hour nearest each case scan.
 - **Terrain:** the solver accepts any digital elevation model on a regular grid. SRTM [ref] will be used for the terrain-aware runs (not included in the results here).
 
 ### 2.4 Study period and regions
@@ -70,6 +70,8 @@ Cloud-top height is estimated per pixel from TIR1 brightness temperature. For an
 
 1. **Cloud mask.** A pixel is cloudy if its BT is more than 8 K below the ISRO clear-sky BT, sampled to the pixel by nearest neighbour. Where no clear-sky BT is available, a pixel is cloudy if BT < 270 K. Clear pixels get no height and are not moved.
 2. **Height lookup.** BT is interpolated linearly in the AFGL tropical profile between the surface and the cold-point tropopause (17 km, 194.8 K). BT colder than the tropopause minimum, as in overshooting tops, is assigned the tropopause height.
+
+As an alternative, ERA5 profiles are interpolated bilinearly to each pixel, with geopotential converted to geometric height. The lookup then runs downwards from each column's cold-point tropopause (searched up to 70 hPa), so low-level inversions cannot capture high clouds. On the 14 validation cases, ERA5 changes cold-core heights by −0.15 km (median) and the INSAT–GPM offsets by under 0.5 km relative to the standard atmosphere.
 
 Profile heights are above mean sea level. We treat them as ellipsoidal heights. The difference (the geoid undulation, −50 to −100 m over India) changes the shift by less than 1%.
 
@@ -211,6 +213,5 @@ An error $\delta h$ in cloud-top height shifts the corrected position by about $
 
 - Add references: MOSDAC product guide, GPM DPR ATBD, Natural Earth, pyproj, pyorbital, satpy, Vicente et al. (2002), Bieliński (2020), Anderson et al. (1986).
 - Section 3.4 needs the SRTM runs before it can report results.
-- If ERA5 profiles replace the standard atmosphere, update Section 3.2.
 - Confirm the INSAT-3DR yaw-flip dates from IMD's SatMet SOP before stating them as fact.
 - The U-Net comparison (Model A uncorrected, Model B corrected) will need its own section.

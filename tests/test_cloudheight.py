@@ -71,3 +71,55 @@ def test_ctp_reader_synthetic(tmp_path):
     csbt = read_insat_csbt(path)
     assert csbt["clear_sky_bt"].values[1, 1] == 296.0
     assert csbt.attrs["start_time"] == "2022-06-06T17:15:06"
+
+
+def _era5_file(path, t_offset=0.0):
+    """Synthetic CDS-style ERA5 file: the AFGL tropical profile on 26 levels, uniform in space."""
+    import xarray as xr
+
+    from pygeoparallax.ingest.era5 import EARTH_RADIUS, G0
+
+    lat = np.array([30.0, 25.0, 20.0])  # CDS order: north to south
+    lon = np.array([85.0, 90.0, 95.0])
+    p = TROPICAL.pressure[::-1]  # CDS order: top first
+    z = TROPICAL.height[::-1]
+    t = TROPICAL.temperature[::-1] + t_offset
+    geop = G0 * EARTH_RADIUS * z / (EARTH_RADIUS + z)  # inverse of geometric_height
+    shape = (1, p.size, lat.size, lon.size)
+    ds = xr.Dataset(
+        {"t": (("valid_time", "pressure_level", "latitude", "longitude"), np.broadcast_to(t[None, :, None, None], shape)),
+         "z": (("valid_time", "pressure_level", "latitude", "longitude"), np.broadcast_to(geop[None, :, None, None], shape))},
+        coords={"valid_time": [np.datetime64("2024-08-18T22:00")], "pressure_level": p, "latitude": lat, "longitude": lon},
+    )
+    ds.to_netcdf(path)
+    return path
+
+
+def test_read_era5_profiles(tmp_path):
+    from pygeoparallax.ingest import read_era5_profiles
+
+    era5 = read_era5_profiles(_era5_file(tmp_path / "era5.nc"))
+    assert era5["temperature"].dims == ("level", "lat", "lon")
+    assert era5["level"].values[0] == TROPICAL.pressure[0] and np.all(np.diff(era5["lat"].values) > 0)
+    np.testing.assert_allclose(era5["height"].values[:, 1, 1], TROPICAL.height, atol=1e-6)
+    np.testing.assert_allclose(era5["temperature"].values[:, 0, 2], TROPICAL.temperature)
+
+
+def test_cloud_top_height_profiles_matches_single_profile(tmp_path):
+    from pygeoparallax.cloudheight import cloud_top_height_profiles, height_from_temperature_profiles
+    from pygeoparallax.ingest import read_era5_profiles
+
+    bt = np.array([[285.0, 240.0, 210.0], [195.0, 190.0, np.nan]])
+    lat = np.full(bt.shape, 24.3)
+    lon = np.full(bt.shape, 91.7)
+    era5 = read_era5_profiles(_era5_file(tmp_path / "era5.nc"))
+    h = cloud_top_height_profiles(bt, lat, lon, era5, min_pressure=50.0)
+    np.testing.assert_allclose(h, cloud_top_height(bt), equal_nan=True, atol=1e-6)
+    # A warmer atmosphere puts the same BT higher up.
+    warm = read_era5_profiles(_era5_file(tmp_path / "warm.nc", t_offset=2.0))
+    assert cloud_top_height_profiles(np.array([240.0]), [24.0], [90.0], warm, min_pressure=50.0)[0] > h[0, 1]
+    # The search runs down from the cold point, so a low inversion does not capture a high cloud.
+    pt = np.array([[290.0, 295.0, 280.0, 250.0, 220.0, 200.0, 210.0]])
+    pz = np.array([[0.0, 1000.0, 3000.0, 7000.0, 11000.0, 16000.0, 19000.0]])
+    assert height_from_temperature_profiles([292.0], pt, pz)[0] == pytest.approx(1000 + 2000 * 3 / 15)
+    assert height_from_temperature_profiles([190.0], pt, pz)[0] == pytest.approx(16000.0)

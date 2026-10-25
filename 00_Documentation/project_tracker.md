@@ -8,8 +8,8 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🔬 Validation done with GPM (Month 3) → moving to Month 4 (U-Net comparison, manuscript)
-*   **Completed Tasks**: 🟢 7 / 16 Weeks done, 🟡 6 partly done (waiting on SRTM, ERA5 or IMD data, or on release)
-*   **Overall Progress**: `████████████░░░░░░░░ 62%` (partly done weeks counted as half)
+*   **Completed Tasks**: 🟢 8 / 16 Weeks done, 🟡 5 partly done (waiting on SRTM or IMD data, or on release)
+*   **Overall Progress**: `█████████████░░░░░░░ 66%` (partly done weeks counted as half)
 *   **Next Milestone**: Week 13 - U-Net comparison, uncorrected vs corrected (needs the existing model and its training data)
 *   **Key result so far**: the correction moves features by the computed amount along the line of sight and lowers the median INSAT–GPM offset from 5.4 to 3.0 km (storm top, 10 of 12 cases). In monsoon data a navigation error of ~3–4 km partly masks the parallax, so navigation and parallax are corrected together. See `validation_summary.md`.
 
@@ -22,10 +22,10 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 1 — Pipeline Setup, Data Engineering & Spatial Transformations
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[~]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | **Done:** `read_insat_l1c` (L1C SGP sector, BT/albedo via LUTs, optional position offset), `read_insat_ctp` / `read_insat_csbt` (L2 CTP; it has no height, and its 82°E attribute is wrong), `read_gpm_2a` (2A Ku/DPR V08, storm tops placed on the slanted beam). 0.04° (`SOUTH_ASIA_0P04`) and 0.02° grids. 570 GPM overpasses listed; 34 validation cases downloaded. **Still to do:** SRTM and ERA5 readers. See `sample_data_notes.md`. |
+| `[~]` | **Week 1** | Data Acquisition & Standardized Ingestion | • Ingest script for INSAT-3DR Imager, CTH, GPM 2ADPR, SRTM DEM.<br>• Resample to 0.04° grid. | **Done:** `read_insat_l1c` (L1C SGP sector, BT/albedo via LUTs, optional position offset), `read_insat_ctp` / `read_insat_csbt` (L2 CTP; it has no height, and its 82°E attribute is wrong), `read_gpm_2a` (2A Ku/DPR V08, storm tops placed on the slanted beam). 0.04° (`SOUTH_ASIA_0P04`) and 0.02° grids. 570 GPM overpasses listed; 34 validation cases downloaded. ERA5 pressure-level reader `read_era5_profiles` plus `scripts/download_era5.py`. **Still to do:** SRTM reader. See `sample_data_notes.md`. |
 | `[x]` | **Week 2** | Viewing Geometry & Angle Calculation | • VZA, VAA, and SZA angle maps per INSAT scene.<br>• Verify VZA ranges across regions. | Done: `satellite_view_angles` / `solar_angles`, within 0.01° of pyorbital, computed per scene from the L1C grid. ISRO's `Sat_Elevation`/`Sat_Azimuth` are ~1° off and are not used. VZA at the cases: South 14–17°, Central 24–26°, Himalaya 33–35°, Northeast 33–38°. |
 | `[x]` | **Week 3** | Geocentric ECEF Transformation Engine | • Bidirectional coordinate converter module (`src/geometry/`).<br>• Unit tests matching `pyproj` (< 1m delta). | Done: `geometry/ecef.py`, matches pyproj to < 1 mm. |
-| `[~]` | **Week 4** | Cloud-Top Height Ingestion & Fallback Module | • CTH grid ingestion parser.<br>• Thermal profile lookup using ERA5 profiles when CTH is NaN. | `cloudheight.py`: TIR1 BT → height via the AFGL tropical profile, capped at the 17 km tropopause; cloud mask from ISRO CSBT, or BT < 270 K without CTP. Kochi: r = 0.86 against ISRO CTP. **GPM check:** cold-core height 17.0 km vs GPM echo top 12.4 km (52% of cells at the cap); worth ~1–2 km of extra shift. **Still to do:** ERA5 profiles (needs a CDS key). |
+| `[x]` | **Week 4** | Cloud-Top Height Ingestion & Fallback Module | • CTH grid ingestion parser.<br>• Thermal profile lookup using ERA5 profiles when CTH is NaN. | Done: `cloudheight.py`: TIR1 BT → height via the AFGL tropical profile or per-pixel ERA5 profiles (`cloud_top_height_profiles`, searched down from each column's cold point); cloud mask from ISRO CSBT, or BT < 270 K without CTP. Kochi: r = 0.86 against ISRO CTP. **ERA5 vs AFGL on the 14 GPM cases:** cold-core height 16.75 vs 16.9 km, offsets change by < 0.5 km; the gap to GPM echo tops (12.45 km) is physical, not a profile error. ERA5 puts mid-level clouds ~0.9 km higher. |
 
 ### Month 2 — Ray-Tracing Engine, Terrain Integration & Resampling
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |

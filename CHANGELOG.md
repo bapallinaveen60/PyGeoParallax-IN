@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **ERA5 profiles:** `read_era5_profiles` (CDS pressure-level NetCDF, geopotential to geometric height), `cloud_top_height_profiles` (per-pixel bilinear profiles, lookup down from each column's cold point), `scripts/download_era5.py`, `--profile era5` in the case driver and `scripts/compare_era5_heights.py`.
+
+### Findings
+- ERA5 instead of the AFGL standard atmosphere changes cold-core heights by −0.15 km and the INSAT–GPM offsets by under 0.5 km; the overshoot is not a profile error.
+
 ## 0.1.0 (2026-10-25)
 
 First release: the full correction pipeline for INSAT-3DR, a navigation correction, and validation against GPM.

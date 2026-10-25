@@ -21,6 +21,7 @@ Conventions:
 | `to_standard_scene(ds, cth=None)` | Turn an L1C dataset into the *standard scene* NetCDF layout used by the CLI. |
 | `read_insat_ctp(path)` | L2B cloud-top pressure/temperature product (coarse boxes; no height). |
 | `read_insat_csbt(path, channel="TIR1")` | Clear-sky BT from the same L2B product, for the cloud mask. |
+| `read_era5_profiles(path, time=None)` | ERA5 pressure-level temperature and geopotential (CDS NetCDF) as `temperature` and geometric `height` on `(level, lat, lon)`, surface first. |
 | `read_gpm_2a(path, swath="FS", bbox=None)` | GPM 2A Ku/DPR: near-surface reflectivity and rain rate, storm-top height, precipitation type, scan times. Adds `top_lat`/`top_lon`: storm tops placed on the slanted radar beam. |
 | `CONVECTIVE`, `STRATIFORM`, `OTHER`, `NO_RAIN` | GPM precipitation-type codes. |
 
@@ -29,6 +30,7 @@ Conventions:
 | Name | Purpose |
 | :--- | :--- |
 | `cloud_top_height(bt, clear_sky_bt=None, profile=TROPICAL)` | Height [m] where cloudy, NaN elsewhere. Cloudy means BT below clear-sky BT by 8 K, or below 270 K when no clear-sky BT is given. |
+| `cloud_top_height_profiles(bt, lat, lon, profiles, clear_sky_bt=None, min_pressure=70)` | Same with gridded profiles (e.g. ERA5), interpolated to each pixel; the lookup runs down from each column's cold point. |
 | `height_from_temperature(t, profile)`, `height_from_pressure(p, profile)` | Profile lookups (AFGL tropical by default, capped at the 17 km tropopause). |
 | `cloud_mask(bt, clear_sky_bt=None, delta=8.0, threshold=270.0)` | The cloud mask on its own. |
 | `Profile`, `TROPICAL` | Atmospheric profile type and the default profile. |
