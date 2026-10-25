@@ -60,6 +60,7 @@ BT height vs ISRO CTP height over ~62,000 cloudy pixels: **r = 0.94**, mean diff
 
 - **The same-day correction came only from distant coasts.** The usable windows were Andhra (+2.0 E, +6.5 N), Chennai (+4.5, +4.2) and Konkan (−2.5, +9.2). Rakhine, the nearest window to the Northeast, was too cloudy. The field therefore interpolates about **+1.7 km E, +6.4 km N** over the Northeast, from coasts more than 1,000 km away.
 - **Applying it made every metric slightly worse.** For example, the 250 km offset went from (+3, −5) to (+5, −5) uncorrected, and correlation dropped by 0.01–0.02. Its north component pushes INSAT the wrong way here.
+- **Checked with the new Bay of Bengal windows:** Chittagong and the Sundarbans (east-only) were added. That day, they and Odisha/Rakhine were 0–1 % clear at 04:15 and 06:15, so no nearby measurement exists for this case.
 - **Conclusion:** don't apply a correction interpolated from distant coasts. For Northeast cases, use a Northeast window (Rakhine, or a Bangladesh/Sundarbans window still to be added), or run without navigation correction and quote the monsoon navigation uncertainty (~5 km).
 
 ## Interpretation

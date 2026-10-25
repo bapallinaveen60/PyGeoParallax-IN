@@ -44,7 +44,15 @@ WINDOWS = {
     "odisha": (19.0, 22.0, 85.0, 88.0),
     "andaman": (10.5, 13.8, 92.0, 93.6),
     "rakhine": (16.5, 20.5, 92.5, 95.5),
+    "chittagong": (20.7, 22.9, 91.2, 92.6),  # Chittagong - Cox's Bazar: straight coast, ~200 km from Agartala
+    "sundarbans": (21.0, 22.9, 88.0, 90.6),  # Ganges delta: complex, turbid; use with care
 }
+
+#: Windows that constrain only the east-west offset. Their coast runs roughly
+#: north-south or is blurred by estuaries/tidal islands, so a north-south match
+#: is unreliable (it runs to the search edge). Their north is reported as NaN and
+#: the correction field takes north from the other windows.
+EAST_ONLY = {"chittagong", "sundarbans"}
 
 
 def load_land(path):
@@ -87,7 +95,7 @@ def _corr(a, b):
 
 
 def measure_window(lat, lon, image, interp, sign=1.0, clear=None, max_km=30.0, coarse_km=2.0,
-                   fine_km=0.5, min_pixels=300, min_side=50):
+                   fine_km=0.5, min_pixels=300, min_side=50, east_only=False):
     """Best coastline shift for one window.
 
     Parameters
@@ -102,6 +110,8 @@ def measure_window(lat, lon, image, interp, sign=1.0, clear=None, max_km=30.0, c
         Pixels to use (clear sky). Defaults to all finite pixels.
     max_km, coarse_km, fine_km : float
         Search range, coarse step, and refinement step around the coarse best.
+    east_only : bool
+        Search only east-west shifts (north fixed at 0); ``north_km`` is NaN.
 
     Returns
     -------
@@ -127,13 +137,15 @@ def measure_window(lat, lon, image, interp, sign=1.0, clear=None, max_km=30.0, c
         return _corr(v[good], ref[good])
 
     coarse = np.arange(-max_km, max_km + coarse_km / 2, coarse_km)
-    best = max(((score(de, dn), de, dn) for dn in coarse for de in coarse), key=lambda t: t[0])
-    _, de0, dn0 = best
     fine = np.arange(-coarse_km, coarse_km + fine_km / 2, fine_km)
-    best = max(((score(de0 + a, dn0 + b), de0 + a, dn0 + b) for b in fine for a in fine), key=lambda t: t[0])
+    north_coarse = [0.0] if east_only else coarse
+    north_fine = [0.0] if east_only else fine
+    best = max(((score(de, dn), de, dn) for dn in north_coarse for de in coarse), key=lambda t: t[0])
+    _, de0, dn0 = best
+    best = max(((score(de0 + a, dn0 + b), de0 + a, dn0 + b) for b in north_fine for a in fine), key=lambda t: t[0])
     r_best, de, dn = best
     return {
-        "east_km": float(de), "north_km": float(dn),
+        "east_km": float(de), "north_km": float("nan") if east_only else float(dn),
         "r_best": float(r_best), "r_zero": float(score(0.0, 0.0)),
         "on_edge": bool(max(abs(de), abs(dn)) >= max_km),
         "clear_pixels": int(ok.sum()), "land": n_land, "sea": n_sea,
@@ -161,10 +173,11 @@ def measure_scan(path, land, windows=None, interps=None, **kwargs):
         tir, vis = ds["TIR1"].values, ds["VIS"].values
         if sza < 75.0:
             res = measure_window(ds["lat"].values, ds["lon"].values, vis, interp, 1.0,
-                                 (vis < 30.0) & (tir > 285.0), **kwargs)
+                                 (vis < 30.0) & (tir > 285.0), east_only=name in EAST_ONLY, **kwargs)
             channel = "VIS"
         else:
-            res = measure_window(ds["lat"].values, ds["lon"].values, tir, interp, -1.0, tir > 285.0, **kwargs)
+            res = measure_window(ds["lat"].values, ds["lon"].values, tir, interp, -1.0, tir > 285.0,
+                                 east_only=name in EAST_ONLY, **kwargs)
             channel = "TIR1"
         if res is not None:
             res.update({"window": name, "lat": centre[0], "lon": centre[1], "channel": channel,
@@ -212,22 +225,27 @@ class NavigationCorrection:
           cloud artefact usually is not. The median of the matches is used.
         * If the window was matched in only one scan, it needs
           r >= ``single_min_r``.
+
+        East-only windows (:data:`EAST_ONLY`) carry a NaN north; the field then
+        takes its north component from the other windows.
         """
         by_window = {}
         for m in matches:
-            if m["r_best"] >= min_r and not m["on_edge"] and max(abs(m["east_km"]), abs(m["north_km"])) <= max_offset_km:
+            size = np.nanmax(np.abs([m["east_km"], m["north_km"]]))  # north is NaN for east-only windows
+            if m["r_best"] >= min_r and not m["on_edge"] and size <= max_offset_km:
                 by_window.setdefault(m["window"], []).append(m)
         rows = []
         for name, ms in sorted(by_window.items()):
             e = [m["east_km"] for m in ms]
             n = [m["north_km"] for m in ms]
+            n_ok = [v for v in n if np.isfinite(v)]
             if len(ms) >= 2:
-                if max(e) - min(e) > agree_km or max(n) - min(n) > agree_km:
+                if max(e) - min(e) > agree_km or (n_ok and max(n_ok) - min(n_ok) > agree_km):
                     continue
             elif ms[0]["r_best"] < single_min_r:
                 continue
             rows.append((np.median([m["lat"] for m in ms]), np.median([m["lon"] for m in ms]),
-                         np.median(e), np.median(n), name, len(ms)))
+                         np.median(e), np.median(n_ok) if n_ok else np.nan, name, len(ms)))
         if not rows:
             raise ValueError("no usable coastline matches (weak, inconsistent between scans, or cloudy)")
         lat, lon, e, n, names, counts = zip(*rows)
@@ -245,7 +263,8 @@ class NavigationCorrection:
         flat_lat = np.broadcast_to(lat, shape).ravel()
         flat_lon = np.broadcast_to(lon, shape).ravel()
         east = np.empty(flat_lat.size)
-        north = np.empty(flat_lat.size)
+        north = np.zeros(flat_lat.size)
+        has_n = np.isfinite(self.north_km)
         p2 = np.radians(self.lat)
         chunk = 500_000  # bounds memory to chunk x n_points
         for s in range(0, flat_lat.size, chunk):
@@ -254,9 +273,10 @@ class NavigationCorrection:
             a = np.sin((p2 - p1) / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(dl / 2) ** 2
             d = 2 * 6371.0 * np.arcsin(np.sqrt(np.clip(a, 0, 1)))
             w = 1.0 / np.maximum(d, 1.0) ** self.power
-            w /= w.sum(axis=1, keepdims=True)
-            east[s:s + chunk] = w @ self.east_km
-            north[s:s + chunk] = w @ self.north_km
+            east[s:s + chunk] = (w @ self.east_km) / w.sum(axis=1)
+            if has_n.any():  # north only from windows that measured it; 0 if none did
+                wn = w[:, has_n]
+                north[s:s + chunk] = (wn @ self.north_km[has_n]) / wn.sum(axis=1)
         return east.reshape(shape), north.reshape(shape)
 
     def to_json(self, path):

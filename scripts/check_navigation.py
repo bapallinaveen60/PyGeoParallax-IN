@@ -27,17 +27,19 @@ import numpy as np
 
 from pygeoparallax.geometry import solar_angles
 from pygeoparallax.ingest import read_insat_l1c
-from pygeoparallax.navigation import WINDOWS, land_fraction_interpolator, load_land, measure_window
+from pygeoparallax.navigation import EAST_ONLY, WINDOWS, land_fraction_interpolator, load_land, measure_window
 
 
-def match_window(ds, interp, day):
+def match_window(ds, interp, day, east_only=False):
     tir = ds["TIR1"].values
     vis = ds["VIS"].values if "VIS" in ds else None
     if day and vis is not None:
-        res = measure_window(ds["lat"].values, ds["lon"].values, vis, interp, 1.0, (vis < 30.0) & (tir > 285.0))
+        res = measure_window(ds["lat"].values, ds["lon"].values, vis, interp, 1.0, (vis < 30.0) & (tir > 285.0),
+                             east_only=east_only)
         channel = "VIS"
     else:
-        res = measure_window(ds["lat"].values, ds["lon"].values, tir, interp, 1.0 if day else -1.0, tir > 285.0)
+        res = measure_window(ds["lat"].values, ds["lon"].values, tir, interp, 1.0 if day else -1.0, tir > 285.0,
+                             east_only=east_only)
         channel = "TIR1"
     if res is not None:
         res["channel"] = channel
@@ -71,7 +73,7 @@ def main(argv=None):
                 break
             centre = ((bbox[0] + bbox[1]) / 2, (bbox[2] + bbox[3]) / 2)
             sza, _ = solar_angles(np.datetime64(ds.attrs["time"]), *centre)
-            res = match_window(ds, interps[name], day=bool(sza < 75.0))
+            res = match_window(ds, interps[name], day=bool(sza < 75.0), east_only=name in EAST_ONLY)
             if res is None:
                 continue
             res.update({"scan": ds.attrs["product"], "window": name, "sza": float(sza)})

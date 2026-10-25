@@ -245,3 +245,30 @@ Over all 15 reliable measurements: **median E +1.8 km (IQR +0.2 to +4.2), median
 4. Some windows (Andhra, Goa) show north offsets of +12 km even when both scans agree. This may be real, or the effect of turbid monsoon coastal water on the land–sea edge. Treat those windows with caution.
 
 Corrections for each measured day are in `05_validation/nav_corrections/<DDMONYYYY>.json` (git-ignored). Days measured before this run used the earlier, laxer rules; re-run `pygeoparallax navigation` on them to regenerate.
+
+## Bay of Bengal head windows (Chittagong, Sundarbans)
+
+Added to give Northeast India cases a nearby navigation measurement:
+- `chittagong`: 20.7–22.9N, 91.2–92.6E, the Chittagong–Cox's Bazar coast, ~200 km from Agartala
+- `sundarbans`: 21.0–22.9N, 88.0–90.6E, the Ganges delta
+
+**Both are east-only** (`navigation.EAST_ONLY`):
+- With a full two-way search, their north offset ran to the search edge (+32 km) in almost every clear scan. Chittagong's coast runs north–south, which leaves north unconstrained, and the delta's tidal islands and turbid estuary water blur the edge.
+- They now search only east–west. Their north is reported as NaN, and the correction field takes its north component from the other windows.
+
+East correction [km], east-only, on the 15th-of-month scans, next to the neighbouring windows:
+
+| Scan (06:15 unless noted) | Odisha | Sundarbans | Chittagong | Rakhine |
+| :--- | ---: | ---: | ---: | ---: |
+| 15 Mar 2022 | −20.5 | −15.5 | −10.5 | −14.0 |
+| 15 Nov 2022 | −17.0 | −12.5 | −5.5 | −9.5 |
+| 15 Dec 2022 | −12.5 | −9.0 | . | −8.5 |
+| 15 Feb 2023 (04:15) | −17.0 | −8.5 | . | −10.0 |
+| 15 Apr 2023 | +5.0 | +3.5 | −1.5 | . |
+| 15 Aug 2023 | +1.0 | −1.0 | . | . |
+| 15 Dec 2023 | −12.0 | −23.5 | . | −6.5 |
+| 15 Dec 2024 | −20.0 | −12.5 | . | . |
+
+- **Sundarbans** tracks its neighbours on 7 of 8 dates (outlier: Dec 2023). It is useful.
+- **Chittagong** gives few matches, and some are suspect (15 May 2023: −16 km against a summer-state +0 to +10). Treat it as weak.
+- **On 18 Aug 2024**, the Northeast validation case, all four Bay of Bengal head windows were 0–1 % clear at both 04:15 and 06:15. No nearby correction was possible. On such days, measure a correction from a clear morning a few days away within the same half-year, or run without one and quote the monsoon navigation uncertainty (~5 km).

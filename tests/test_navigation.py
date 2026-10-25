@@ -79,3 +79,24 @@ def test_from_matches_quality_rules():
     assert corr.meta["windows"] == ["kutch", "sri_lanka"]
     np.testing.assert_allclose(corr.east_km, [5.0, 2.0])
     np.testing.assert_allclose(corr.north_km, [2.5, 1.0])
+
+
+def test_east_only_window_and_field():
+    interp = land_fraction_interpolator(_wavy_land(), BBOX)
+    lat, lon = np.meshgrid(np.arange(9.6, 12.4, 0.036), np.arange(73.6, 76.9, 0.036), indexing="ij")
+    t_lat, t_lon = shift_positions(lat, lon, -6.0, 0.0)
+    vis = 8.0 + 20.0 * interp(np.stack([t_lat, t_lon], -1))
+    res = measure_window(lat, lon, vis, interp, east_only=True)
+    assert res["east_km"] == pytest.approx(-6.0, abs=0.6)
+    assert np.isnan(res["north_km"])
+
+    matches = [
+        _match("odisha", 20.5, 86.5, -14.0, 1.0),
+        _match("chittagong", 21.8, 91.9, -16.0, float("nan"), scan="0415"),
+        _match("chittagong", 21.8, 91.9, -15.0, float("nan"), scan="0615"),  # agree in east: kept
+    ]
+    corr = NavigationCorrection.from_matches(matches)
+    assert corr.meta["windows"] == ["chittagong", "odisha"]
+    e, n = corr(21.8, 91.9)
+    assert float(e) == pytest.approx(-15.5, abs=0.1)
+    assert float(n) == pytest.approx(1.0)  # north comes only from odisha
