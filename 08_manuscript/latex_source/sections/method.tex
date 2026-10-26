@@ -142,5 +142,5 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 \subsection{Implementation}\label{sec:3.7}
 
-The method is implemented in the open-source Python package \texttt{pygeoparallax} (v0.2.1, MIT licence; Zenodo DOI 10.5281/zenodo.23666958). The solver has a vectorised NumPy reference and a parallel Numba kernel \citep{lam2015} with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (57) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
+The method is implemented in the open-source Python package \texttt{pygeoparallax} (v0.3.0, MIT licence; Zenodo DOI 10.5281/zenodo.23672246). The solver has a vectorised NumPy reference and a parallel Numba kernel \citep{lam2015} with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (57) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
 
