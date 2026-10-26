@@ -8,8 +8,8 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🔬 Validation done with GPM (Month 3) → moving to Month 4 (U-Net comparison, manuscript)
-*   **Completed Tasks**: 🟢 11 / 15 Weeks done, 🟡 1 partly done (paper submission); Week 10 (IMD ground radar) dropped from scope
-*   **Overall Progress**: `███████████████░░░░░ 77%` (of the 15 weeks in scope; partly done weeks counted as half)
+*   **Completed Tasks**: 🟢 11 / 15 Weeks done, 🟡 2 partly done (manuscript drafts, paper submission); Week 10 (IMD ground radar) dropped from scope
+*   **Overall Progress**: `████████████████░░░░ 80%` (of the 15 weeks in scope; partly done weeks counted as half)
 *   **Next Milestone**: Week 13 - U-Net comparison, uncorrected vs corrected (needs the existing model and its training data)
 *   **Key result so far**: the correction moves features by the computed amount along the line of sight. Against GPM (12 cases), the median INSAT–GPM storm-top offset falls from 5.5 km to 3.1 km with parallax correction and to 1.8 km with the monsoon navigation correction as well (−0.5 km E, +2.5 km N, ±2 km). See `validation_summary.md`.
 
@@ -47,7 +47,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
 | `[ ]` | **Week 13** | Impact on Deep Learning Segmentation | • Train two comparative U-Net models (Model A vs. Model B).<br>• Evaluate boundary edge precision over test sets. | Inputs ready, model not started. `scripts/build_paired_dataset.py` writes Model A (uncorrected) and Model B (corrected) NetCDF per scene on one grid (5 channels, `cth`, `fill_flag`, manifest; parallel, resumable; optional ERA5/DEM). Test set designed: 96 scenes (`events/benchmark_scenes.csv`), download in progress. Needs the existing U-Net config, labels and its training dates (to avoid overlap with the test set). |
-| `[ ]` | **Week 14** | Manuscript Structuring & Figure Generation | • Outline manuscript sections.<br>• Render 3D ray-tracing diagrams and displacement vector plots. | Not started. Case figures and the progress report exist; the main findings for the paper are listed in `validation_summary.md`. |
+| `[~]` | **Week 14** | Manuscript Structuring & Figure Generation | • Outline manuscript sections.<br>• Render 3D ray-tracing diagrams and displacement vector plots. | Drafts in `08_manuscript/`: Methods (`methods_draft.md`, with verified references) and Results + Discussion (`results_discussion_draft.md`). Paper figures 1–6 from `scripts/make_paper_figures.py`. Still to do: U-Net section, Introduction, Abstract, Conclusions, ray-tracing diagram. |
 | `[ ]` | **Week 15** | Manuscript Writing & Peer Review | • Compile LaTeX source file.<br>• Mathematical proof verification and self-review. | Not started. |
 | `[~]` | **Week 16** | Code Packaging & Submission | • Python library packaging.<br>• Release code on GitHub and submit paper to journal. | Package installable (`pyproject.toml`, `pygeoparallax` CLI), public on GitHub with CI; README, API reference and changelog. Releases v0.1.0 (25 Oct 2026) and v0.2.0 (26 Oct 2026). Still to do: paper submission. |
 
