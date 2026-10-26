@@ -5,6 +5,7 @@
 ### Added
 - **ERA5 profiles:** `read_era5_profiles` (CDS pressure-level NetCDF, geopotential to geometric height), `cloud_top_height_profiles` (per-pixel bilinear profiles, lookup down from each column's cold point), `scripts/download_era5.py`, `--profile era5` in the case driver and `scripts/compare_variants.py`.
 - **SRTM:** `read_srtm` (GeoTIFF tiles block-averaged to a coarse grid while reading; damaged parts of a tile are skipped with a warning), `scripts/prepare_srtm.py`, `--dem` in the case driver, `compare_variants.py --variant dem`, and a terrain parallax map (`make_paper_figures.py`, Fig. 6). `rasterio` added to the `dev` extras.
+- **Case scans pinned** in `00_Documentation/events/case_scans.csv`; the file-name fallback now only accepts L1C files from the case date outside navigation time slots (navigation scans from neighbouring days were being picked).
 - **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6).
 
 ### Findings

@@ -131,7 +131,9 @@ Cloud-top heights were recomputed with ERA5 temperature and geopotential (hour n
 
 ## Terrain (SRTM)
 
-Terrain-aware correction (SRTM block-averaged to 0.01°; `scripts/prepare_srtm.py`, `compare_variants.py --variant dem`) **changes nothing at the storms**: field offsets (12 cases) and cell offsets (69–73 cells) are identical to 0.1 km in every state. Storm tops are 10–17 km above the ground, so the ground height under them does not matter. Terrain does move clear-sky ground: in Himalayan scenes by 1.3–2.5 km (median) and up to ~5.8 km, changing 9–19% of grid cells. Three SRTM tiles in 18–24°N are damaged and were treated as sea level; they lie outside the Himalaya cases.
+Terrain-aware correction (SRTM block-averaged to 0.01°; `scripts/prepare_srtm.py`, `compare_variants.py --variant dem`) **changes nothing at the storms**: field offsets (12 cases) and cell offsets (69–73 cells) are identical to 0.1 km in every state. Storm tops are 10–17 km above the ground, so the ground height under them does not matter. Terrain does move clear-sky ground: in Himalayan scenes by 1.3–2.5 km (median) and up to ~5.8 km, changing 9–19% of grid cells; in Central India by only ~0.15 km (median), up to 0.65 km.
+
+Case scans are pinned in `00_Documentation/events/case_scans.csv`. Case folders now also hold navigation scans from neighbouring days, and a file-name rule alone picked a wrong scan for two cases without a CTP file.
 
 ## For the paper
 

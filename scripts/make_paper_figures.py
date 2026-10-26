@@ -258,8 +258,8 @@ def fig6_terrain(dem_path=Path("02_standardized_grid/srtm_0p01deg.nc"), damaged=
     save(fig, "fig6_terrain")
 
 
-#: SRTM tiles that could not be read in full (lat0, lat1, lon0, lon1); re-download to fill them.
-DAMAGED_SRTM = [(18.0, 24.0, 74.0, 80.0), (18.0, 24.0, 80.0, 86.0), (18.0, 24.0, 92.0, 98.0)]
+#: SRTM tiles that could not be read in full (lat0, lat1, lon0, lon1); hatched on the map. None at present.
+DAMAGED_SRTM = []
 
 
 def main():

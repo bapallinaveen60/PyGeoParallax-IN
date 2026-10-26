@@ -24,8 +24,8 @@ import argparse
 import csv
 import glob
 import json
-import re
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -44,17 +44,37 @@ MIN_CLUSTER = 100  # convective footprints in the main cluster for a case to cou
 # GPM storm-top height is the primary field (same storm tops as TIR1); rain intensity (Z) is secondary.
 
 
+#: Case scans fixed when each case was first run. Case folders also hold navigation scans
+#: (other times, and the days before and after), so a rule on file names alone is ambiguous.
+CASE_SCANS = Path(__file__).resolve().parents[1] / "00_Documentation" / "events" / "case_scans.csv"
+NAV_SLOTS = ("_0315", "_0415", "_0515", "_0615", "_0815")
+
+
 def case_scan(folder):
-    """The INSAT case scan: the stamp of the CTP file if there is one (a case scan can be at
-    04:15 or 06:15), else the L1C that is not a 04:15/06:15 navigation scan."""
-    for p in sorted(glob.glob(str(Path(folder) / "3RIMG_*_L2B_CTP_V01R00.h5"))):
-        m = re.match(r"3RIMG_(\d{2}[A-Z]{3}\d{4}_\d{4})_L2B", Path(p).name)
-        if m and (Path(folder) / f"3RIMG_{m.group(1)}_L1C_SGP_V01R00.h5").exists():
-            return m.group(1)
-    for p in sorted(glob.glob(str(Path(folder) / "3RIMG_*_L1C_SGP_V01R00.h5"))):
-        m = re.match(r"3RIMG_(\d{2}[A-Z]{3}\d{4}_\d{4})_L1C", Path(p).name)
-        if m and not m.group(1).endswith(("_0415", "_0615")):
-            return m.group(1)
+    """The INSAT case scan of a case folder.
+
+    1. The scan pinned in ``case_scans.csv``, if the case is listed.
+    2. Else the stamp of a CTP file on the case date (a case scan can be at 04:15 or 06:15).
+    3. Else an L1C on the case date that is not in a navigation time slot.
+    """
+    folder = Path(folder)
+    if CASE_SCANS.exists():
+        with CASE_SCANS.open(newline="") as fh:
+            pinned = {r["case"]: r["insat_scan"] for r in csv.DictReader(fh)}
+        if folder.name in pinned:
+            return pinned[folder.name]
+    try:
+        day = datetime.strptime(folder.name.split("_")[1], "%Y%m%d").strftime("%d%b%Y").upper()
+    except (IndexError, ValueError):
+        return None
+    for p in sorted(folder.glob(f"3RIMG_{day}_*_L2B_CTP_V01R00.h5")):
+        stamp = p.name[6:20]
+        if (folder / f"3RIMG_{stamp}_L1C_SGP_V01R00.h5").exists():
+            return stamp
+    for p in sorted(folder.glob(f"3RIMG_{day}_*_L1C_SGP_V01R00.h5")):
+        stamp = p.name[6:20]
+        if not stamp.endswith(NAV_SLOTS):
+            return stamp
     return None
 
 
