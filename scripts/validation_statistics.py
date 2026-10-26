@@ -16,7 +16,8 @@ Cell measure (GPM deep-echo cells vs INSAT cold cores): cells of one case are no
 independent, so intervals come from a cluster bootstrap that resamples cases;
 the paired test uses the per-case medians.
 
-Navigation states use the pooled near-storm correction (-0.5 km E, +2.5 km N);
+Navigation states use each year's pooled monsoon correction (``--nav-tag ynav``,
+from ``yearly_navigation.py``; ``pnav`` selects the earlier 2022-2024 near-storm value);
 the all-India monsoon median is reported as a sensitivity test.
 
 Usage:
@@ -46,15 +47,20 @@ STATES = {"raw": "Raw", "parallax": "Parallax only", "nav": "Navigation only",
           "both": "Navigation + parallax", "both_allindia": "All-India navigation + parallax"}
 
 
-def field_table(rad=250):
+def field_table(rad=250, nav_tag="ynav"):
     """Per-case along- and cross-look offsets in every state; only cases valid in all states."""
     t = pd.read_csv(VAL / "all_cases.csv")
     rows = []
+    nt = f"_{nav_tag}"
     for case in t[(t.nav == "no_nav") & t.status.str.startswith("usable")].case:
-        run = {s: json.loads((VAL / f"{case}{s}.json").read_text()) for s in ("", "_pnav", "_mnav")}
+        files = {s: VAL / f"{case}{s}.json" for s in ("", nt, "_mnav")}
+        if not all(f.exists() for f in files.values()):
+            print(f"  {case}: navigation runs missing, skipped")
+            continue
+        run = {s: json.loads(f.read_text()) for s, f in files.items()}
         near = {s: r["runs"]["no_nav" if s == "" else "nav"][f"near_{rad}km"] for s, r in run.items()}
-        st = {"raw": near[""]["uncorrected"], "parallax": near[""]["corrected"], "nav": near["_pnav"]["uncorrected"],
-              "both": near["_pnav"]["corrected"], "both_allindia": near["_mnav"]["corrected"]}
+        st = {"raw": near[""]["uncorrected"], "parallax": near[""]["corrected"], "nav": near[nt]["uncorrected"],
+              "both": near[nt]["corrected"], "both_allindia": near["_mnav"]["corrected"]}
         st = {k: v["top"] for k, v in st.items()}
         if not all(max(abs(x) for x in v["lag_cells_s_e"]) < EDGE for v in st.values()):
             continue
@@ -66,10 +72,10 @@ def field_table(rad=250):
     return pd.DataFrame(rows)
 
 
-def cell_table():
-    """Per-cell along-look offsets: raw and parallax from the base runs, navigation states from the near-storm runs."""
+def cell_table(nav_tag="ynav"):
+    """Per-cell along-look offsets: raw and parallax from the base runs, navigation states from the ``nav_tag`` runs."""
     base = pd.read_csv(VAL / "core_offsets_cells.csv")
-    near = pd.read_csv(VAL / "core_offsets_pnav_cells.csv")
+    near = pd.read_csv(VAL / f"core_offsets_{nav_tag}_cells.csv")
     parts = {"raw": base[base.kind == "uncorrected"], "parallax": base[base.kind == "corrected"],
              "nav": near[near.kind == "nav_only"], "both": near[near.kind == "nav_parallax"],
              "both_allindia": base[base.kind == "nav_parallax"]}
@@ -115,11 +121,12 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--n-boot", type=int, default=10000)
     ap.add_argument("--seed", type=int, default=2026)
+    ap.add_argument("--nav-tag", default="ynav", help="navigation runs to use: ynav (per-year pooled) or pnav")
     args = ap.parse_args(argv)
     rng = np.random.default_rng(args.seed)
     n = args.n_boot
 
-    f = field_table()
+    f = field_table(nav_tag=args.nav_tag)
     res = {"field_cases": len(f), "field": {}, "field_paired": {}, "cells": {}, "cells_paired": {}}
     for s in STATES:
         a = f[f"{s}_along"].values
@@ -139,7 +146,7 @@ def main(argv=None):
                              "slope_ci": (float(np.percentile(slopes, 2.5)), float(np.percentile(slopes, 97.5))),
                              "expected_slope_for_pure_parallax_km": "about 10-12 (cloud-top height)"}
 
-    cells = cell_table()
+    cells = cell_table(nav_tag=args.nav_tag)
     for s in STATES:
         d = cells[cells.state == s]
         res["cells"][s] = {"cells": len(d), "cases": int(d.case.nunique()),

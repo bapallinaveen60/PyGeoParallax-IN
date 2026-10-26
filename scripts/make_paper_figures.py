@@ -174,10 +174,13 @@ def field_offsets(rad=250):
     t = pd.read_csv(VAL / "all_cases.csv")
     rows = []
     for case in t[(t.nav == "no_nav") & t.status.str.startswith("usable")].case:
-        runs = {s: json.loads((VAL / f"{case}{s}.json").read_text()) for s in ("", "_mnav", "_pnav")}
+        files = {s: VAL / f"{case}{s}.json" for s in ("", "_mnav", "_ynav")}
+        if not all(f.exists() for f in files.values()):
+            continue
+        runs = {s: json.loads(f.read_text()) for s, f in files.items()}
         near = {s: r["runs"]["no_nav" if s == "" else "nav"][f"near_{rad}km"] for s, r in runs.items()}
         st = {"raw": near[""]["uncorrected"], "parallax": near[""]["corrected"],
-              "nav_near": near["_pnav"]["uncorrected"], "both_near": near["_pnav"]["corrected"],
+              "nav_near": near["_ynav"]["uncorrected"], "both_near": near["_ynav"]["corrected"],
               "both_monsoon": near["_mnav"]["corrected"]}
         st = {k: v["top"] for k, v in st.items()}
         if all(max(abs(x) for x in v["lag_cells_s_e"]) < 9.5 for v in st.values()):
@@ -188,7 +191,7 @@ def field_offsets(rad=250):
 
 def fig4_states():
     base = pd.read_csv(VAL / "core_offsets_cells.csv")
-    near = pd.read_csv(VAL / "core_offsets_pnav_cells.csv")
+    near = pd.read_csv(VAL / "core_offsets_ynav_cells.csv")
     field = field_offsets()
     # (cell table, cell kind, field column, label)
     states = [(base, "uncorrected", "raw", "Raw"),
@@ -215,7 +218,7 @@ def fig4_states():
                plt.Line2D([], [], marker="D", ls="", color="#eb6834", mec="white", ms=6, label=f"Field correlation, mean of {len(field)} cases")]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.2), fontsize=8, ncol=2)
     ax.set_xlim(-0.8, n - 0.4)
-    ax.set_title("Offsets by correction state. Navigation: near-storm monsoon value (−0.5 km E, +2.5 km N);\n"
+    ax.set_title("Offsets by correction state. Navigation: pooled monsoon value of each year;\n"
                  "shaded: all-India monsoon median (+1.8 km E, +4.8 km N)", loc="left", fontsize=9)
     save(fig, "fig4_states")
 

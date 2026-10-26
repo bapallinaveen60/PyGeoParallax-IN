@@ -175,6 +175,36 @@ The near-storm correction with parallax gives the closest field agreement so far
 - **Not supported with 12 cases:** that navigation + parallax is better than parallax alone in the field measure (4 of 12 improve), and that the raw offset does not grow with viewing angle (Spearman ρ = −0.03, but the slope interval, −19 … +15 km per unit tan VZA, still includes the ~10 km expected from parallax alone).
 - **Consequence:** report 1.8 km as a point estimate, not as a demonstrated improvement over parallax correction; more cases (batch 4) are needed to resolve the navigation and viewing-angle questions.
 
+## Full set: 38 usable cases (2018–2024)
+
+Batch 4 added 2018–2021 cases over South and Central India (50 GPM passes screened, 37 passed, 33 runnable, 24 usable). Totals: **63 cases processed, 38 usable** (South 14, Central 15, Himalaya 4, Northeast 5); 30 give a reliable field match in every state, 27–28 have matched cells. Navigation is now each year's pooled monsoon value from daytime coastline matches near the cases (`scripts/yearly_navigation.py`; 2018 has too few matches and uses the all-years value, +0.5 km E, +1.5 km N). The per-year values are small: east −2.0 … +3.0 km, north −0.8 … +2.5 km.
+
+| Measure | Raw | Parallax only | Navigation + parallax |
+| :--- | :--- | :--- | :--- |
+| Field, median absolute [km] (95 % interval), 30 cases | 5.1 (3.4–7.0) | 3.8 (2.6–6.7) | 4.3 (3.0–6.5) |
+| Field, cases improved vs raw | – | 18 of 30 (sign p = 0.36) | 15 of 30 |
+| Cells, median [km] (cluster bootstrap), 27–28 cases | −0.1 (−2.7 … +3.5) | **−4.7 (−6.8 … −0.9)** | −3.3 (−5.9 … +0.2) |
+| Cross-look change, raw → parallax [km] | – | 0.0 (−0.2 … +0.2) | – |
+
+- **The correction acts only along the line of sight** (cross-look unchanged): confirmed.
+- **Parallax correction does not significantly improve the field agreement** with 30 cases (18 of 30 improve; median change −1.1 km, interval −1.6 … +1.2). The earlier 12 cases (10 of 12 improved) were favourable; the new Central India cases are not (6 of 12).
+- **Uncorrected INSAT cold cores already sit on the GPM deep-echo cells**, in both periods (2018–21: −1.1 km; 2022–24: +0.8 km) and in every region, and parallax correction moves them 4–7 km past (p < 0.001).
+- **Only about 5 % of the computed parallax is visible** between uncorrected cold cores and GPM cells (median of the per-case ratio of raw cell offset to applied shift: 0.05, 95 % interval −0.47 … +0.55). The raw field offset does not grow with viewing angle (slope −0.8 km per unit tan VZA, interval −12.9 … +9.4), which now **excludes** the ~10–12 km expected for deep convection.
+- **Navigation does not explain it:** the measured monsoon navigation error is ~1–2.5 km, far smaller than the 4–10 km of parallax that is not visible.
+- **The L1C metadata gives no hint of a parallax or height correction** in ISRO's processing (WGS84 datum, nominal altitude 36 000 km).
+
+### Investigation (26 Oct 2026)
+
+1. **The comparison method is correct.** A synthetic storm with a known parallax, put through the same gridding and cell-matching code, gives a raw offset equal to the full parallax (+10.9 km measured vs +10.5 km expected at VZA 35°; +9.1 vs +8.6; +3.5 vs +3.9 at VZA 15°) and about 0 after correction. INSAT and GPM grids share the same row order, and the sign chain (VAA = bearing to the satellite; along-look positive = INSAT must move towards the satellite) is consistent.
+2. **Overlays confirm it visually** (`scripts/check_parallax_visibility.py`, `07_figures/checks/*_visibility.png`): uncorrected cold cloud masses sit on the GPM deep-echo cells, not ~10 km away from the satellite where geometry places them; after correction the cells lie on the clouds' far edges. Raw cold cores are closer to the GPM cells than to the expected apparent positions in every case with matched cells.
+3. **The monsoon coastline navigation cannot fix the north–south component.** North estimates from different coasts range from −2.5 km (Chennai) to +8.8 km (Kutch), with 5–8 km spread within a coast. A south bias of ~7 km would cancel the median applied shift (7.2 km).
+4. **ISRO's own geolocation checks support a large navigation error towards the satellite.** MOSDAC data-quality reports for five INSAT-3DR full-disk L1B images on 19 June 2020 (ground control points north-west of India) give positions that must move **1.7–2.7 IR pixels north and 1.0–3.3 pixels west**, i.e. roughly 8–12 km north and 5–15 km west. Our coastline value for the 2020 monsoon is −1.0 km E, 0.0 km N. (L1B vs our L1C, and control points outside the storm regions, so this is supporting evidence, not proof.)
+5. **GPM itself gives a navigation estimate:** after parallax correction the cells are offset by −4.7 km (95 % interval −6.8 … −0.9) along the line of sight, i.e. INSAT positions sit ~5 km towards the satellite.
+
+**Leading explanation:** INSAT-3DR monsoon positions carry a navigation error towards the satellite (south-west) of roughly 5–10 km, several times larger than the coastline estimate, which cancels most of the parallax of deep convection. The parallax correction is geometrically right; applying it without the true navigation correction worsens the alignment. Not yet excluded: a storm-structure offset between the coldest tops and the radar cells.
+
+**Status:** this is the most important result of the validation. Candidate explanations to test: (1) an undocumented height reference or correction in INSAT-3DR L1C geolocation; (2) a systematic storm-structure offset between the coldest IR tops and the radar's deep-echo cells along the line of sight; (3) a problem in the comparison method. Checks: visual overlays of raw INSAT and GPM for high-VZA cases; an independent geostationary view of the same storms (e.g. Meteosat IODC at 45.5°E, which sees the parallax in a different direction); asking ISRO/SAC how L1C geolocation is done.
+
 ## For the paper
 
 1. **Geometry verified:** pyproj, pyorbital and satpy agree. The correction moves features by the computed amount along the line of sight and leaves the cross-look offset unchanged, in every field, window and metric.
