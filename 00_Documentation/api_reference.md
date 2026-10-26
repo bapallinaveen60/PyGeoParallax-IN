@@ -22,6 +22,7 @@ Conventions:
 | `read_insat_ctp(path)` | L2B cloud-top pressure/temperature product (coarse boxes; no height). |
 | `read_insat_csbt(path, channel="TIR1")` | Clear-sky BT from the same L2B product, for the cloud mask. |
 | `read_era5_profiles(path, time=None)` | ERA5 pressure-level temperature and geopotential (CDS NetCDF) as `temperature` and geometric `height` on `(level, lat, lon)`, surface first. |
+| `read_srtm(paths, bbox=None, res=0.01)` | SRTM GeoTIFF tiles (folder, glob or list) mosaicked and block-averaged to `res` degrees as `elevation` [m above EGM96]; damaged parts of a tile are skipped with a warning. |
 | `read_gpm_2a(path, swath="FS", bbox=None)` | GPM 2A Ku/DPR: near-surface reflectivity and rain rate, storm-top height, precipitation type, scan times. Adds `top_lat`/`top_lon`: storm tops placed on the slanted radar beam. |
 | `CONVECTIVE`, `STRATIFORM`, `OTHER`, `NO_RAIN` | GPM precipitation-type codes. |
 

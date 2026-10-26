@@ -26,7 +26,7 @@ GPM 2A gives each footprint's position at the surface. An echo at height $h$ lie
 
 - **Coastlines:** Natural Earth 10 m land polygons (public domain) [ref], used for the navigation check (Section 3.6).
 - **Atmospheric profiles:** AFGL tropical standard atmosphere [Anderson et al., 1986], 0–25 km at 1 km resolution; and ERA5 reanalysis [Hersbach et al., 2020] temperature and geopotential on 29 pressure levels (1000–50 hPa, 0.25°), at the hour nearest each case scan.
-- **Terrain:** the solver accepts any digital elevation model on a regular grid. SRTM [ref] will be used for the terrain-aware runs (not included in the results here).
+- **Terrain:** SRTM GL1 [Farr et al., 2007], 1 arcsecond tiles block-averaged to 0.01° (about 1 km). Heights are above the EGM96 geoid, which lies 50–105 m below the ellipsoid over India; this changes the terrain correction by under 75 m at VZA 35°, so heights are used as they are.
 
 ### 2.4 Study period and regions
 
@@ -112,6 +112,8 @@ Ellipsoid-navigated data misplace not only clouds but also elevated ground: over
 - **clear pixels:** moves them to where the line of sight meets the terrain (terrain parallax).
 
 The ground height must be taken at the corrected position, which is not known in advance. We solve this by fixed-point iteration (three steps): look up the ground at the current position, correct, and repeat. The iteration converges where the terrain is less steep than the line of sight, which holds for VZA below about 70°.
+
+With SRTM over India, the ground shift reaches 3–4 km over the Himalaya and the Tibetan Plateau, 1–2 km over the Northeast hills and under 0.5 km over the Western Ghats and Deccan. Cloud tops are far above the ground, so terrain changes the position of storm cores negligibly; in the 14 validation cases the offsets with and without terrain are identical to 0.1 km. In clear sky, ground pixels in Himalayan scenes move by 1.3–2.5 km (median), up to about 6 km.
 
 ### 3.5 Resampling onto a regular grid
 
@@ -212,6 +214,5 @@ An error $\delta h$ in cloud-top height shifts the corrected position by about $
 ## Notes for revision
 
 - Add references: MOSDAC product guide, GPM DPR ATBD, Natural Earth, pyproj, pyorbital, satpy, Vicente et al. (2002), Bieliński (2020), Anderson et al. (1986).
-- Section 3.4 needs the SRTM runs before it can report results.
 - Confirm the INSAT-3DR yaw-flip dates from IMD's SatMet SOP before stating them as fact.
 - The U-Net comparison (Model A uncorrected, Model B corrected) will need its own section.

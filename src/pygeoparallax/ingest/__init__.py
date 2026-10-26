@@ -4,6 +4,7 @@ from .era5 import read_era5_profiles
 from .gpm import CONVECTIVE, NO_RAIN, OTHER, STRATIFORM, read_gpm_2a
 from .insat import read_insat_l1c, to_standard_scene
 from .insat_ctp import read_insat_csbt, read_insat_ctp
+from .srtm import read_srtm
 
 __all__ = [
     "CONVECTIVE",
@@ -15,5 +16,6 @@ __all__ = [
     "read_insat_csbt",
     "read_insat_ctp",
     "read_insat_l1c",
+    "read_srtm",
     "to_standard_scene",
 ]

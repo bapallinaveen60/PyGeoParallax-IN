@@ -110,7 +110,7 @@ The two metrics differ by a steady 4–5 km. The field metric is driven by the c
 
 ## ERA5 profiles instead of the standard atmosphere
 
-Cloud-top heights were recomputed with ERA5 temperature and geopotential (hour nearest the case scan, 29 levels 1000–50 hPa, interpolated to each pixel; `scripts/download_era5.py`, `compare_era5_heights.py`). **ERA5 does not change the result.**
+Cloud-top heights were recomputed with ERA5 temperature and geopotential (hour nearest the case scan, 29 levels 1000–50 hPa, interpolated to each pixel; `scripts/download_era5.py`, `compare_variants.py --variant era5`). **ERA5 does not change the result.**
 
 | Measure | AFGL | ERA5 |
 | :--- | ---: | ---: |
@@ -128,6 +128,10 @@ Cloud-top heights were recomputed with ERA5 temperature and geopotential (hour n
 - **Deep cores:** the coldest tops are colder than the ERA5 cold-point tropopause too, so both profiles put them at about 17 km. The standard atmosphere's cap is therefore not the cause of the high INSAT heights.
 - **Mid-level clouds:** ERA5 puts them about 0.9 km higher than AFGL (Northeast 18 Aug 2024: bias against ISRO CTP −0.26 → +0.65 km). These do not drive the storm-core offsets.
 - **So** the ~4.4 km gap between IR cloud tops and GPM echo tops is physical (radar echo tops lie below the IR top) rather than a profile error. The navigation error stays the main remaining uncertainty.
+
+## Terrain (SRTM)
+
+Terrain-aware correction (SRTM block-averaged to 0.01°; `scripts/prepare_srtm.py`, `compare_variants.py --variant dem`) **changes nothing at the storms**: field offsets (12 cases) and cell offsets (69–73 cells) are identical to 0.1 km in every state. Storm tops are 10–17 km above the ground, so the ground height under them does not matter. Terrain does move clear-sky ground: in Himalayan scenes by 1.3–2.5 km (median) and up to ~5.8 km, changing 9–19% of grid cells. Three SRTM tiles in 18–24°N are damaged and were treated as sea level; they lie outside the Himalaya cases.
 
 ## For the paper
 

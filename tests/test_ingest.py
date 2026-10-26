@@ -197,3 +197,52 @@ def test_along_beam_geometry():
     dist, az = parallax_shift(20.0, 85.0, float(lat[0]), float(lon[0]))
     assert 4.3e3 < float(dist) < 5.5e3
     assert float(az) == pytest.approx(90.0, abs=2.0)
+
+
+def _srtm_tile(path, lat0, lon0, size_deg=1.0, pixel=1 / 120, fill=None):
+    """Synthetic SRTM-like GeoTIFF: elevation = 1000*lat_index_fraction, pixel-centred like SRTM."""
+    rasterio = pytest.importorskip("rasterio")
+    from rasterio.transform import from_origin
+
+    n = int(round(size_deg / pixel))
+    rows = np.arange(n)[:, None]
+    elev = np.broadcast_to((n - 1 - rows) * 10, (n, n)).astype(np.int16).copy()  # rises northwards
+    if fill is not None:
+        elev[: n // 2, : n // 2] = fill
+    transform = from_origin(lon0 - pixel / 2, lat0 + size_deg + pixel / 2, pixel, pixel)
+    with rasterio.open(path, "w", driver="GTiff", height=n, width=n, count=1, dtype="int16",
+                       crs="EPSG:4326", transform=transform, nodata=-32768) as dst:
+        dst.write(elev, 1)
+    return path
+
+
+def test_read_srtm_mosaic_and_average(tmp_path):
+    pytest.importorskip("rasterio")
+    from pygeoparallax.ingest import read_srtm
+
+    _srtm_tile(tmp_path / "a.tif", 20.0, 80.0)
+    _srtm_tile(tmp_path / "b.tif", 20.0, 81.0, fill=-32768)  # voids in its north-west quarter
+    dem = read_srtm(tmp_path, bbox=(20.0, 21.0, 80.0, 82.0), res=0.1)
+    e = dem["elevation"].values
+    assert e.shape == (10, 20)
+    np.testing.assert_allclose(dem["lat"].values, 20.05 + 0.1 * np.arange(10))
+    # Each 0.1 deg cell averages 12 rows rising 10 m each: south row mean = 55 m, steps of 120 m.
+    np.testing.assert_allclose(e[:, 0], 55.0 + 120.0 * np.arange(10), atol=1.0)
+    np.testing.assert_allclose(e[:, 0], e[:, 9])
+    # Voids are skipped: the voided quarter of tile b is NaN, the rest matches tile a.
+    assert np.isnan(e[5:, 10:15]).all() and np.isfinite(e[:5, 10:]).all()
+    np.testing.assert_allclose(e[:5, 15], e[:5, 0], atol=1.0)
+    with pytest.raises(ValueError):
+        read_srtm(tmp_path, res=0.013)
+
+
+def test_read_srtm_damaged_tile(tmp_path):
+    pytest.importorskip("rasterio")
+    from pygeoparallax.ingest import read_srtm
+
+    path = _srtm_tile(tmp_path / "a.tif", 20.0, 80.0)
+    data = path.read_bytes()
+    path.write_bytes(data[: len(data) * 2 // 3])  # truncated download
+    with pytest.warns(UserWarning, match="unreadable"):
+        dem = read_srtm(tmp_path, bbox=(20.0, 21.0, 80.0, 81.0), res=0.1, band_rows=2)
+    assert dem["elevation"].shape == (10, 10)

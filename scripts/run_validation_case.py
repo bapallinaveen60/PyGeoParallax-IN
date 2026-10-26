@@ -10,7 +10,8 @@ Steps:
    reference, and ISRO's CTP height is reported as a check. Without a CTP
    file, the cloud mask is BT < 270 K and the check is skipped.
 3. Parallax-correct and regrid to ``--res`` degrees, along with an uncorrected
-   copy on the same grid.
+   copy on the same grid. With ``--dem``, the correction is terrain-aware
+   (clouds clamped to the ground, clear-sky terrain parallax corrected).
 4. Rasterise the GPM footprints (nearest within 3.5 km) and compare:
    * cold cloud (BT < 235 K) vs echo (Z > 25 dBZ): IoU, correlation,
      mutual information, best-lag offset;
@@ -40,6 +41,7 @@ from pygeoparallax.geometry import parallax_correct, parallax_shift, satellite_v
 from pygeoparallax.ingest import read_era5_profiles, read_gpm_2a, read_insat_csbt, read_insat_ctp, read_insat_l1c
 from pygeoparallax.navigation import NavigationCorrection
 from pygeoparallax.resample import Grid, sample_nearest
+from pygeoparallax.terrain import surface_height_from_dataset
 from pygeoparallax.validation import compare, iou, range_mask, subcell_displacement
 
 SAT_LON = 74.0
@@ -173,7 +175,8 @@ def run(args, nav):
             "deep_core_ctp_height_km": round(float(np.median(ctp_h[deep]) / 1000), 2) if deep.any() else None,
         }
     channels = {"TIR1": bt, "WV": l1c["WV"].values}
-    cor = correct_scene(lat, lon, channels, cth, sat_lon=SAT_LON, grid=grid)
+    ground = surface_height_from_dataset(args.dem) if args.dem else None
+    cor = correct_scene(lat, lon, channels, cth, sat_lon=SAT_LON, grid=grid, surface_height=ground)
     raw = correct_scene(lat, lon, channels, cth, sat_lon=SAT_LON, grid=grid, correct=False)
     return l1c, cth, ctp_h, cor, raw, check
 
@@ -220,6 +223,7 @@ def main(argv=None):
     ap.add_argument("--nav-only", action="store_true", help="with --nav, skip the run without navigation correction")
     ap.add_argument("--profile", choices=("afgl", "era5"), default="afgl",
                     help="temperature profile for cloud-top height (era5 needs era5_pl_*.nc in --dir)")
+    ap.add_argument("--dem", help="DEM NetCDF (e.g. from prepare_srtm.py) for terrain-aware correction")
     ap.add_argument("--max-lag", type=int, default=8, help="lag search in grid cells")
     ap.add_argument("--out", default=".")
     args = ap.parse_args(argv)
@@ -228,6 +232,7 @@ def main(argv=None):
     grid = Grid(*args.bbox, res=args.res)
     gpm = gpm_on_grid(find(args.dir, "2A.GPM.*"), grid, tuple(args.bbox))
     summary = {"case": args.case, "insat_scan": args.scan, "grid_res_deg": args.res, "profile": args.profile,
+               "dem": args.dem,
                "gpm_time_at_convection": gpm["time_conv"], "gpm_convective_footprints": gpm["n_convective"],
                "gpm_convective_cluster": gpm["n_convective_cluster"],
                "gpm_storm_top_max_km": gpm["storm_top_max_km"], "gpm_convection_centre": gpm["conv_centre"],

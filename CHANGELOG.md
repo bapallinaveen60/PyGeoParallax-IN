@@ -3,10 +3,13 @@
 ## Unreleased
 
 ### Added
-- **ERA5 profiles:** `read_era5_profiles` (CDS pressure-level NetCDF, geopotential to geometric height), `cloud_top_height_profiles` (per-pixel bilinear profiles, lookup down from each column's cold point), `scripts/download_era5.py`, `--profile era5` in the case driver and `scripts/compare_era5_heights.py`.
+- **ERA5 profiles:** `read_era5_profiles` (CDS pressure-level NetCDF, geopotential to geometric height), `cloud_top_height_profiles` (per-pixel bilinear profiles, lookup down from each column's cold point), `scripts/download_era5.py`, `--profile era5` in the case driver and `scripts/compare_variants.py`.
+- **SRTM:** `read_srtm` (GeoTIFF tiles block-averaged to a coarse grid while reading; damaged parts of a tile are skipped with a warning), `scripts/prepare_srtm.py`, `--dem` in the case driver, `compare_variants.py --variant dem`, and a terrain parallax map (`make_paper_figures.py`, Fig. 6). `rasterio` added to the `dev` extras.
+- **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6).
 
 ### Findings
 - ERA5 instead of the AFGL standard atmosphere changes cold-core heights by −0.15 km and the INSAT–GPM offsets by under 0.5 km; the overshoot is not a profile error.
+- Terrain-aware correction leaves the storm results unchanged (cloud tops are far above the ground) but moves clear-sky ground in Himalayan scenes by 1.3–2.5 km (median), up to ~5.8 km.
 
 ## 0.1.0 (2026-10-25)
 

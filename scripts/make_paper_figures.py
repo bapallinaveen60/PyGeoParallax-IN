@@ -8,6 +8,7 @@
    parallax correction (storm-top field, 250 km window).
 4. ``fig4_states``: cell-by-cell offsets in the four correction states.
 5. ``fig5_heights``: INSAT cold-core height vs GPM maximum echo top per cell.
+6. ``fig6_terrain``: clear-sky terrain parallax of the ground from SRTM.
 
 Inputs are the outputs of ``run_all_cases.py``, ``test_navigation_parallax.py``,
 ``analyze_core_offsets.py`` and ``pygeoparallax navigation`` runs.
@@ -218,12 +219,56 @@ def fig5_heights():
     save(fig, "fig5_heights")
 
 
+def fig6_terrain(dem_path=Path("02_standardized_grid/srtm_0p01deg.nc"), damaged=()):
+    import xarray as xr
+
+    from pygeoparallax.geometry import parallax_correct, parallax_shift
+
+    if not dem_path.exists():
+        print(f"skip fig6_terrain: no {dem_path} (run scripts/prepare_srtm.py)")
+        return
+    dem = xr.open_dataset(dem_path)["elevation"].coarsen(lat=5, lon=5, boundary="trim").mean()
+    glon, glat = np.meshgrid(dem.lon.values, dem.lat.values)
+    h = np.where(dem.values > 0, dem.values, np.nan)
+    lat_c, lon_c = parallax_correct(glat, glon, h, SAT_LON)
+    shift, _ = parallax_shift(glat, glon, lat_c, lon_c)
+    shift = shift / 1000.0
+    box = (6.0, 38.0, 68.0, 98.0)
+    fig, ax = plt.subplots(figsize=(6.6, 6.2))
+    ax.grid(False)
+    levels = [0, 0.25, 0.5, 1, 1.5, 2, 3, 4]
+    cf = ax.contourf(glon, glat, shift, levels=levels, colors=BLUE_RAMP, extend="max")
+    coastlines(ax, box)
+    for la0, la1, lo0, lo1 in damaged:
+        ax.add_patch(plt.Rectangle((lo0, la0), lo1 - lo0, la1 - la0, fill=False, ec=MUTED, hatch="///", lw=0.6))
+    if damaged:
+        ax.text(damaged[0][2] + 0.3, damaged[0][0] + 0.3, "DEM tile damaged", fontsize=7, color=INK2,
+                bbox={"fc": "white", "ec": "none", "alpha": 0.8, "pad": 1})
+    for key, (name, _, _, (la0, la1, lo0, lo1)) in REGIONS.items():
+        ax.add_patch(plt.Rectangle((lo0, la0), lo1 - lo0, la1 - la0, fill=False, ec=INK, lw=1.0, ls="--"))
+    ax.set_xlim(box[2], box[3])
+    ax.set_ylim(box[0], box[1])
+    ax.set_aspect(1 / np.cos(np.radians(22)))
+    ax.set_xlabel("Longitude [°E]")
+    ax.set_ylabel("Latitude [°N]")
+    cb = fig.colorbar(cf, ax=ax, shrink=0.8, pad=0.02)
+    cb.set_label("Terrain parallax shift of the ground [km]", color=INK2)
+    cb.outline.set_edgecolor(AXIS)
+    ax.set_title("Clear-sky terrain parallax from SRTM (0.05° mean elevation)", loc="left")
+    save(fig, "fig6_terrain")
+
+
+#: SRTM tiles that could not be read in full (lat0, lat1, lon0, lon1); re-download to fill them.
+DAMAGED_SRTM = [(18.0, 24.0, 74.0, 80.0), (18.0, 24.0, 80.0, 86.0), (18.0, 24.0, 92.0, 98.0)]
+
+
 def main():
     fig1_geometry()
     fig2_navigation()
     fig3_cases()
     fig4_states()
     fig5_heights()
+    fig6_terrain(damaged=DAMAGED_SRTM)
 
 
 if __name__ == "__main__":
