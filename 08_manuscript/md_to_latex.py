@@ -92,6 +92,11 @@ def to_latex(md):
                  lambda m: f"\\subsection{{{m.group(3)}}}\\label{{sec:{m.group(1)}.{m.group(2)}}}", tex)
     for pat, rep in REFERENCES:
         tex = re.sub(pat, rep, tex)
+    # Tables are short: print the header and caption once, not again on a continuation page.
+    tex = tex.replace("\\endhead", "\\endfirsthead")
+    # ...and keep them on one page: "\\*" forbids a page break after a row.
+    tex = re.sub(r"\\begin\{longtable\}.*?\\end\{longtable\}",
+                 lambda m: re.sub(r"\\\\(?=\s*\n)", r"\\\\*", m.group(0)), tex, flags=re.S)
     # Markdown section separators ("---") would print as rules.
     tex = tex.replace("\\begin{center}\\rule{0.5\\linewidth}{0.5pt}\\end{center}\n", "")
     # "**Table N.** Caption" paragraphs become captions inside the longtable that follows them.

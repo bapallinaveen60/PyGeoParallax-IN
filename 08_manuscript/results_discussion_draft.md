@@ -34,9 +34,9 @@ Of 33 coincident INSAT–GPM cases (GPM within 5 min of the INSAT scan at the st
 
 ### 5.4 Effect of parallax correction
 
-Parallax correction brings INSAT closer to GPM on average (Fig. 3, Table 2). For the storm-top field within 250 km of the main convective cluster, the median absolute offset falls from 5.5 km to 3.1 km and 10 of the 12 cases improve. The mean offset changes from +4.3 km to −0.9 km.
+Parallax correction brings INSAT closer to GPM on average (Fig. 3, Table 2). For the storm-top field within 250 km of the main convective cluster, the median absolute offset falls from 5.5 km to 3.1 km and 10 of the 12 cases improve. The mean offset changes from +4.3 km to −0.9 km. Case by case, the absolute offset falls by a median of 1.6 km (95 % bootstrap interval 0.6–5.4 km); the improvement is significant by the sign test (p = 0.039) but not by the Wilcoxon signed-rank test (p = 0.13), so the evidence is moderate.
 
-The correction acts only along the line of sight, as it should: the cross-look offset is the same before and after (median absolute 8.8 and 9.0 km). The cross-look scatter is therefore not a parallax effect but reflects storm structure, storm motion within the 1–2 min between the two observations, and the different quantities the two instruments see.
+The correction acts only along the line of sight, as it should: the cross-look offset is the same before and after (median absolute 8.8 and 9.0 km; median change 0.0 km, 95 % interval −0.3 to +0.2 km). The cross-look scatter is therefore not a parallax effect but reflects storm structure, storm motion within the 1–2 min between the two observations, and the different quantities the two instruments see.
 
 The gain is clearest at high viewing angles (Table 2). Over the Himalaya and Northeast India, where the deep cores moved by about 10 km, the mean offset moves from +2.0 and +5.2 km to −4.9 and −1.4 km. In South India, where the parallax is only 3–5 km, it changes from +6.2 to +4.9 km, within the case-to-case scatter.
 
@@ -52,19 +52,19 @@ The gain is clearest at high viewing angles (Table 2). Over the Himalaya and Nor
 
 Applied shifts are medians over all 14 usable cases; offsets use the 12 cases valid in every state.
 
-### 5.5 The uncorrected offset does not grow with viewing angle
+### 5.5 Parallax-only correction overshoots at storm cores
 
-If the uncorrected offset were pure parallax, it would grow with tan(VZA). It does not: across the 12 cases the raw offset is unrelated to tan(VZA) (r = −0.15). Two independent measures show why.
+If the uncorrected offset were pure parallax, it would grow with tan(VZA), by about 10–12 km per unit tan(VZA) for deep convection. Across the 12 cases no such growth is visible (Spearman ρ = −0.03), but with so few cases the slope is poorly constrained (−4 km per unit tan(VZA), 95 % bootstrap interval −19 to +15 km), and a parallax-like trend cannot be excluded. The two offset measures give a clearer picture.
 
-**Cell by cell** (Fig. 4), uncorrected INSAT cold cores already sit almost on top of GPM's deep-echo cells (median −0.1 km over 69 cells in 11 cases), and parallax correction moves them 5.7 km past (median −5.7 km). The **field correlation** sees the opposite sign before correction (+4.3 km) and lands near zero after it (−0.9 km). The two measures differ by a steady 4–5 km in every state. The field measure is driven by the large cold anvil against the rain area, the cell measure by the coldest tops against the tallest echoes.
+**Cell by cell** (Fig. 4), uncorrected INSAT cold cores already sit almost on top of GPM's deep-echo cells (median −0.1 km over 69 cells in 11 cases), and parallax correction moves them 5.7 km past (median −5.7 km; 95 % interval −8.2 to −2.2 km from a bootstrap that resamples cases, since cells of one storm are not independent). The **field correlation** sees the opposite sign before correction (+4.3 km) and lands near zero after it (−0.9 km). The two measures differ by a steady 4–5 km in every state. The field measure is driven by the large cold anvil against the rain area, the cell measure by the coldest tops against the tallest echoes.
 
 Three sources of this behaviour were tested:
 
 1. **GPM's slanted beam.** Placing storm tops on the slanted Ku beam instead of at the surface footprint (a median displacement of 1 km, up to 5 km) changes the cell medians by at most 0.6 km. It adds scatter, not bias.
 2. **Cloud-top height.** In 95 matched cells, the BT-derived height of the INSAT cold core is 16.9 km (median), against a GPM maximum echo top of 12.45 km (Fig. 5); about half the cores sit at the tropopause. ERA5 profiles instead of the standard atmosphere give 16.75 km and change every offset by under 0.5 km. The gap between infrared cloud top and radar echo top is therefore physical: radar echo tops lie 1–3 km below the infrared top of deep convection. It accounts for about 1–2 km of the cell-measure overshoot.
-3. **Navigation.** Adding the monsoon navigation correction moves the cell median from −5.7 to −4.1 km and the field mean from −0.9 to +1.0 km (Fig. 4). Navigation thus accounts for about 1.5–3 km of the overshoot, depending on which monsoon estimate is used.
+3. **Navigation.** Adding the monsoon navigation correction moves the cell median from −5.7 to −4.1 km (per-case change +1.3 km, 95 % interval +0.5 to +1.9 km, Wilcoxon p = 0.002) and the field mean from −0.9 to +1.0 km (Fig. 4). Navigation thus accounts for about 1.5–3 km of the overshoot, depending on which monsoon estimate is used; the remaining cell overshoot (−4.1 km, interval −7.8 to −0.6 km) is still significant.
 
-With navigation and parallax corrected together, the storm-top field gives the closest agreement of any state: mean +1.0 km, median absolute 1.8 km (Table 3). The cell measure remains at −4.1 km, so the two measures bracket zero, as they do only in the corrected states.
+With navigation and parallax corrected together, the storm-top field gives the smallest median offset of any state: mean +1.0 km, median absolute 1.8 km (Table 3). This is a point estimate: with 12 cases it is not significantly better than parallax correction alone (4 of 12 cases improve; median change +1.1 km, 95 % interval −1.9 to +1.4 km; Wilcoxon p = 0.91), and its interval is wide (1.4–8.6 km). The cell measure remains at −4.1 km, so the two measures bracket zero, as they do only in the corrected states.
 
 **Table 3.** Offsets in each correction state (12 cases for the field measure; 69–75 cells for the cell measure).
 
@@ -96,11 +96,11 @@ Fourteen scenes from 11–14 June 2023 turned out to be partial INSAT-3DR scans,
 
 ### 6.1 What the correction achieves
 
-The ellipsoid ray-tracing correction is exact to well under the pixel size, and its effect on real data is the one geometry predicts: features move along the line of sight by h·tan(VZA), and nothing moves across it. Against GPM, the correction halves the typical INSAT–radar offset (5.5 → 3.1 km), and together with the monsoon navigation correction brings it to 1.8 km. The gain is largest where it matters most, over the Himalaya and Northeast India, where the parallax of deep convection (about 10 km) is two to three INSAT pixels.
+The ellipsoid ray-tracing correction is exact to well under the pixel size, and its effect on real data is the one geometry predicts: features move along the line of sight by h·tan(VZA), and nothing moves across it. Against GPM, the correction lowers the typical INSAT–radar offset from 5.5 to 3.1 km (10 of 12 cases improve; sign test p = 0.039), and together with the monsoon navigation correction gives a median of 1.8 km, although with 12 cases this further step is not statistically significant. The gain is largest where it matters most, over the Himalaya and Northeast India, where the parallax of deep convection (about 10 km) is two to three INSAT pixels.
 
 ### 6.2 Navigation partly masks the parallax
 
-The most important finding for users of INSAT-3DR data is that the raw INSAT–GPM offset does not follow the viewing angle. In the monsoon, a navigation error of 2.5–5 km to the south partly offsets the northward parallax displacement, so uncorrected cold cores sit close to the radar cells (Section 5.5). A correction that removes only the parallax therefore overshoots at storm cores.
+The most important finding for users of INSAT-3DR data is that a parallax-only correction overshoots at storm cores. In the monsoon, a navigation error of 2.5–5 km to the south partly offsets the northward parallax displacement, so uncorrected cold cores sit close to the radar cells (Section 5.5); the raw offset shows no visible growth with viewing angle, although 12 cases cannot exclude one.
 
 Two practical consequences follow:
 - Parallax and navigation should be corrected together. The navigation error is seasonal: small in the monsoon, but 7–20 km to the west from late September to mid-March, larger than the parallax itself. Users of INSAT-3DR outside the monsoon need the seasonal correction even more than the parallax correction.
@@ -126,7 +126,7 @@ ISRO's data-quality reports already measure INSAT-3DR geolocation error per imag
 
 ### 6.6 Limitations
 
-- **Sample size.** Fourteen usable cases (12 for the field measure) are enough to show the effect but not to give tight regional statistics. South and Central India have only 1–3 cases each.
+- **Sample size.** Fourteen usable cases (12 for the field measure) show that parallax correction improves the agreement (moderate evidence) and that it acts only along the line of sight (strong evidence). They are too few to show that adding the navigation correction improves the field measure further, to establish how the raw offset depends on viewing angle, or to give regional statistics; South and Central India have only 1–3 cases each.
 - **One reference instrument.** Validation uses GPM only. GPM samples each storm once, in a 245 km swath, and its echo tops differ from infrared tops by definition. Ground-based radar (IMD Doppler Weather Radar) would add many more cases at fixed sites and is left for future work.
 - **Two measures, one gap.** The field and cell measures differ by a steady 4–5 km because they compare different parts of the storm. We report both; the absolute residual offset is therefore uncertain by about ±2–3 km.
 - **Navigation.** The monsoon navigation correction is a seasonal value with an uncertainty of about ±2 km; the yaw-flip explanation of its seasonal change is a hypothesis.

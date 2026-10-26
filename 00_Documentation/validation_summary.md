@@ -154,6 +154,27 @@ Re-running all cases with the pooled near-storm correction (`near_storm_pooled.j
 
 The near-storm correction with parallax gives the closest field agreement so far (median 1.8 km), while the cell measure moves from −5.7 to −4.1 km. The steady 4–5 km gap between the two measures remains; it comes from what each measures (anvil vs coldest tops), not from navigation. **The monsoon navigation error is 2.5–5 km north, uncertain by about ±2 km, and cannot be fixed per day from coastlines.** Navigation therefore explains roughly 1.5–3 km of the cell overshoot, BT heights 1–2 km, and the rest is the field-vs-cell definition.
 
+## Statistics (12 cases)
+
+`scripts/validation_statistics.py`: 95 % bootstrap intervals (10 000 resamples of cases), Wilcoxon signed-rank and exact sign tests on paired absolute offsets; for cells, a cluster bootstrap over cases (cells of one storm are not independent). Output: `05_validation/statistics/statistics.json`.
+
+| Comparison (field measure, storm top 250 km) | Median change in absolute offset [km] | 95 % interval | Improved | Wilcoxon p | Sign p |
+| :--- | ---: | :--- | ---: | ---: | ---: |
+| Raw → parallax | −1.6 | −5.4 … −0.6 | 10 of 12 | 0.13 | **0.039** |
+| Raw → navigation + parallax | −2.3 | −4.3 … +1.3 | 7 of 12 | 0.23 | 0.77 |
+| Parallax → navigation + parallax | +1.1 | −1.9 … +1.4 | 4 of 12 | 0.91 | 0.39 |
+| Cross-look, raw → parallax | 0.0 | −0.3 … +0.2 | – | 0.91 | – |
+
+| State | Field median absolute [km] (95 % interval) | Cells median [km] (95 % interval, cluster bootstrap) |
+| :--- | :--- | :--- |
+| Raw | 5.5 (4.2–7.9) | −0.1 (−3.6 … +4.7) |
+| Parallax only | 3.1 (0.4–7.6) | −5.7 (−8.2 … −2.2) |
+| Navigation + parallax | 1.8 (1.4–8.6) | −4.1 (−7.8 … −0.6) |
+
+- **Supported:** the cross-look offset does not change (strong); parallax correction improves the field measure (moderate: the bootstrap interval excludes zero and the sign test is significant, the Wilcoxon test is not); in the cell measure, parallax correction overshoots significantly and adding navigation reduces the overshoot significantly (per-case change +1.3 km, p = 0.002) without removing it.
+- **Not supported with 12 cases:** that navigation + parallax is better than parallax alone in the field measure (4 of 12 improve), and that the raw offset does not grow with viewing angle (Spearman ρ = −0.03, but the slope interval, −19 … +15 km per unit tan VZA, still includes the ~10 km expected from parallax alone).
+- **Consequence:** report 1.8 km as a point estimate, not as a demonstrated improvement over parallax correction; more cases (batch 4) are needed to resolve the navigation and viewing-angle questions.
+
 ## For the paper
 
 1. **Geometry verified:** pyproj, pyorbital and satpy agree. The correction moves features by the computed amount along the line of sight and leaves the cross-look offset unchanged, in every field, window and metric.

@@ -215,6 +215,10 @@ To separate sources of residual offset, we also compare INSAT cold-core heights 
 
 An error $\delta h$ in cloud-top height shifts the corrected position by about $\delta h\tan(\mathrm{VZA})$: about 0.4 km per km of height error at Mumbai and 0.7 km at Agartala. We quantify this with Monte Carlo perturbations of cloud-top height (standard deviation 1 km, 100 members) and with fixed biases of ±1 and ±2 km.
 
+### 4.7 Statistics
+
+Uncertainties are 95 % percentile bootstrap intervals from 10 000 resamples. For the field measure, cases are resampled; for the cell measure, cases are resampled with all their cells (a cluster bootstrap), because cells of one storm are not independent. Paired comparisons between correction states use the absolute offset of each case: the median change with its bootstrap interval, the Wilcoxon signed-rank test and the exact sign test on the number of cases that improve. For the cell measure the paired test uses the per-case medians. The dependence of the raw offset on viewing angle is tested with the Spearman rank correlation and the least-squares slope against tan(VZA), with a bootstrap interval.
+
 ---
 
 ## Notes for revision

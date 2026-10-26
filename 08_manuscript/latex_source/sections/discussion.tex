@@ -4,11 +4,11 @@
 
 \subsection{What the correction achieves}\label{sec:6.1}
 
-The ellipsoid ray-tracing correction is exact to well under the pixel size, and its effect on real data is the one geometry predicts: features move along the line of sight by h·tan(VZA), and nothing moves across it. Against GPM, the correction halves the typical INSAT--radar offset (5.5 → 3.1 km), and together with the monsoon navigation correction brings it to 1.8 km. The gain is largest where it matters most, over the Himalaya and Northeast India, where the parallax of deep convection (about 10 km) is two to three INSAT pixels.
+The ellipsoid ray-tracing correction is exact to well under the pixel size, and its effect on real data is the one geometry predicts: features move along the line of sight by h·tan(VZA), and nothing moves across it. Against GPM, the correction lowers the typical INSAT--radar offset from 5.5 to 3.1 km (10 of 12 cases improve; sign test p = 0.039), and together with the monsoon navigation correction gives a median of 1.8 km, although with 12 cases this further step is not statistically significant. The gain is largest where it matters most, over the Himalaya and Northeast India, where the parallax of deep convection (about 10 km) is two to three INSAT pixels.
 
 \subsection{Navigation partly masks the parallax}\label{sec:6.2}
 
-The most important finding for users of INSAT-3DR data is that the raw INSAT--GPM offset does not follow the viewing angle. In the monsoon, a navigation error of 2.5--5 km to the south partly offsets the northward parallax displacement, so uncorrected cold cores sit close to the radar cells (Section~\ref{sec:5.5}). A correction that removes only the parallax therefore overshoots at storm cores.
+The most important finding for users of INSAT-3DR data is that a parallax-only correction overshoots at storm cores. In the monsoon, a navigation error of 2.5--5 km to the south partly offsets the northward parallax displacement, so uncorrected cold cores sit close to the radar cells (Section~\ref{sec:5.5}); the raw offset shows no visible growth with viewing angle, although 12 cases cannot exclude one.
 
 Two practical consequences follow:
 
@@ -49,7 +49,7 @@ ISRO's data-quality reports \citep{mosdac_dqe2020} already measure INSAT-3DR geo
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Sample size.} Fourteen usable cases (12 for the field measure) are enough to show the effect but not to give tight regional statistics. South and Central India have only 1--3 cases each.
+  \textbf{Sample size.} Fourteen usable cases (12 for the field measure) show that parallax correction improves the agreement (moderate evidence) and that it acts only along the line of sight (strong evidence). They are too few to show that adding the navigation correction improves the field measure further, to establish how the raw offset depends on viewing angle, or to give regional statistics; South and Central India have only 1--3 cases each.
 \item
   \textbf{One reference instrument.} Validation uses GPM only. GPM samples each storm once, in a 245 km swath, and its echo tops differ from infrared tops by definition. Ground-based radar (IMD Doppler Weather Radar) would add many more cases at fixed sites and is left for future work.
 \item

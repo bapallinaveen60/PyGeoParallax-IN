@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Validation statistics:** `scripts/validation_statistics.py` (bootstrap intervals, cluster bootstrap for cells, Wilcoxon and sign tests, viewing-angle trend).
+- **LaTeX manuscript** (`08_manuscript/latex_source/`, generated sections via `08_manuscript/md_to_latex.py`).
+
+### Findings
+- With 12 cases, parallax correction improves the field offset with moderate evidence (sign test p = 0.039; Wilcoxon p = 0.13) and leaves the cross-look offset unchanged (change 0.0 km, 95 % interval −0.3 … +0.2). Adding the navigation correction is not significantly better in the field measure (p = 0.91) but significantly reduces the cell-measure overshoot (p = 0.002). The viewing-angle trend of the raw offset is not constrained (slope interval −19 … +15 km per unit tan VZA).
+
 ## 0.2.0 (2026-10-26)
 
 ERA5 and SRTM inputs, navigation near the storms, a benchmark, and the paired dataset for the U-Net comparison.
