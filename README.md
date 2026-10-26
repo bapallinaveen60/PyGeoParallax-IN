@@ -6,7 +6,7 @@ PyGeoParallax-IN is a Python-based processing pipeline designed to correct **clo
 
 The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission, and later against ground-based Doppler Weather Radar (DWR) from the India Meteorological Department (IMD).
 
-## Status (v0.1.0)
+## Status (v0.2.0)
 
 | Part | State |
 | :--- | :--- |

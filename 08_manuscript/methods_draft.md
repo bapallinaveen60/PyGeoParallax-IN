@@ -1,6 +1,6 @@
 # Methods (draft)
 
-*Draft of 25 Oct 2026 for the PyGeoParallax-IN paper. Equations are in LaTeX math; references in [brackets] are placeholders to be completed. All numbers match `pygeoparallax` v0.1.0.*
+*Draft of 26 Oct 2026 for the PyGeoParallax-IN paper. Equations are in LaTeX math; citations are [Author, year], listed at the end. All numbers match `pygeoparallax` v0.2.0.*
 
 ---
 
@@ -8,7 +8,7 @@
 
 ### 2.1 INSAT-3DR Imager
 
-INSAT-3DR is a geostationary satellite at 74.0°E. Its Imager scans the full disk every 30 minutes (scans start at HH:15 and HH:45) in six channels: visible (VIS, 0.65 µm), shortwave infrared (SWIR, 1.6 µm), mid-wave infrared (MIR, 3.9 µm), water vapour (WV, 6.8 µm) and two thermal infrared channels (TIR1, 10.8 µm; TIR2, 12.0 µm). The sampling interval is 1 km for VIS and SWIR and 4 km for the infrared channels at the sub-satellite point. We used the Level-1C sector product (`3RIMG_*_L1C_SGP`) from MOSDAC [ref]. It is on a Mercator grid (`lon_0 = 75°E`) with pixel-centre coordinates. Calibrated counts are converted to brightness temperature (BT) or albedo through the lookup tables in each file.
+INSAT-3DR is a geostationary satellite at 74.0°E. Its Imager scans the full disk every 30 minutes (scans start at HH:15 and HH:45) in six channels: visible (VIS, 0.65 µm), shortwave infrared (SWIR, 1.6 µm), mid-wave infrared (MIR, 3.9 µm), water vapour (WV, 6.8 µm) and two thermal infrared channels (TIR1, 10.8 µm; TIR2, 12.0 µm). The sampling interval is 1 km for VIS and SWIR and 4 km for the infrared channels at the sub-satellite point. We used the Level-1C sector product (`3RIMG_*_L1C_SGP`) from MOSDAC; INSAT-3DR products use the INSAT-3D formats [SAC, 2014]. It is on a Mercator grid (`lon_0 = 75°E`) with pixel-centre coordinates. Calibrated counts are converted to brightness temperature (BT) or albedo through the lookup tables in each file.
 
 The full-disk scan runs north to south, from 81°N to 81°S, in about 26.9 min (from the file start and end times). We estimate the scan time at a given latitude by linear interpolation along this sweep.
 
@@ -18,14 +18,14 @@ The Level-2B cloud-top pressure product (`3RIMG_*_L2B_CTP`) gives cloud-top pres
 
 ### 2.2 GPM Dual-frequency Precipitation Radar
 
-GPM Core Observatory carries the Dual-frequency Precipitation Radar (DPR) [ref]. We used the Ku-band Level-2A product (`2A.GPM.Ku`, version V08) from NASA GES DISC, full-swath (`FS`) group, about 245 km wide with a footprint of about 5 km. Variables read: storm-top height, near-surface corrected reflectivity, near-surface precipitation rate, precipitation type, bright-band height and the spacecraft position.
+GPM Core Observatory carries the Dual-frequency Precipitation Radar (DPR) [Hou et al., 2014]. We used the Ku-band Level-2A product (`2A.GPM.Ku`, version V08 [Iguchi & Meneghini, 2026]; algorithm in Iguchi et al. [2021]) from NASA GES DISC, full-swath (`FS`) group, about 245 km wide with a footprint of about 5 km. Variables read: storm-top height, near-surface corrected reflectivity, near-surface precipitation rate, precipitation type, bright-band height and the spacecraft position.
 
 GPM 2A gives each footprint's position at the surface. An echo at height $h$ lies on the slanted radar beam, displaced towards the spacecraft by about $h\tan\theta_{\mathrm{GPM}}$, where $\theta_{\mathrm{GPM}}$ is the local zenith angle of the beam. This displacement is up to about 5 km for a 15 km storm top at the swath edge. We place storm tops on the beam by intersecting the line from the footprint to the spacecraft with the ellipsoid surface at height $h$, using the same Newton refinement as in Section 3.3. The median displacement in our cases is 1 km.
 
 ### 2.3 Ancillary data
 
-- **Coastlines:** Natural Earth 10 m land polygons (public domain) [ref], used for the navigation check (Section 3.6).
-- **Atmospheric profiles:** AFGL tropical standard atmosphere [Anderson et al., 1986], 0–25 km at 1 km resolution; and ERA5 reanalysis [Hersbach et al., 2020] temperature and geopotential on 29 pressure levels (1000–50 hPa, 0.25°), at the hour nearest each case scan.
+- **Coastlines:** Natural Earth 10 m land polygons (public domain) [Natural Earth], used for the navigation check (Section 3.6).
+- **Atmospheric profiles:** AFGL tropical standard atmosphere [Anderson et al., 1986], 0–25 km at 1 km resolution; and ERA5 reanalysis [Hersbach et al., 2020; C3S, 2018] temperature and geopotential on 29 pressure levels (1000–50 hPa, 0.25°), at the hour nearest each case scan.
 - **Terrain:** SRTM GL1 [Farr et al., 2007], 1 arcsecond tiles block-averaged to 0.01° (about 1 km). Heights are above the EGM96 geoid, which lies 50–105 m below the ellipsoid over India; this changes the terrain correction by under 75 m at VZA 35°, so heights are used as they are.
 
 ### 2.4 Study period and regions
@@ -45,16 +45,16 @@ The study covers the monsoon season (June–September) of 2022, 2023 and 2024. V
 
 ### 3.1 Viewing geometry
 
-All positions are geodetic coordinates on the WGS84 ellipsoid. A surface point at latitude $\varphi$, longitude $\lambda$ and ellipsoidal height $h$ has Earth-centred, Earth-fixed (ECEF) coordinates
+All positions are geodetic coordinates on the WGS84 ellipsoid [NIMA, 2000]. A surface point at latitude $\varphi$, longitude $\lambda$ and ellipsoidal height $h$ has Earth-centred, Earth-fixed (ECEF) coordinates
 
 $$
 \mathbf{p} = \begin{pmatrix} (N + h)\cos\varphi\cos\lambda \\ (N + h)\cos\varphi\sin\lambda \\ \left(N(1 - e^2) + h\right)\sin\varphi \end{pmatrix},
 \qquad N = \frac{a}{\sqrt{1 - e^2\sin^2\varphi}},
 $$
 
-with semi-major axis $a$ and eccentricity $e$. The inverse transform uses three fixed-point iterations on latitude. Both directions agree with pyproj [ref] to better than 1 mm.
+with semi-major axis $a$ and eccentricity $e$. The inverse transform uses three fixed-point iterations on latitude. Both directions agree with pyproj [Snow et al.] to better than 1 mm.
 
-The satellite is at $\mathbf{s} = R_{\mathrm{geo}}(\cos\lambda_s, \sin\lambda_s, 0)$, with $R_{\mathrm{geo}} = 42\,164$ km and $\lambda_s = 74.0°$. The unit line-of-sight vector from the ground to the satellite is $\hat{\mathbf{d}} = (\mathbf{s} - \mathbf{p})/\lVert\mathbf{s} - \mathbf{p}\rVert$. The viewing zenith angle (VZA) is the angle between $\hat{\mathbf{d}}$ and the local vertical; the viewing azimuth angle (VAA) comes from its east and north components. These agree with pyorbital [ref] within 0.01°.
+The satellite is at $\mathbf{s} = R_{\mathrm{geo}}(\cos\lambda_s, \sin\lambda_s, 0)$, with $R_{\mathrm{geo}} = 42\,164$ km and $\lambda_s = 74.0°$. The unit line-of-sight vector from the ground to the satellite is $\hat{\mathbf{d}} = (\mathbf{s} - \mathbf{p})/\lVert\mathbf{s} - \mathbf{p}\rVert$. The viewing zenith angle (VZA) is the angle between $\hat{\mathbf{d}}$ and the local vertical; the viewing azimuth angle (VAA) comes from its east and north components. These agree with pyorbital [Raspaud et al., 2018] within 0.01°.
 
 A cloud at height $h$ appears displaced away from the satellite by approximately
 
@@ -62,7 +62,7 @@ $$
 \Delta \approx h \tan(\mathrm{VZA}).
 $$
 
-Over India the displacement is mostly northward. For a 12 km cloud top it is about 2.6 km at Kochi (VZA 12°) and 8–9 km over Northeast India and the Himalaya (VZA 34–36°).
+Uncorrected, this displacement misplaces satellite rainfall estimates by several kilometres, especially for deep convection at high viewing angles [Vicente et al., 2002]. Over India the displacement is mostly northward. For a 12 km cloud top it is about 2.6 km at Kochi (VZA 12°) and 8–9 km over Northeast India and the Himalaya (VZA 34–36°).
 
 ### 3.2 Cloud-top height
 
@@ -102,7 +102,7 @@ We follow Bieliński [2020] in two steps:
 
 Points the satellite cannot see (line of sight below the local horizon) and pixels without a height are returned as missing. The corrected position is $\mathbf{q}(t)$ converted back to geodetic coordinates.
 
-Unlike the spherical-Earth correction in satpy [ref], this solver works on the ellipsoid and allows a non-zero reference height. The two agree within 25 m.
+Unlike the spherical-Earth correction in satpy [Raspaud et al., 2018], this solver works on the ellipsoid and allows a non-zero reference height. The two agree within 25 m.
 
 ### 3.4 Terrain
 
@@ -152,7 +152,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 ### 3.7 Implementation
 
-The method is implemented in the open-source Python package `pygeoparallax` (v0.1.0, MIT licence) [repository link]. The solver has a vectorised NumPy reference and a parallel Numba kernel with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (52) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
+The method is implemented in the open-source Python package `pygeoparallax` (v0.2.0, MIT licence; https://github.com/bapallinaveen60/PyGeoParallax-IN). The solver has a vectorised NumPy reference and a parallel Numba kernel [Lam et al., 2015] with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (52) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
 
 ---
 
@@ -213,6 +213,25 @@ An error $\delta h$ in cloud-top height shifts the corrected position by about $
 
 ## Notes for revision
 
-- Add references: MOSDAC product guide, GPM DPR ATBD, Natural Earth, pyproj, pyorbital, satpy, Vicente et al. (2002), Bieliński (2020), Anderson et al. (1986).
 - Confirm the INSAT-3DR yaw-flip dates from IMD's SatMet SOP before stating them as fact.
 - The U-Net comparison (Model A uncorrected, Model B corrected) will need its own section.
+
+---
+
+## References
+
+- Anderson, G. P., Clough, S. A., Kneizys, F. X., Chetwynd, J. H., & Shettle, E. P. (1986). *AFGL atmospheric constituent profiles (0–120 km)*. AFGL-TR-86-0110, Air Force Geophysics Laboratory, Hanscom AFB, MA.
+- Bieliński, T. (2020). A parallax shift effect correction based on cloud height for geostationary satellites and radar observations. *Remote Sensing*, 12(3), 365. https://doi.org/10.3390/rs12030365
+- C3S (Copernicus Climate Change Service) (2018). ERA5 hourly data on pressure levels from 1940 to present. Copernicus Climate Change Service Climate Data Store. https://doi.org/10.24381/cds.bd0915c6
+- Farr, T. G., et al. (2007). The Shuttle Radar Topography Mission. *Reviews of Geophysics*, 45(2), RG2004. https://doi.org/10.1029/2005RG000183
+- Hersbach, H., et al. (2020). The ERA5 global reanalysis. *Quarterly Journal of the Royal Meteorological Society*, 146(730), 1999–2049. https://doi.org/10.1002/qj.3803
+- Hou, A. Y., et al. (2014). The Global Precipitation Measurement Mission. *Bulletin of the American Meteorological Society*, 95(5), 701–722. https://doi.org/10.1175/BAMS-D-13-00164.1
+- Iguchi, T., & Meneghini, R. (2026). GPM DPR Ku Precipitation Profile 2A 1.5 hours 5 km V08. NASA Goddard Earth Sciences Data and Information Services Center (GES DISC). https://doi.org/10.5067/GPM/DPR/Ku/2A/08
+- Iguchi, T., Seto, S., Meneghini, R., Yoshida, N., Awaka, J., Le, M., Chandrasekar, V., Brodzik, S., Kubota, T., & Takahashi, N. (2021). *GPM/DPR Level-2 Algorithm Theoretical Basis Document*, version 07A. NASA GSFC / JAXA. https://gpm.nasa.gov/sites/default/files/2022-06/ATBD_DPR_V07A.pdf
+- Lam, S. K., Pitrou, A., & Seibert, S. (2015). Numba: a LLVM-based Python JIT compiler. In *Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC* (pp. 1–6). https://doi.org/10.1145/2833157.2833162
+- Natural Earth. 1:10m physical vectors: land. Public domain. https://www.naturalearthdata.com
+- NIMA (2000). *Department of Defense World Geodetic System 1984: its definition and relationships with local geodetic systems*. Technical Report TR8350.2, 3rd ed., amendment 1. National Imagery and Mapping Agency.
+- Raspaud, M., et al. (2018). PyTroll: an open-source, community-driven Python framework to process Earth observation satellite data. *Bulletin of the American Meteorological Society*, 99(7), 1329–1336. https://doi.org/10.1175/BAMS-D-17-0277.1
+- SAC (2014). *INSAT-3D data products format document*, version 1.1, SAC/IMDPS/SIPA/DPSG/MSDPD/TN-01. Space Applications Centre, ISRO. https://www.mosdac.gov.in/docs/INSAT3D_Products.pdf
+- Snow, A. D., et al. pyproj: Python interface to PROJ. Zenodo. https://doi.org/10.5281/zenodo.2592232
+- Vicente, G. A., Davenport, J. C., & Scofield, R. A. (2002). The role of orographic and parallax corrections on real time high resolution satellite rainfall rate distribution. *International Journal of Remote Sensing*, 23(2), 221–230. https://doi.org/10.1080/01431160010006935

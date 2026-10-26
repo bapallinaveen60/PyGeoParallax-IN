@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-10-26)
+
+ERA5 and SRTM inputs, navigation near the storms, a benchmark, and the paired dataset for the U-Net comparison.
 
 ### Added
 - **ERA5 profiles:** `read_era5_profiles` (CDS pressure-level NetCDF, geopotential to geometric height), `cloud_top_height_profiles` (per-pixel bilinear profiles, lookup down from each column's cold point), `scripts/download_era5.py`, `--profile era5` in the case driver and `scripts/compare_variants.py`.
@@ -8,6 +10,7 @@
 - **Case scans pinned** in `00_Documentation/events/case_scans.csv`; the file-name fallback now only accepts L1C files from the case date outside navigation time slots (navigation scans from neighbouring days were being picked).
 - **Near-storm navigation:** `scripts/near_storm_navigation.py` measures daytime coastline offsets around each case date and writes per-case and pooled corrections; `analyze_core_offsets.py --nav-tag` selects which navigation runs to analyse.
 - **Benchmark:** `scripts/benchmark_scenes.py` (148 scenes: 1.8 s per scene, no failures; `00_Documentation/benchmark.md`). A test checks that clear cells are identical in corrected and uncorrected grids.
+- **Methods draft** (`08_manuscript/methods_draft.md`) with verified references.
 - **Paired dataset builder:** `scripts/build_paired_dataset.py` writes Model A (uncorrected) and Model B (corrected) NetCDF per scene on the same grid, with a manifest; parallel and resumable, optional ERA5 heights and DEM. `scripts/design_benchmark_set.py` chooses the 96-scene benchmark / test set.
 - **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6); Fig. 4 shows the near-storm and all-India navigation corrections.
 
