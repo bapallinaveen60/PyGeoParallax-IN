@@ -57,20 +57,29 @@ A case is usable if its convective cluster has at least 100 footprints and at le
 
 \subsection{Experiments}\label{sec:4.5}
 
-Each case is run in four states:
+Each case is run in four main states:
 
-\begin{longtable}[]{@{}lll@{}}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
 \caption{Correction states.}\label{tab:S}\\
 \toprule\noalign{}
-State & Navigation correction & Parallax correction \\*
+\begin{minipage}[b]{\linewidth}\raggedright
+State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Navigation correction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parallax correction
+\end{minipage} \\*
 \midrule\noalign{}
 \endfirsthead
 \bottomrule\noalign{}
 \endlastfoot
 Raw & no & no \\*
-Navigation only & per-year monsoon correction (Section~\ref{sec:3.6}) & no \\*
+Coastline navigation only & per-year monsoon correction (Section~\ref{sec:3.6}) & no \\*
 Parallax only & no & yes \\*
-Navigation + parallax & per-year monsoon correction & yes \\*
+Coastline navigation + parallax & per-year monsoon correction & yes \\*
 \end{longtable}
 
 Two further tests address the residual offset:
@@ -78,7 +87,7 @@ Two further tests address the residual offset:
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Navigation from GPM.} If the residual cell offset after parallax correction were a navigation error, a navigation correction fitted to it should improve both offset measures. For each case we take the median cell offset (converted to east and north) of all \emph{other} cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
+  \textbf{Navigation from GPM.} If the residual cell offset after parallax correction were a navigation error, a single translation fitted to it should centre both offset measures. For each case we take the median cell offset (converted to east and north) of all \emph{other} cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
 \item
   \textbf{Synthetic storm.} A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
 \end{itemize}

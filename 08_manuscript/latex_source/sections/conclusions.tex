@@ -5,14 +5,14 @@ We have presented PyGeoParallax-IN, an open-source tool that corrects INSAT-3DR 
 
 \begin{enumerate}
   \item \textbf{The correction is exact and behaves as geometry predicts.} It agrees with independent implementations to within millimetres to tens of metres. It moves features only along the line of sight, and it moves deep convection by 4\,km over South India and about 10\,km over the Himalaya and Northeast India.
-  \item \textbf{At storm scale it removes the mean bias, but GPM cannot show a per-case gain.} The mean INSAT--GPM offset of the storm-top field reverses from $+2.2$ to $-1.9$\,km. Only 18 of 30 cases improve, which is not significant. The favourable result of our first 12 cases did not hold in the full set.
+  \item \textbf{At storm scale it reverses the mean bias, but GPM cannot show a per-case gain.} The mean INSAT--GPM offset of the storm-top field moves from $+2.2$ to $-1.9$\,km, not significantly different from zero. Only 18 of 30 cases improve, which is not significant.
   \item \textbf{At convective cores, most of the computed parallax is not visible.} Uncorrected INSAT cold cores already coincide with GPM deep-echo cells ($-0.1$\,km), and correction moves them about 5\,km past ($p<0.001$). Only about 5\,\% of the computed parallax is visible. A synthetic test shows that the method recovers the full parallax when it is present.
-  \item \textbf{The difference between the two measures is storm structure, not navigation.} A navigation correction fitted to the GPM cells centres the cell measure but makes the storm-scale agreement significantly worse. The coldest infrared tops and the deepest radar echoes are different targets, and their $\sim$5\,km difference limits GPM-based validation of absolute position to about $\pm$3--5\,km. This is as large as the parallax over most of India.
+  \item \textbf{Navigation alone cannot explain the result.} A navigation correction fitted to the GPM cells centres the cell measure but leaves the storm-scale agreement worse than uncorrected. No single translation centres both measures, which differ by 2--5\,km depending on the navigation applied. We attribute this mainly to storm structure: the coldest infrared tops and the deepest radar echoes are different targets. It limits GPM-based validation of absolute position to about $\pm$3--5\,km, comparable to the parallax over most of India.
   \item \textbf{Navigation, cloud height and terrain.}
   \begin{itemize}
     \item INSAT-3DR L1C navigation errors are seasonal, 7--20\,km to the west from late September to mid-March. In the monsoon they are small and cannot be measured per day from coastlines.
     \item Brightness-temperature heights of the coldest tops lie at the tropopause, about 3\,km above the GPM echo tops, with either the standard atmosphere or ERA5.
-    \item Terrain changes the storm results by less than 0.1\,km but moves clear-sky ground in the Himalaya by up to 6\,km.
+    \item In the 14 cases of 2022--2024, ERA5 profiles change the offsets by less than 0.5\,km and terrain by less than 0.1\,km; terrain moves clear-sky ground in the Himalaya by up to 6\,km.
   \end{itemize}
   \item \textbf{The tool is fast and ready for downstream use.} It processes an India scene in 1.8\,s and writes uncorrected and corrected datasets that are identical in clear sky.
 \end{enumerate}

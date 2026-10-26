@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.3.0 (2026-10-26)
+
+Full GPM validation (38 usable cases, 2018–2024), the investigation of why most of the parallax is not visible against GPM, and the U-Net A/B retraining package. No changes to the correction itself.
+
+### Added
+- **More validation cases:** batch 4 (2018–2021, South and Central India); 63 cases processed, 38 usable. Case scans pinned in `00_Documentation/events/case_scans.csv`.
+- **Per-year navigation:** `scripts/yearly_navigation.py` pools each monsoon's daytime coastline matches (all-years value when a year has fewer than 8).
+- **GPM-derived navigation test:** `scripts/gpm_navigation.py` (leave-one-case-out) and the `gnav` state in `scripts/run_navigation_states.py`.
+- **Diagnostics:** `scripts/check_parallax_visibility.py` (overlays of uncorrected and corrected INSAT on GPM storm tops).
+- **U-Net A/B:** `scripts/build_unet_patches.py` (parallax correction of the U-Net training patches on their own L1C pixel grid), `scripts/pack_unet_dataset.py`, `scripts/train_unet_ab.py` (the group's attention U-Net; TensorFlow 2.15 or Keras 3; per-epoch checkpoint and resume), `scripts/compare_unet_ab.py` (paired scene bootstrap), `colab/unet_ab_colab.ipynb`.
+- **Paper figures:** Fig. 3 now plots the uncorrected offset against the applied shift; Fig. 4 includes the GPM-navigation state.
+- **Manuscript** reframed around the full validation (“the limits of validation against GPM radar”), with four new verified references.
+
+### Findings
+- The correction leaves the cross-look offset unchanged (median change 0.0 km, −0.2 … +0.2) and reverses the mean storm-scale offset (+2.2 → −1.9 km), but the per-case gain is not significant (18 of 30 cases, sign p = 0.36).
+- Uncorrected INSAT cold cores already sit on the GPM deep-echo cells (−0.1 km); correction moves them 4.7 km past (p < 0.001). Only about 5 % of the computed parallax is visible.
+- Navigation fitted to the GPM cells centres them but leaves the storm-scale agreement worse than uncorrected (Wilcoxon p = 0.027); no single translation centres both measures. GPM validation of absolute position is limited to about ±3–5 km.
+
 ## 0.2.1 (2026-10-26)
 
 Validation statistics, citation metadata (first release archived on Zenodo), a ray-tracing schematic and the LaTeX manuscript. No changes to the correction itself.

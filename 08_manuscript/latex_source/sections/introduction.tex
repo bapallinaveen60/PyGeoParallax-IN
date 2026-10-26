@@ -13,7 +13,7 @@ This paper addresses both the correction and its verification. Our contributions
 \begin{enumerate}
   \item \textbf{An open-source tool, PyGeoParallax-IN} \citep{pygeoparallax}. It corrects INSAT-3DR imagery for parallax by exact ray tracing on the WGS84 ellipsoid, optionally with terrain, and applies a navigation correction measured from coastlines. It produces uncorrected and corrected datasets on the same grid with occlusion-aware resampling.
   \item \textbf{A validation against GPM Ku-band radar} in 63 coincident monsoon cases (2018--2024; 38 usable) across four Indian regions that span the full range of viewing angles. It uses two independent offset measures, at the scale of the storm and of the convective core.
-  \item \textbf{A test of what radar validation can resolve.} Most of the computed parallax is not visible against GPM at convective cores. We show, with a synthetic test and with a navigation correction fitted to GPM, that this is neither a method error nor navigation, and that storm structure limits GPM-based validation of absolute position to about $\pm$3--5\,km.
+  \item \textbf{A test of what radar validation can resolve.} Most of the computed parallax is not visible against GPM at convective cores. With a synthetic test and a navigation correction fitted to GPM, we show that this is not a method error and cannot be explained by navigation alone, and that storm structure limits GPM-based validation of absolute position to about $\pm$3--5\,km.
   \item \textbf{A characterisation of INSAT-3DR L1C navigation error} and of the remaining error sources: cloud-top height (standard atmosphere versus ERA5), terrain (SRTM) and the slanted GPM radar beam.
 \end{enumerate}
 

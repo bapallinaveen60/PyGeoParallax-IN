@@ -84,3 +84,6 @@ datasets/
 08_manuscript/latex_source/*.blg
 08_manuscript/latex_source/*.png
 08_manuscript/submission_versions/*.zip
+
+# Group U-Net package (models, 2.4 GB of patches); not part of this repository
+U_net_info/

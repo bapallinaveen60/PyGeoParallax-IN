@@ -4,7 +4,7 @@
 
 \subsection{What the correction does, and what GPM can verify}\label{sec:6.1}
 
-The ellipsoid ray-tracing correction is exact to well under the pixel size, and on real data it does what geometry predicts. Features move along the line of sight by h·tan(VZA), and nothing moves across it; the cross-look control is unchanged in every case, field and window. At the scale of whole storms it reverses the mean INSAT--GPM bias, from +2.2 to −1.9 km.
+The ellipsoid ray-tracing correction is exact to well under the pixel size, and on real data it does what geometry predicts. Features move along the line of sight by h·tan(VZA), and nothing moves across it: the cross-look offset changes by a median of 0.0 km (95 \% interval −0.2 to +0.2 km). At the scale of whole storms it reverses the mean INSAT--GPM bias, from +2.2 to −1.9 km.
 
 What GPM cannot do is confirm that the corrected positions are more accurate than the uncorrected ones. With 38 usable cases over seven monsoons:
 
@@ -16,7 +16,7 @@ What GPM cannot do is confirm that the corrected positions are more accurate tha
   the cell measure says the uncorrected cores were already in place.
 \end{itemize}
 
-The two measures disagree with each other by about 5 km, so a GPM-based validation of absolute position is limited to about ±3--5 km for monsoon deep convection. That is the size of the parallax over South and Central India, and half of it over the Himalaya and the Northeast. The 12-case result we obtained first (10 of 12 cases improving) did not hold up in the larger sample. This is a caution for validation studies based on a few overpasses.
+The two measures disagree with each other by 2--3 km, and by about 5 km once navigation is fitted to one of them, so a GPM-based validation of absolute position is limited to about ±3--5 km for monsoon deep convection. That is comparable to the parallax over South and Central India, and a third to a half of it over the Himalaya and the Northeast. The 12-case result we obtained first (10 of 12 cases improving) did not hold up in the larger sample. This is a caution for validation studies based on a few overpasses.
 
 \subsection{Why the coldest tops and the deepest echoes coincide}\label{sec:6.2}
 
@@ -25,22 +25,22 @@ For the uncorrected cold cores to sit on the radar cells, the coldest infrared t
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Storm structure.} In mature monsoon convection the overshooting and coldest tops are not vertically above the deepest radar echo. Tilt of the updraft in the strong easterly shear of the monsoon, and anvil spreading, can displace the coldest top by several kilometres from the precipitation core. A systematic southward component would cancel the northward parallax.
+  \textbf{Storm structure.} Monsoon convection over India is organised in large systems whose deep echoes reach 17 km and whose stratiform and anvil regions extend over hundreds of kilometres \citep{houze2007,romatschke2011}. The coldest top of such a system need not lie vertically above its deepest radar echo: updraft tilt in the strong easterly shear of the monsoon, and anvil spreading, could displace it by several kilometres. A systematic southward component would cancel the northward parallax. We are not aware of a measurement of this offset for monsoon storms, so it remains a hypothesis.
 \item
-  \textbf{Effective height.} The cold core seen at 10.8 µm is the cloud top at the tropopause (16.6 km median), 3--5 km above the radar echo top. If the radiating top of the core is spatially offset from the echo core, the full infrared height is the wrong height for matching rain.
+  \textbf{Effective height.} The cold core seen at 10.8 µm is the cloud top at the tropopause (16.6 km median), about 3 km (median 3.2 km) above the radar echo top. If the radiating top of the core is spatially offset from the echo core, the full infrared height is the wrong height for matching rain.
 \item
-  \textbf{Navigation.} ISRO's own geolocation checks for June 2020 point to an error of 7--11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. We cannot exclude a navigation contribution, but it cannot explain the field--cell gap.
+  \textbf{Navigation.} ISRO's own geolocation checks for June 2020 point to an error of 7--11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. We cannot exclude a navigation contribution, but navigation alone cannot reconcile the two measures.
 \end{itemize}
 
 An independent geostationary view of the same storms, for example Meteosat IODC at 45.5°E, which sees the parallax in a different direction, would separate these explanations. So would ground radar at known positions. Both are left for future work.
 
 \subsection{Navigation}\label{sec:6.3}
 
-The INSAT-3DR L1C navigation error is seasonal: 7--20 km to the west from late September to mid-March. This is larger than the parallax, and outside the monsoon it is the dominant geolocation error. In the monsoon the coastline method gives small values (−2 to +3 km east, −1 to +2.5 km north per year) but cannot constrain the north component better than several kilometres, and it cannot be applied per day. Users should apply the seasonal correction outside the monsoon, and should not fit navigation to radar cells: Section~\ref{sec:5.6} shows that doing so absorbs storm structure into the navigation and degrades storm-scale agreement.
+The INSAT-3DR L1C navigation error is seasonal: 7--20 km to the west from late September to mid-March. This is larger than the parallax, and outside the monsoon it is the dominant geolocation error. In the monsoon the coastline method gives small values (−2.0 to +3.0 km east, −0.8 to +2.5 km north per year) but cannot constrain the north component better than several kilometres, and it cannot be applied per day. Users should apply the seasonal correction outside the monsoon, and should not fit navigation to radar cells: Section~\ref{sec:5.6} shows that doing so absorbs storm structure into the navigation and degrades storm-scale agreement.
 
 \subsection{Which cloud height to use}\label{sec:6.4}
 
-Brightness-temperature heights put the coldest convective tops at the tropopause, a median 3.2 km above the GPM echo tops, with either the standard atmosphere or ERA5. This is mainly physical: the infrared signal comes from the top of the cloud, while the radar sees large precipitation particles lower down.
+Brightness-temperature heights put the coldest convective tops at the tropopause, a median 3.2 km above the GPM echo tops, with either the standard atmosphere or ERA5. This is mainly physical: the infrared signal comes from the top of the cloud, while the Ku-band radar detects only precipitation-sized particles, with a threshold of about 14.5--18 dBZ \citep{toyoshima2015}.
 
 \begin{itemize}
 \tightlist
@@ -50,7 +50,7 @@ Brightness-temperature heights put the coldest convective tops at the tropopause
   For \textbf{precipitation products}, the rain-relevant level lies below the infrared top, and our cell results suggest that correcting cores with the full infrared height moves the cold signal past the rain. An effective height between the echo top and the infrared top could suit precipitation better.
 \end{itemize}
 
-The effect on a precipitation-type classifier is tested directly in Section~\ref{sec:6.8}.
+The effect on a precipitation-type classifier is being tested (Section~\ref{sec:6.8}).
 
 ISRO's operational cloud-top pressure product placed deep cores 2--3 km lower than the BT heights in our first case (Kochi, 6 June 2022; r = 0.86 overall). It was not used for the correction.
 
@@ -62,18 +62,20 @@ Terrain does not affect the storm results but matters for anything observed at t
 
 \citet{vicente2002} showed that parallax and orographic corrections matter for satellite rainfall estimates from GOES. Since 2001, the GOES Hydro-Estimator \citep{scofield2003} has applied their correction operationally. \citet{bielinski2020} derived the ellipsoid solution that our solver follows; we extend it to terrain and to a navigation correction. satpy \citep{satpy_parallax} offers an open-source spherical-Earth correction for gridded geostationary data. For Meteosat SEVIRI, \citet{wiltink2025} compared geometric parallax correction with an empirical shift that maximises the correlation with ground observations, the idea behind our field measure. To our knowledge, no parallax correction or validation has been published for INSAT-3D or INSAT-3DR.
 
-Our results add a caution to radar-based validation of geostationary parallax correction. Where the expected parallax is a few kilometres, as for most of India, the measured improvement depends on which part of the storm is compared. Cell-scale comparisons can show the opposite of storm-scale ones. ISRO's data-quality reports \citep{mosdac_dqe2020} already measure INSAT-3DR geolocation error per image against ground control points. Their June 2020 values point in the same northward direction as our cell result, but they are for L1B images, at control points outside the storm regions, and in one year. \emph{(See \texttt{00\_Documentation/novelty\_check.md}; confirm with a Google Scholar / Scopus search before submission.)}
+Our results add a caution to radar-based validation of geostationary parallax correction. Where the expected parallax is a few kilometres, as for most of India, the measured improvement depends on which part of the storm is compared. Cell-scale comparisons can show the opposite of storm-scale ones. ISRO's data-quality reports \citep{mosdac_dqe2020} already measure INSAT-3DR geolocation error per image against ground control points (for example, for 19 June 2020). Their June 2020 values point in the same northward direction as our cell result, but they are for L1B images, at control points outside the storm regions, and in one year.
 
 \subsection{Limitations}\label{sec:6.7}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Reference instrument.} Validation uses GPM only. GPM samples each storm once, in a 245 km swath. Its echo tops differ from infrared tops by definition, and the two offset measures differ by about 5 km. Ground-based radar (IMD Doppler Weather Radar) at fixed sites, or a second geostationary view, would be needed to verify absolute positions to better than this.
+  \textbf{Reference instrument.} Validation uses GPM only. GPM samples each storm once, in a 245 km swath. Its echo tops differ from infrared tops by definition, and the two offset measures differ by 2--5 km depending on the navigation applied. Ground-based radar (IMD Doppler Weather Radar) at fixed sites, or a second geostationary view, would be needed to verify absolute positions to better than this.
 \item
   \textbf{Sample by region.} South and Central India have 14--15 usable cases each, but the Himalaya and Northeast India only 4--5. Regional means at high viewing angles rest on few cases.
 \item
-  \textbf{Navigation.} The monsoon navigation correction is a per-year value whose north component is uncertain by several kilometres. The yaw-flip explanation of the seasonal change is a hypothesis.
+  \textbf{Navigation.} The monsoon navigation correction is a per-year value whose north component is uncertain by several kilometres. The link between the seasonal change and the yaw flip rests on timing only.
+\item
+  \textbf{Sensitivity tests.} ERA5 profiles and SRTM terrain were tested on the 14 cases of 2022--2024 only.
 \item
   \textbf{Cloud height.} Heights come from TIR1 brightness temperature. This underestimates thin cirrus, caps overshooting tops at the tropopause, and does not give the effective height relevant for precipitation.
 \end{itemize}

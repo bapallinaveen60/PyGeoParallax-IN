@@ -36,10 +36,10 @@ Validation cases come from the monsoon seasons (June–September) of 2018–2024
 
 | Region | Box (lat, lon) | Viewing zenith angle |
 | :--- | :--- | :--- |
-| South India (Kerala, Karnataka, Tamil Nadu) | 8–17°N, 74–80.5°E | 9–20° |
-| Central India (Madhya Pradesh, Chhattisgarh) | 19–26°N, 76–85°E | 22–33° |
-| Himalaya (Uttarakhand, Himachal, Nepal) | 27–33°N, 75–89°E | 31–38° |
-| Northeast India and Bangladesh | 22–29°N, 89–97°E | 33–37° |
+| South India (Kerala, Karnataka, Tamil Nadu) | 7–18°N, 73–82°E | 8–23° |
+| Central India (Madhya Pradesh, Chhattisgarh) | 18–27°N, 75–86°E | 21–34° |
+| Himalaya (Uttarakhand, Himachal, Nepal) | 24–33°N, 74–90°E | 28–42° |
+| Northeast India and Bangladesh | 21–29°N, 88–97°E | 29–42° |
 
 ---
 
@@ -150,7 +150,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 **Correction field.** Accepted window offsets are spread over the scene by inverse-distance weighting (power 2, great-circle distance, minimum distance 1 km). The north component uses only windows that measured it. The resulting east and north offsets are added to each pixel's position before cloud-top height and parallax correction.
 
-**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the satellite's yaw flip. During the monsoon the error is small and cannot be measured reliably for a single day: night-time matching fails because land and sea have nearly the same TIR1 temperature, and daytime matches from scans 1–2 h apart scatter by about 9–10 km. We therefore apply one correction per monsoon: the median of that year's daytime matches near the validation storms (r ≥ 0.7, not at the search edge, both components within 25 km). The values are small, −2.0 to +3.0 km east and −0.8 to +2.5 km north. A year with fewer than 8 such matches (2018, with 2) uses the value pooled over all years, +0.5 km east and +1.5 km north. The north component is uncertain by several kilometres: different coasts give −2.5 to +8.8 km.
+**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the yaw flip of the INSAT-3D-series spacecraft, a 180° rotation about the yaw axis in March and September of every year [Prakash et al., 2014]. During the monsoon the error is small and cannot be measured reliably for a single day: night-time matching fails because land and sea have nearly the same TIR1 temperature, and daytime matches from scans 1–2 h apart scatter by about 9–10 km. We therefore apply one correction per monsoon: the median of that year's daytime matches near the validation storms, from scans of the case days and the days before and after (2018–2024) (r ≥ 0.7, not at the search edge, both components within 25 km). The values are small, −2.0 to +3.0 km east and −0.8 to +2.5 km north. A year with fewer than 8 such matches (2018, with 2) uses the value pooled over all years, +0.5 km east and +1.5 km north. The north component is uncertain by several kilometres: different coasts give −2.5 to +8.8 km.
 
 ### 3.7 Implementation
 
@@ -198,20 +198,20 @@ A case is usable if its convective cluster has at least 100 footprints and at le
 
 ### 4.5 Experiments
 
-Each case is run in four states:
+Each case is run in four main states:
 
 **Table S.** Correction states.
 
 | State | Navigation correction | Parallax correction |
 | :--- | :--- | :--- |
 | Raw | no | no |
-| Navigation only | per-year monsoon correction (Section 3.6) | no |
+| Coastline navigation only | per-year monsoon correction (Section 3.6) | no |
 | Parallax only | no | yes |
-| Navigation + parallax | per-year monsoon correction | yes |
+| Coastline navigation + parallax | per-year monsoon correction | yes |
 
 Two further tests address the residual offset:
 
-- **Navigation from GPM.** If the residual cell offset after parallax correction were a navigation error, a navigation correction fitted to it should improve both offset measures. For each case we take the median cell offset (converted to east and north) of all *other* cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
+- **Navigation from GPM.** If the residual cell offset after parallax correction were a navigation error, a single translation fitted to it should centre both offset measures. For each case we take the median cell offset (converted to east and north) of all *other* cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
 - **Synthetic storm.** A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
@@ -228,8 +228,6 @@ Uncertainties are 95 % percentile bootstrap intervals from 10 000 resamples. For
 
 ## Notes for revision
 
-- Confirm the INSAT-3DR yaw-flip dates from IMD's SatMet SOP before stating them as fact.
-- The U-Net comparison (Model A uncorrected, Model B corrected) will need its own section.
 - Validation is against GPM only. In the Discussion, name ground-radar (IMD DWR) validation as future work: denser sampling in time and fixed sites at known viewing angles.
 
 ---

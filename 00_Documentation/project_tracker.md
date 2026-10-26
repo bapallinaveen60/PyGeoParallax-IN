@@ -2,16 +2,16 @@
 
 This document tracks the 4-month (16-week) implementation and validation roadmap for the `PyGeoParallax-IN` framework.
 
-*Last updated: 25 Oct 2026 (commit `d43167c`; 52 tests pass, CI green on Ubuntu 3.10/3.12 and Windows 3.12).*
+*Last updated: 26 Oct 2026 (after commit `a78cb74`; 57 tests pass, CI green on Ubuntu 3.10/3.12 and Windows 3.12).*
 
 ---
 
 ## 📈 Overall Project Health
-*   **Current Phase**: 🔬 Validation done with GPM (Month 3) → moving to Month 4 (U-Net comparison, manuscript)
-*   **Completed Tasks**: 🟢 11 / 15 Weeks done, 🟡 3 partly done (manuscript structure, writing, submission); Week 10 (IMD ground radar) dropped from scope
-*   **Overall Progress**: `█████████████████░░░ 83%` (of the 15 weeks in scope; partly done weeks counted as half)
-*   **Next Milestone**: Week 13 - U-Net comparison, uncorrected vs corrected (needs the existing model and its training data)
-*   **Key result so far**: the correction moves features by the computed amount along the line of sight. Against GPM (12 cases), the median INSAT–GPM storm-top offset falls from 5.5 km to 3.1 km with parallax correction and to 1.8 km with the monsoon navigation correction as well (−0.5 km E, +2.5 km N, ±2 km). See `validation_summary.md`.
+*   **Current Phase**: 📝 Month 4: U-Net A/B retraining running on Colab; manuscript reframed and self-reviewed
+*   **Completed Tasks**: 🟢 11 / 15 Weeks done, 🟡 4 partly done (U-Net comparison, manuscript structure, writing, submission); Week 10 (IMD ground radar) dropped from scope
+*   **Overall Progress**: `█████████████████░░░ 87%` (of the 15 weeks in scope; partly done weeks counted as half)
+*   **Next Milestone**: Week 13 - U-Net Model A vs Model B results from Colab (package in `Insat_data/unet_colab`), then manuscript Section 6.8
+*   **Key result so far**: the correction moves features by the computed amount along the line of sight only. Against GPM (38 usable cases, 2018–2024) it reverses the mean storm-scale offset (+2.2 → −1.9 km), but the per-case gain is not significant (18 of 30). At convective cores, uncorrected cold cores already sit on the GPM cells and only ~5 % of the computed parallax is visible. No single navigation shift centres both measures, so GPM can verify absolute position only to about ±3–5 km. See `validation_summary.md`.
 
 **Legend:** `[x]` done · `[~]` partly done · `[ ]` not started · `[–]` dropped from scope
 
@@ -38,27 +38,29 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 ### Month 3 — Multi-Sensor Validation & Quantitative Alignment Analysis
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[x]` | **Week 9** | Spaceborne Radar (GPM DPR) Cross-Alignment | • Colocation module between INSAT TIR1 and GPM DPR orbit tracks.<br>• Compute spatial cross-correlation & mutual information. | Done: `validation/colocate.py`, `metrics.py` (IoU, Pearson, MI, sub-cell shift). **34 cases, 4 regions, 14 usable.** Storm-top field within 250 km: median line-of-sight offset **5.4 → 3.0 km**, 10 of 12 improve; cross-look unchanged. Cell cores: raw −0.1, parallax only −5.7, both −3.3 km. The overshoot comes from navigation (~3–4 km) and BT heights (~1–2 km); the GPM beam slant adds scatter only. See `validation_summary.md`, `validation_cases.md`. |
+| `[x]` | **Week 9** | Spaceborne Radar (GPM DPR) Cross-Alignment | • Colocation module between INSAT TIR1 and GPM DPR orbit tracks.<br>• Compute spatial cross-correlation & mutual information. | Done: `validation/colocate.py`, `metrics.py` (IoU, Pearson, MI, sub-cell shift). **63 cases processed (2018–2024), 38 usable.** Storm-top field within 250 km: mean line-of-sight offset +2.2 → −1.9 km, median absolute 5.1 → 3.8 km, 18 of 30 improve (not significant); cross-look unchanged. Cell cores: raw −0.1, parallax only −4.7 km (p < 0.001). Synthetic test and overlays confirm the method; GPM-fitted navigation centres the cells but worsens the field (p = 0.027). See `validation_summary.md`, `validation_cases.md`. |
 | `[–]` | **Week 10** | Ground Radar (IMD DWR) Validation | • Volume scan extractor for Mumbai, Goa, Kochi, Agartala.<br>• Compute Intersection-over-Union (IoU) with DWR cores. | **Dropped from scope (26 Oct 2026); future work.** Not required by the thesis or the U-Net, and data access is slow and uncertain. GPM (34 cases, 4 regions) is the validation. The comparison code (`range_mask`, `compare`) is ready if IMD data become available. |
-| `[x]` | **Week 11** | Regional Statistical Dissection | • Detailed statistics tables partitioned by regime.<br>• Validation of shift direction and distance trends. | Done for GPM: Northeast, Himalaya, Central and South India boxes (`REGION_BOX`). Applied shift (deep cores, median): South 4.2, Central 7.3, Himalaya 9.8, Northeast 10.5 km, following tan(VZA). Raw INSAT–GPM offset does **not** grow with VZA, because of the navigation error. Gain is clearest at VZA ≥ 30°. |
-| `[x]` | **Week 12** | Sensitivity & Error Budget Analysis | • Monte Carlo simulation script perturbing CTH (+/- 1-2 km).<br>• Error propagation bounds. | Done: `monte_carlo_shift`, `bias_sweep`: error ≈ ΔCTH × tan(VZA) (~0.4 km per km at Mumbai, ~0.7 km at Agartala). **Navigation** (`navigation.py`, 13 coastline windows): seasonal; late Sep–mid Mar 7–20 km west, monsoon median +1.8 km E / +4.8 km N; same-day correction 8.8 → 4.3 km. Error budget for the overshoot in `validation_summary.md`. |
+| `[x]` | **Week 11** | Regional Statistical Dissection | • Detailed statistics tables partitioned by regime.<br>• Validation of shift direction and distance trends. | Done for GPM: Northeast, Himalaya, Central and South India boxes (`REGION_BOX`). Applied shift (deep cores, median): South 3.9, Central 7.3, Himalaya 9.8, Northeast 10.5 km, following tan(VZA). Raw INSAT–GPM offset does **not** grow with VZA (slope −0.8 km per unit tan VZA, interval −12.9 … +9.4); cell offsets stay within ±3 km of zero in every region. |
+| `[x]` | **Week 12** | Sensitivity & Error Budget Analysis | • Monte Carlo simulation script perturbing CTH (+/- 1-2 km).<br>• Error propagation bounds. | Done: `monte_carlo_shift`, `bias_sweep`: error ≈ ΔCTH × tan(VZA) (~0.4 km per km at Mumbai, ~0.7 km at Agartala). **Navigation** (`navigation.py`, 13 coastline windows): seasonal; late Sep–mid Mar 7–20 km west (yaw flip in March and September, Prakash et al. 2014). Monsoon per-year values −2.0 … +3.0 km E, −0.8 … +2.5 km N (`yearly_navigation.py`); the north component is uncertain by several km. GPM-derived navigation (`gpm_navigation.py`) tested leave-one-case-out. |
 
 ### Month 4 — Downstream Model Evaluation, Manuscript & Code Release
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
-| `[ ]` | **Week 13** | Impact on Deep Learning Segmentation | • Train two comparative U-Net models (Model A vs. Model B).<br>• Evaluate boundary edge precision over test sets. | Inputs ready, model not started. `scripts/build_paired_dataset.py` writes Model A (uncorrected) and Model B (corrected) NetCDF per scene on one grid (5 channels, `cth`, `fill_flag`, manifest; parallel, resumable; optional ERA5/DEM). Test set built: 91 of 96 designed scenes (5 late-evening slots have no scan on MOSDAC), paired Model A/B files in `04_corrected_output/paired/` (`events/benchmark_final.csv`). Needs the existing U-Net config, labels and its training dates (to avoid overlap with the test set). |
-| `[~]` | **Week 14** | Manuscript Structuring & Figure Generation | • Outline manuscript sections.<br>• Render 3D ray-tracing diagrams and displacement vector plots. | Drafts in `08_manuscript/`: Methods (`methods_draft.md`, with verified references) and Results + Discussion (`results_discussion_draft.md`). Paper figures 1–6 from `scripts/make_paper_figures.py`. Introduction, Abstract and Conclusions drafted in LaTeX; ray-tracing schematic (Fig. 1, `fig0_schematic`). Still to do: U-Net section. |
-| `[~]` | **Week 15** | Manuscript Writing & Peer Review | • Compile LaTeX source file.<br>• Mathematical proof verification and self-review. | Full draft compiles (`08_manuscript/latex_source/main.tex`, 22 pages): Abstract, Introduction, Data, Method, Validation design (with statistics), Results, Discussion, Conclusions, 7 figures, 5 tables, 20 verified references. Sections 2–6 are generated from the Markdown drafts (`08_manuscript/md_to_latex.py`). Overleaf upload zip: `submission_versions/PyGeoParallax-IN_overleaf.zip`. Still to do: U-Net section, self-review, co-authors. |
-| `[~]` | **Week 16** | Code Packaging & Submission | • Python library packaging.<br>• Release code on GitHub and submit paper to journal. | Package installable (`pyproject.toml`, `pygeoparallax` CLI), public on GitHub with CI; README, API reference and changelog. Releases v0.1.0 (25 Oct 2026) and v0.2.0 (26 Oct 2026). Still to do: paper submission. |
+| `[~]` | **Week 13** | Impact on Deep Learning Segmentation | • Train two comparative U-Net models (Model A vs. Model B).<br>• Evaluate boundary edge precision over test sets. | **Retraining set up, running on Colab.** The group's attention U-Net (4 BT channels TIR1/TIR2/WV/MIR, 128×128 patches, GPM DPR precipitation type) is retrained twice with identical architecture, labels, mask, seed and schedule: Model A on the original 7,279 patches, Model B on the same patches parallax-corrected on their own pixel grid (`build_unet_patches.py`; median shift 4.4 km, TIR1 changed > 1 K on 34 % of pixels). Train 5,082 patches (2018, 2021–2023), test 2,197 (Sep 2023, 2024). Three tasks: four-class, stratiform/convective, rain/no-rain. Package: `pack_unet_dataset.py`, `train_unet_ab.py`, `compare_unet_ab.py`, `colab/unet_ab_colab.ipynb` (~37 h per model on the laptop CPU, so Colab GPU). The 91-scene paired benchmark (`04_corrected_output/paired/`) remains for inference demos. |
+| `[~]` | **Week 14** | Manuscript Structuring & Figure Generation | • Outline manuscript sections.<br>• Render 3D ray-tracing diagrams and displacement vector plots. | Drafts in `08_manuscript/`: Methods (`methods_draft.md`, with verified references) and Results + Discussion (`results_discussion_draft.md`). Paper figures 1–6 from `scripts/make_paper_figures.py` (Fig. 3 now raw offset against applied shift; Fig. 4 with the GPM-navigation state). Introduction, Abstract and Conclusions drafted in LaTeX; ray-tracing schematic (`fig0_schematic`). Reframed on 26 Oct 2026 around the 38-case result (title: the limits of validation against GPM radar). Still to do: U-Net section. |
+| `[~]` | **Week 15** | Manuscript Writing & Peer Review | • Compile LaTeX source file.<br>• Mathematical proof verification and self-review. | Full draft compiles (`08_manuscript/latex_source/main.tex`, 24 pages): 7 figures, 5 tables, 24 verified references. Sections 2–6 are generated from the Markdown drafts (`08_manuscript/md_to_latex.py`). Overleaf upload zip: `submission_versions/PyGeoParallax-IN_overleaf.zip`. Independent self-review done (26 Oct 2026) and its fixes applied. Still to do: U-Net section, novelty search (Scholar/Scopus), Hydro-Estimator ATBD check, co-authors, journal. |
+| `[~]` | **Week 16** | Code Packaging & Submission | • Python library packaging.<br>• Release code on GitHub and submit paper to journal. | Package installable (`pyproject.toml`, `pygeoparallax` CLI), public on GitHub with CI; README, API reference and changelog. Releases v0.1.0 (25 Oct 2026), v0.2.0, v0.2.1 and v0.3.0 (26 Oct 2026), archived on Zenodo (concept DOI 10.5281/zenodo.23666957). Still to do: paper submission. |
 
 ### Work added along the way
 | Status | Work stream | Notes |
 | :---: | :--- | :--- |
 | `[x]` | INSAT navigation check and correction | Coastline matching against Natural Earth; `NavigationCorrection` IDW field with acceptance rules; seasonal (yaw-flip) pattern found. `navigation_check.md`. |
 | `[x]` | GPM slant-beam storm tops | `ingest.gpm.along_beam` places storm tops on the Ku beam (median 1 km, up to 5 km from the surface footprint). |
-| `[x]` | Cell-by-cell core check | `analyze_core_offsets.py`: 69–73 cells in 11 cases; independent of the field correlation. |
+| `[x]` | Cell-by-cell core check | `analyze_core_offsets.py`: 157–167 cells in 27–28 cases; independent of the field correlation. |
 | `[x]` | Same-day navigation near each storm | 57 daytime scans around the case dates. Night matching fails in the monsoon; daytime same-day matches scatter ~9–10 km, so per-case corrections are unreliable. Pooled near-storm correction −0.5 km E, +2.5 km N; with parallax it gives field median 1.8 km (best so far), cells −4.1 km. See `validation_summary.md`. |
-| `[ ]` | More South and Central India cases | Only 2–3 usable each. |
+| `[x]` | More South and Central India cases | Batch 4 (2018–2021): 24 more usable cases; now South 14, Central 15. |
+| `[x]` | Investigation of the invisible parallax | Synthetic test, overlays (`check_parallax_visibility.py`), ISRO DQE reports, GPM-derived navigation (`gpm_navigation.py`). Conclusion: mainly storm structure; navigation alone cannot explain it. |
+| `[ ]` | More Himalaya and Northeast cases | Only 4–5 usable each. |
 
 ---
 
@@ -79,16 +81,16 @@ Computed with `pygeoparallax.geometry.satellite_view_angles` (satellite at 74.0�
 
 ## 🎯 Quantifiable Performance Targets
 
-Measured values are medians over the usable GPM cases (`05_validation/gpm_colocation/all_cases.csv`, 250 km window, parallax correction only).
+Measured values are over the usable GPM cases (`05_validation/statistics/statistics_ynav.json`, 250 km window, parallax correction only; 30 cases valid in every state).
 
 | Evaluation Metric | Baseline (Uncorrected) | Project Target (Corrected) | Current Value (raw → corrected) | Status |
 | :--- | :---: | :---: | :---: | :---: |
-| **INSAT–GPM line-of-sight offset (storm top)** | — | < 3 km | 5.4 → **3.0 km** (10 of 12 improve) | 🟢 Met |
-| **Cross-look offset unchanged** | — | no change | 7.8 → 7.9 km | 🟢 Met |
-| **GPM DPR deep-core IoU** | 0.42 – 0.48 | 0.68 – 0.75 | 0.34 → 0.39 (7 of 13 improve) | 🟠 Below target |
+| **INSAT–GPM line-of-sight offset (storm top)** | — | < 3 km | median absolute 5.1 → 3.8 km (18 of 30 improve, n.s.) | 🟠 Not shown |
+| **Cross-look offset unchanged** | — | no change | median change 0.0 km (−0.2 … +0.2) | 🟢 Met |
+| **GPM DPR deep-core IoU** | 0.42 – 0.48 | 0.68 – 0.75 | 0.34 → 0.39 (7 of 13 improve; 2022–2024 cases) | 🟠 Below target |
 | **GPM storm-top field correlation (r)** | — | — | 0.64 → 0.64 | ⚪ No change |
 | **IMD DWR Core Cross-Correlation** | 0.51 | 0.82 | – | ➖ Dropped (future work) |
-| **Mean Geolocation Shift Distance** | 0.0 km | 4.2 km (Ghats) / 8.6 km (Himalayas) | South 4.2 / Central 7.3 / Himalaya 9.8 / Northeast 10.5 km | 🟢 Matches geometry |
-| **Downstream U-Net Edge Precision** | 0.45 | 0.62 | *TBD* | ⚪ Pending (Week 13) |
+| **Mean Geolocation Shift Distance** | 0.0 km | 4.2 km (Ghats) / 8.6 km (Himalayas) | South 3.9 / Central 7.3 / Himalaya 9.8 / Northeast 10.5 km | 🟢 Matches geometry |
+| **Downstream U-Net Edge Precision** | 0.45 | 0.62 | *TBD* | ⚪ Pending (Colab runs) |
 
-IoU and r change little because a 3–10 km shift is small compared with storm size and because GPM samples only part of each storm; the line-of-sight offset is the more direct measure.
+IoU and r change little because a 3–10 km shift is small compared with storm size and because GPM samples only part of each storm; the line-of-sight offset is the more direct measure, but the field and cell measures disagree by 2–5 km, so GPM cannot verify absolute position to better than about ±3–5 km.

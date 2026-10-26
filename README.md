@@ -7,7 +7,7 @@ PyGeoParallax-IN is a Python-based processing pipeline designed to correct **clo
 
 The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission. Validation against ground-based Doppler Weather Radar from the India Meteorological Department (IMD) is left for future work; the comparison code supports it.
 
-## Status (v0.2.1)
+## Status (v0.3.0)
 
 | Part | State |
 | :--- | :--- |
@@ -20,7 +20,9 @@ The corrected output is validated against spaceborne radar overpasses from the G
 | CLI (`correct`, `batch`, `navigation`) | done |
 | Validation metrics (IoU, correlation, mutual information, sub-cell displacement) | done |
 
-**Validation against GPM** (34 monsoon cases 2022–2024, 14 usable, 4 regions): the correction moves features by the computed amount along the line of sight and lowers the median INSAT–GPM storm-top offset from 5.4 to 3.0 km (10 of 12 cases improve). In monsoon INSAT-3DR data a navigation error of ~3–4 km partly masks the parallax, so correct navigation and parallax together. Details: [validation_summary.md](00_Documentation/validation_summary.md).
+**Validation against GPM** (63 monsoon cases 2018–2024, 38 usable, 4 regions): the correction moves features by the computed amount, only along the line of sight. It reverses the mean storm-scale INSAT–GPM offset (+2.2 → −1.9 km), but the per-case gain is not significant (18 of 30 cases). At convective cores, uncorrected cold cores already sit on the GPM radar cells, and only about 5 % of the computed parallax is visible. A synthetic test confirms the method; navigation alone cannot explain the result (no single shift centres both offset measures). GPM can therefore verify absolute position only to about ±3–5 km. Details: [validation_summary.md](00_Documentation/validation_summary.md).
+
+**U-Net comparison:** scripts to retrain the precipitation-type U-Net on uncorrected (Model A) and parallax-corrected (Model B) patches, with a Colab notebook ([colab/unet_ab_colab.ipynb](colab/unet_ab_colab.ipynb)); results pending.
 
 Speed: 1.8 s per India scene ([benchmark.md](00_Documentation/benchmark.md)). API overview: [api_reference.md](00_Documentation/api_reference.md). Changes: [CHANGELOG.md](CHANGELOG.md).
 
