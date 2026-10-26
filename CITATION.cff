@@ -11,7 +11,7 @@ type: software
 authors:
   - family-names: Bapalli
     given-names: Naveen
-version: 0.2.0
+version: 0.2.1
 date-released: 2026-10-26
 license: MIT
 repository-code: "https://github.com/bapallinaveen60/PyGeoParallax-IN"

@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 (2026-10-26)
+
+Validation statistics, citation metadata (first release archived on Zenodo), a ray-tracing schematic and the LaTeX manuscript. No changes to the correction itself.
 
 ### Added
 - **Validation statistics:** `scripts/validation_statistics.py` (bootstrap intervals, cluster bootstrap for cells, Wilcoxon and sign tests, viewing-angle trend).
