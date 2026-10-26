@@ -120,7 +120,9 @@ Terrain does not affect the storm results but matters for anything observed at t
 
 ### 6.5 Relation to earlier work
 
-Vicente et al. (2002) showed that parallax and orographic corrections matter for satellite rainfall estimates from GOES; our results confirm the size of the effect for INSAT-3DR over India, where the high viewing angles over the Himalaya and the Northeast make it about 10 km for deep convection. The solver follows Bieliński (2020), extended here to terrain and to a navigation correction measured from coastlines. To our knowledge this is the first quantified parallax correction and validation for INSAT-3DR, and the first to show that INSAT-3DR navigation error masks part of the parallax in the monsoon. *(Novelty to be checked against Indian journals and grey literature before submission.)*
+Vicente et al. (2002) showed that parallax and orographic corrections matter for satellite rainfall estimates from GOES; our results confirm the size of the effect for INSAT-3DR over India, where the high viewing angles over the Himalaya and the Northeast make it about 10 km for deep convection. The solver follows Bieliński (2020), extended here to terrain and to a navigation correction measured from coastlines. The GOES Hydro-Estimator has applied the Vicente et al. (2002) correction operationally since 2001, and satpy offers an open-source spherical-Earth correction for gridded geostationary data. To our knowledge, however, no parallax correction or validation has been published for INSAT-3D or INSAT-3DR.
+
+ISRO's data-quality reports already measure INSAT-3DR geolocation error per image against ground control points; for a full-disk L1B image of 19 June 2020 they give a mean error of about 2.6 IR pixels to the north and 1.0 pixel to the west. Our coastline estimate for the 2022–2024 monsoon L1C data is smaller (2.5–5 km to the north) but has the same direction; the products, years and methods differ. What is new here is the multi-year seasonal behaviour of the L1C error and its interaction with the parallax: in the monsoon the two partly cancel, so a parallax-only correction overshoots, and the navigation error cannot be measured for a single day. *(See `00_Documentation/novelty_check.md`; confirm with a Google Scholar / Scopus search before submission.)*
 
 ### 6.6 Limitations
 
@@ -140,4 +142,5 @@ Vicente et al. (2002) showed that parallax and orographic corrections matter for
 
 - Section 5.2: the 7–20 km winter value and the equinox timing come from `navigation_check.md`; cite the yaw-flip sources (ISRO, 2014; IMD SatMet SOP) as in the progress report.
 - Section 6.3: the 1–3 km IR-top vs radar-echo-top difference needs a citation.
+- Section 6.5: cite the MOSDAC DQE report (INSAT-3DR, 19 Jun 2020), the GOES Hydro-Estimator paper and satpy; check whether ISRO's Hydro-Estimator applies a parallax correction.
 - Add Fig. 4 and Table 3 cross-references once the figure numbering is final.
