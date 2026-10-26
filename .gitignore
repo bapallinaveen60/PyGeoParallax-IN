@@ -78,3 +78,9 @@ Thumbs.db
 
 # --- Local sample downloads (never commit) ---
 datasets/
+08_manuscript/latex_source/*.fls
+08_manuscript/latex_source/*.fdb_latexmk
+08_manuscript/latex_source/*.bbl
+08_manuscript/latex_source/*.blg
+08_manuscript/latex_source/*.png
+08_manuscript/submission_versions/*.zip

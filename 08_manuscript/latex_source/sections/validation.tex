@@ -1,0 +1,81 @@
+\section{Validation design}
+\label{sec:validation}
+\label{sec:4}
+
+\subsection{Case selection}\label{sec:4.1}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Coincident overpasses.} For every GPM orbit whose swath centre line crosses a region box between 1 June and 20 September, we estimate when the INSAT-3DR scan reaches that latitude (Section~\ref{sec:2.1}). Crossings within 5 min of an INSAT scan are kept.
+\item
+  \textbf{Convection screening.} Each candidate GPM file is screened for convection before INSAT data are downloaded. The densest convective cluster is found by counting GPM convective footprints in 1° bins and taking all convective footprints within about 150 km of the densest bin. A case needs at least 100 convective footprints in this cluster.
+\item
+  \textbf{Files per case:} the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and the day's 04:15 and 06:15 UTC L1C scans for navigation.
+\end{enumerate}
+
+\subsection{Colocation}\label{sec:4.2}
+
+Each case is processed on a 0.02° grid over its region box. INSAT data are corrected (Section~\ref{sec:3}) and also resampled uncorrected. GPM footprints are assigned to grid cells by nearest neighbour within 3.5 km; storm tops use their slanted-beam positions (Section~\ref{sec:2.2}). Only cells inside the GPM swath are compared. Analysis is limited to within 150 km and 250 km of the centre of the densest convective cluster.
+
+\subsection{Offset measures}\label{sec:4.3}
+
+Because the correction is a displacement, we measure displacements directly, using two independent methods.
+
+\textbf{Field correlation.} We find the shift of the INSAT field that best correlates with the GPM field:
+
+\begin{itemize}
+\tightlist
+\item
+  primary pair: \(-\)BT against GPM storm-top height (both describe storm tops);
+\item
+  secondary pair: \(-\)BT against near-surface reflectivity.
+\end{itemize}
+
+Integer shifts up to ±10 cells (±20 km) are tested, and the best one is refined to a fraction of a cell by fitting a parabola through the correlation at the peak and its two neighbours, separately along each axis.
+
+\textbf{Cell cores.} Each GPM deep-echo cell (connected cells with storm top \textgreater{} 10 km, at least 8 grid cells) is paired with the INSAT cold core within 25 km of its centroid. The cold core is the centroid of pixels within 3 K of the local minimum BT. The case value is the median over its cells. This measure does not depend on the shape or extent of the anvil.
+
+\textbf{Along and across the line of sight.} Each offset is split into a component along the line of sight (positive when INSAT must move towards the satellite to match GPM) and a component across it, using the VAA at the cluster centre. Parallax correction should change only the along-look component. The cross-look component is a control.
+
+\textbf{Overlap scores.} We also report:
+
+\begin{itemize}
+\tightlist
+\item
+  intersection over union (IoU) between INSAT deep cores (BT \textless{} 220 K) and GPM deep echoes (storm top \textgreater{} 8 km);
+\item
+  Pearson correlation and mutual information between cold cloud (BT \textless{} 235 K) and echo (reflectivity \textgreater{} 25 dBZ).
+\end{itemize}
+
+\subsection{Usable cases}\label{sec:4.4}
+
+A case is usable if its convective cluster has at least 100 footprints and at least one field and window gives a reliable match. A match is reliable when the best shift is inside the search range (below 9.5 cells) both before and after correction. Matches at the edge of the search usually mean the two fields describe different parts of the storm.
+
+\subsection{Experiments}\label{sec:4.5}
+
+Each case is run in four states:
+
+\begin{longtable}[]{@{}lll@{}}
+\caption{Correction states.}\label{tab:S}\\
+\toprule\noalign{}
+State & Navigation correction & Parallax correction \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+Raw & no & no \\
+Navigation only & monsoon correction (−0.5 km E, +2.5 km N) & no \\
+Parallax only & no & yes \\
+Navigation + parallax & monsoon correction & yes \\
+\end{longtable}
+
+As a sensitivity test, the navigation states are repeated with the all-India monsoon median (+1.8 km E, +4.8 km N).
+
+To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
+
+\subsection{Sensitivity}\label{sec:4.6}
+
+An error \(\delta h\) in cloud-top height shifts the corrected position by about \(\delta h\tan(\mathrm{VZA})\): about 0.4 km per km of height error at Mumbai and 0.7 km at Agartala. We quantify this with Monte Carlo perturbations of cloud-top height (standard deviation 1 km, 100 members) and with fixed biases of ±1 and ±2 km.
+

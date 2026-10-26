@@ -134,7 +134,7 @@ ISRO's data-quality reports already measure INSAT-3DR geolocation error per imag
 
 ### 6.7 Effect on precipitation-type classification
 
-*To be written after the U-Net comparison (Model A uncorrected vs Model B corrected, on the 96-scene designed test set).*
+*To be written after the U-Net comparison (Model A uncorrected vs Model B corrected, on the designed test set of 91 scenes).*
 
 ---
 

@@ -1,0 +1,63 @@
+% PyGeoParallax-IN manuscript (draft).
+% Compile with pdfLaTeX + BibTeX (Overleaf default). Sections 2-6 are generated from the
+% Markdown drafts by 08_manuscript/md_to_latex.py; edit those drafts or the .tex files here.
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs,longtable,array,calc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[authoryear,round]{natbib}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage{newunicodechar}
+
+% Characters used in the generated sections.
+\newunicodechar{°}{\textdegree}
+\newunicodechar{−}{\ensuremath{-}}
+\newunicodechar{±}{\ensuremath{\pm}}
+\newunicodechar{µ}{\textmu}
+\newunicodechar{≥}{\ensuremath{\geq}}
+\newunicodechar{·}{\ensuremath{\cdot}}
+\newunicodechar{→}{\ensuremath{\rightarrow}}
+
+% Pandoc output helpers.
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcommand{\passthrough}[1]{#1}
+\setlength{\LTcapwidth}{\textwidth}
+
+\title{Parallax and navigation correction of INSAT-3DR imagery over India:\\an open-source tool and validation against GPM radar}
+\author{Naveen Bapalli\thanks{[Affiliation, address, e-mail]}\\[2pt]
+  \small [Co-authors and affiliations to be added]}
+\date{Draft, \today}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+
+\noindent\textbf{Keywords:} parallax correction; INSAT-3DR; geostationary satellite; navigation error; GPM DPR; Indian monsoon; open-source software
+
+\input{sections/introduction}
+\input{sections/data}
+\input{sections/method}
+\input{sections/validation}
+\input{sections/results}
+\input{sections/figures}
+\input{sections/discussion}
+\input{sections/conclusions}
+
+\section*{Code and data availability}
+PyGeoParallax-IN (version 0.2.0, MIT licence) and the scripts and case lists used in this study are available at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN} \citep{pygeoparallax}. INSAT-3DR data are from MOSDAC (\url{https://www.mosdac.gov.in}), GPM 2A Ku data from NASA GES DISC \citep{gpm2aku_v08}, ERA5 from the Copernicus Climate Data Store \citep{c3s2018} and SRTM from OpenTopography.
+
+\section*{Acknowledgements}
+[To be added.]
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

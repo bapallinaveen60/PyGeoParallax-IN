@@ -158,10 +158,7 @@ def fig3_cases():
     ax.set_yticks(range(len(u)), labels, fontsize=8, color=INK2)
     ax.grid(axis="y", visible=False)
     ax.set_xlabel("Line-of-sight offset, GPM minus INSAT [km]  (positive: INSAT must move towards the satellite)")
-    med_b, med_a = np.median(abs(u.top_along250_before)), np.median(abs(u.top_along250_after))
-    ax.set_title(f"Per-case offset before (open) and after (filled) parallax correction\n"
-                 f"median |offset| {med_b:.1f} → {med_a:.1f} km, {(abs(u.top_along250_after) < abs(u.top_along250_before)).sum()} of {len(u)} improve",
-                 loc="left")
+    ax.set_title("Per-case offset before (open) and after (filled) parallax correction", loc="left")
     handles = [plt.Line2D([], [], marker=m, ls="", color=c, mec="white", ms=7, label=n) for n, c, m, _ in REGIONS.values()]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.4, -0.13), fontsize=8, ncol=4)
     save(fig, "fig3_cases")

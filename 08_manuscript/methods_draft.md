@@ -32,6 +32,8 @@ GPM 2A gives each footprint's position at the surface. An echo at height $h$ lie
 
 The study covers the monsoon season (June–September) of 2022, 2023 and 2024. Validation cases come from four regions that span the range of INSAT-3DR viewing angles over India:
 
+**Table R.** Validation regions.
+
 | Region | Box (lat, lon) | Viewing zenith angle |
 | :--- | :--- | :--- |
 | South India (Kerala, Karnataka, Tamil Nadu) | 8–17°N, 74–80.5°E | 9–20° |
@@ -54,7 +56,7 @@ $$
 
 with semi-major axis $a$ and eccentricity $e$. The inverse transform uses three fixed-point iterations on latitude. Both directions agree with pyproj [Snow et al.] to better than 1 mm.
 
-The satellite is at $\mathbf{s} = R_{\mathrm{geo}}(\cos\lambda_s, \sin\lambda_s, 0)$, with $R_{\mathrm{geo}} = 42\,164$ km and $\lambda_s = 74.0°$. The unit line-of-sight vector from the ground to the satellite is $\hat{\mathbf{d}} = (\mathbf{s} - \mathbf{p})/\lVert\mathbf{s} - \mathbf{p}\rVert$. The viewing zenith angle (VZA) is the angle between $\hat{\mathbf{d}}$ and the local vertical; the viewing azimuth angle (VAA) comes from its east and north components. These agree with pyorbital [Raspaud et al., 2018] within 0.01°.
+The satellite is at $\mathbf{s} = R_{\mathrm{geo}}(\cos\lambda_s, \sin\lambda_s, 0)$, with $R_{\mathrm{geo}} = 42\,164$ km and $\lambda_s = 74.0^\circ$. The unit line-of-sight vector from the ground to the satellite is $\hat{\mathbf{d}} = (\mathbf{s} - \mathbf{p})/\lVert\mathbf{s} - \mathbf{p}\rVert$. The viewing zenith angle (VZA) is the angle between $\hat{\mathbf{d}}$ and the local vertical; the viewing azimuth angle (VAA) comes from its east and north components. These agree with pyorbital [Raspaud et al., 2018] within 0.01°.
 
 A cloud at height $h$ appears displaced away from the satellite by approximately
 
@@ -152,7 +154,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 ### 3.7 Implementation
 
-The method is implemented in the open-source Python package `pygeoparallax` (v0.2.0, MIT licence; https://github.com/bapallinaveen60/PyGeoParallax-IN). The solver has a vectorised NumPy reference and a parallel Numba kernel [Lam et al., 2015] with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (52) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
+The method is implemented in the open-source Python package `pygeoparallax` (v0.2.0, MIT licence; https://github.com/bapallinaveen60/PyGeoParallax-IN). The solver has a vectorised NumPy reference and a parallel Numba kernel [Lam et al., 2015] with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (57) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
 
 ---
 
@@ -196,12 +198,16 @@ A case is usable if its convective cluster has at least 100 footprints and at le
 
 Each case is run in four states:
 
+**Table S.** Correction states.
+
 | State | Navigation correction | Parallax correction |
 | :--- | :--- | :--- |
 | Raw | no | no |
-| Navigation only | monsoon median (+1.8 km E, +4.8 km N) | no |
+| Navigation only | monsoon correction (−0.5 km E, +2.5 km N) | no |
 | Parallax only | no | yes |
-| Navigation + parallax | monsoon median | yes |
+| Navigation + parallax | monsoon correction | yes |
+
+As a sensitivity test, the navigation states are repeated with the all-India monsoon median (+1.8 km E, +4.8 km N).
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
 
