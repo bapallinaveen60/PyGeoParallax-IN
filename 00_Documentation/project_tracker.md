@@ -8,8 +8,8 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🔬 Validation done with GPM (Month 3) → moving to Month 4 (U-Net comparison, manuscript)
-*   **Completed Tasks**: 🟢 10 / 16 Weeks done, 🟡 3 partly done (waiting on IMD data, the benchmark set, or release)
-*   **Overall Progress**: `██████████████░░░░░░ 72%` (partly done weeks counted as half)
+*   **Completed Tasks**: 🟢 11 / 16 Weeks done, 🟡 2 partly done (waiting on IMD data, or release)
+*   **Overall Progress**: `██████████████░░░░░░ 75%` (partly done weeks counted as half)
 *   **Next Milestone**: Week 13 - U-Net comparison, uncorrected vs corrected (needs the existing model and its training data)
 *   **Key result so far**: the correction moves features by the computed amount along the line of sight and lowers the median INSAT–GPM offset from 5.4 to 3.0 km (storm top, 10 of 12 cases). In monsoon data a navigation error of ~3–4 km partly masks the parallax, so navigation and parallax are corrected together. See `validation_summary.md`.
 
@@ -33,7 +33,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | `[x]` | **Week 5** | Analytical Ellipsoid Ray-Tracing Solver | • Quadratic ellipsoid solver in `src/geometry/`.<br>• Numba/PyCUDA acceleration (< 2s per full disk frame). | Done: `geometry/parallax.py` (enlarged ellipsoid plus Newton step, < 1 mm; within 25 m of satpy). Numba kernel: **0.5 s per full disk** (numpy ~9 s). |
 | `[x]` | **Week 6** | SRTM Topographic Relief Integration | • Integrate SRTM elevation into projection loop.<br>• Generate local parallax displacement maps (km). | Done: `parallax_correct_terrain` with the SRTM grid (`--dem` in the CLI and case runner). Terrain shift map in `07_figures/paper/fig6_terrain`: ground moves 3–4+ km over the Himalaya and Tibet, 1–2 km over the Northeast hills, < 0.5 km over the Ghats and Deccan. **On the 14 GPM cases terrain changes nothing at the storms** (field and cell offsets identical); in clear sky it moves ground pixels by 1.3–2.5 km (median) up to ~5.8 km in Himalayan scenes, changing 9–19% of cells (Central India: ~0.15 km median, up to 0.65 km). |
 | `[x]` | **Week 7** | BucketResampler & Gridding Strategy | • `BucketResampler` module in `src/resample/`.<br>• Max-CTH occlusion logic and IDW spatial interpolation. | Done: `resample/bucket.py` (highest-wins, IDW fill of small gaps only, `fill_flag` 0/1/2) plus `correct_scene()` (~2 s for a 1M-pixel India scene). `correct=False` gives the uncorrected Model A grid. |
-| `[~]` | **Week 8** | Pipeline Automation & Batch Processing | • End-to-end orchestration pipeline runner script.<br>• Batch execution on 100 benchmark monsoon storm scenes. | **Done:** `pygeoparallax correct` / `batch` / `navigation` CLI (parallel, skips finished scenes, `--nav-correction`); case drivers `run_validation_case.py` and `run_all_cases.py` ran 34 GPM cases end to end. **Still to do:** the 100-scene benchmark set (best built together with the U-Net test set). |
+| `[x]` | **Week 8** | Pipeline Automation & Batch Processing | • End-to-end orchestration pipeline runner script.<br>• Batch execution on 100 benchmark monsoon storm scenes. | Done: `pygeoparallax correct` / `batch` / `navigation` CLI and case drivers. **Benchmark on 148 monsoon scenes** (`scripts/benchmark_scenes.py`, `benchmark.md`): no failures, 1.8 s per scene (median) for read + cloud height + corrected and uncorrected regridding over India, ~450 MB. 98.7 % of cells observed, 1.3 % interpolated, 0.007 % empty; clear cells identical in corrected and uncorrected grids. 14 scenes (11–14 Jun 2023) are partial INSAT scans. |
 
 ### Month 3 — Multi-Sensor Validation & Quantitative Alignment Analysis
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |

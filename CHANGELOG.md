@@ -7,11 +7,13 @@
 - **SRTM:** `read_srtm` (GeoTIFF tiles block-averaged to a coarse grid while reading; damaged parts of a tile are skipped with a warning), `scripts/prepare_srtm.py`, `--dem` in the case driver, `compare_variants.py --variant dem`, and a terrain parallax map (`make_paper_figures.py`, Fig. 6). `rasterio` added to the `dev` extras.
 - **Case scans pinned** in `00_Documentation/events/case_scans.csv`; the file-name fallback now only accepts L1C files from the case date outside navigation time slots (navigation scans from neighbouring days were being picked).
 - **Near-storm navigation:** `scripts/near_storm_navigation.py` measures daytime coastline offsets around each case date and writes per-case and pooled corrections; `analyze_core_offsets.py --nav-tag` selects which navigation runs to analyse.
+- **Benchmark:** `scripts/benchmark_scenes.py` (148 scenes: 1.8 s per scene, no failures; `00_Documentation/benchmark.md`). A test checks that clear cells are identical in corrected and uncorrected grids.
 - **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6).
 
 ### Findings
 - ERA5 instead of the AFGL standard atmosphere changes cold-core heights by −0.15 km and the INSAT–GPM offsets by under 0.5 km; the overshoot is not a profile error.
 - Navigation near the storms: night matching fails in the monsoon and same-day daytime matches scatter ~9–10 km, so per-case corrections are unreliable. The pooled near-storm correction (−0.5 km E, +2.5 km N) with parallax gives the closest field agreement so far (median 1.8 km over 12 cases); cells −4.1 km.
+- INSAT-3DR L1C scenes of 11–14 June 2023 are partial scans (up to 57 % fill values).
 - Terrain-aware correction leaves the storm results unchanged (cloud tops are far above the ground) but moves clear-sky ground in Himalayan scenes by 1.3–2.5 km (median), up to ~5.8 km.
 
 ## 0.1.0 (2026-10-25)

@@ -113,3 +113,18 @@ def test_terrain_scene_flags_and_clear_sky_shift():
     clear = np.isnan(cor["cth"].values) & (cor["fill_flag"].values == OBSERVED)
     # Clear sky over a 4 km plateau at Shimla moves ~3 km.
     assert np.nanmedian(cor["shift_km"].values[clear]) == pytest.approx(2.9, abs=0.3)
+
+
+def test_clear_pixels_identical_with_and_without_correction():
+    # Without a DEM, clear pixels do not move: the corrected and uncorrected grids must agree
+    # exactly in clear sky (the U-Net comparison relies on it), even for pixels on cell edges.
+    grid = Grid(20.0, 22.0, 80.0, 82.0, res=0.04)
+    lat, lon = np.meshgrid(np.arange(20.04, 21.97, 0.04), np.arange(80.04, 81.97, 0.04), indexing="ij")
+    bt = 280.0 + np.random.default_rng(0).normal(size=lat.shape)
+    cth = np.full(lat.shape, np.nan)
+    cth[10:14, 10:14] = 12000.0
+    cor = correct_scene(lat, lon, {"TIR1": bt}, cth, grid=grid)
+    raw = correct_scene(lat, lon, {"TIR1": bt}, cth, grid=grid, correct=False)
+    clear = np.isnan(raw["cth"].values) & np.isnan(cor["cth"].values) & (raw["fill_flag"].values == 0) & (cor["fill_flag"].values == 0)
+    assert clear.sum() > 1000
+    np.testing.assert_array_equal(cor["TIR1"].values[clear], raw["TIR1"].values[clear])
