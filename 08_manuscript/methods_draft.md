@@ -148,7 +148,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 **Correction field.** Accepted window offsets are spread over the scene by inverse-distance weighting (power 2, great-circle distance, minimum distance 1 km). The north component uses only windows that measured it. The resulting east and north offsets are added to each pixel's position before cloud-top height and parallax correction.
 
-**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the satellite's yaw flip. For the monsoon we use the median of all accepted measurements, +1.8 km east and +4.8 km north. A same-day correction was possible on 5 of 7 tested monsoon days.
+**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the satellite's yaw flip. During the monsoon the error is small and cannot be measured reliably for a single day: night-time matching fails because land and sea have nearly the same TIR1 temperature, and daytime matches from scans 1–2 h apart scatter by about 9–10 km. We therefore apply one monsoon correction, the median of daytime matches near the validation storms (36 matches with r ≥ 0.7 within ±25 km): −0.5 km east and +2.5 km north, uncertain by about ±2 km. (The median of all monsoon measurements across India, +1.8 km east and +4.8 km north, is used as a sensitivity test.)
 
 ### 3.7 Implementation
 

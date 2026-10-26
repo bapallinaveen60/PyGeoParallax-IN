@@ -57,7 +57,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | `[x]` | INSAT navigation check and correction | Coastline matching against Natural Earth; `NavigationCorrection` IDW field with acceptance rules; seasonal (yaw-flip) pattern found. `navigation_check.md`. |
 | `[x]` | GPM slant-beam storm tops | `ingest.gpm.along_beam` places storm tops on the Ku beam (median 1 km, up to 5 km from the surface footprint). |
 | `[x]` | Cell-by-cell core check | `analyze_core_offsets.py`: 69–73 cells in 11 cases; independent of the field correlation. |
-| `[ ]` | Same-day navigation near each storm | Main remaining uncertainty (±3–4 km); needs east–west coastlines on monsoon break days. |
+| `[x]` | Same-day navigation near each storm | 57 daytime scans around the case dates. Night matching fails in the monsoon; daytime same-day matches scatter ~9–10 km, so per-case corrections are unreliable. Pooled near-storm correction −0.5 km E, +2.5 km N; with parallax it gives field median 1.8 km (best so far), cells −4.1 km. See `validation_summary.md`. |
 | `[ ]` | More South and Central India cases | Only 2–3 usable each. |
 
 ---

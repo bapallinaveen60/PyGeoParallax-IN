@@ -135,6 +135,25 @@ Terrain-aware correction (SRTM block-averaged to 0.01°; `scripts/prepare_srtm.p
 
 Case scans are pinned in `00_Documentation/events/case_scans.csv`. Case folders now also hold navigation scans from neighbouring days, and a file-name rule alone picked a wrong scan for two cases without a CTP file.
 
+## Navigation near the storms
+
+Coastline matching was repeated on 57 extra daytime scans (case day 03:15–08:15 UTC, and the days before and after), in the four coastal windows nearest each case region (`scripts/near_storm_navigation.py`; all matches in `05_validation/nav_corrections/near_storm_matches.csv`).
+
+- **Night scans do not work in the monsoon:** land and sea have nearly the same TIR1 temperature (r < 0.4 or search-edge matches on every night case scan). Only VIS matches are usable.
+- **Per-case corrections are not reliable.** Of 199 daytime matches, 73 have r ≥ 0.6 and are not at the search edge, but the same coast in scans 1–2 h apart differs by ~9–10 km (robust spread), and the best correlation is typically only 0.01–0.05 above the unshifted one. Per-case medians correlate weakly with each case's leftover offset (r = 0.22 field, 0.26 cells) and do not reduce it.
+- **Pooled, the near-storm matches give a smaller error than the monsoon median:** −0.5 km E, +2.5 km N (36 matches with r ≥ 0.7, not at the edge, |offset| ≤ 25 km), against +1.8 km E, +4.8 km N.
+
+Re-running all cases with the pooled near-storm correction (`near_storm_pooled.json`, runs `<case>_pnav`):
+
+| State | Field mean [km] | Field median absolute [km] | Improved vs raw | Cells median [km] |
+| :--- | ---: | ---: | ---: | ---: |
+| Raw | +4.3 | 5.5 | – | −0.1 |
+| Parallax only | −0.9 | 3.1 | 10 of 12 | −5.7 |
+| Monsoon navigation + parallax | +3.8 | 4.7 | 6 of 12 | −3.3 |
+| **Near-storm navigation + parallax** | **+1.0** | **1.8** | 7 of 12 | −4.1 |
+
+The near-storm correction with parallax gives the closest field agreement so far (median 1.8 km), while the cell measure moves from −5.7 to −4.1 km. The steady 4–5 km gap between the two measures remains; it comes from what each measures (anvil vs coldest tops), not from navigation. **The monsoon navigation error is 2.5–5 km north, uncertain by about ±2 km, and cannot be fixed per day from coastlines.** Navigation therefore explains roughly 1.5–3 km of the cell overshoot, BT heights 1–2 km, and the rest is the field-vs-cell definition.
+
 ## For the paper
 
 1. **Geometry verified:** pyproj, pyorbital and satpy agree. The correction moves features by the computed amount along the line of sight and leaves the cross-look offset unchanged, in every field, window and metric.
@@ -144,5 +163,5 @@ Case scans are pinned in `00_Documentation/events/case_scans.csv`. Case folders 
 
 ## Next
 
-- **Same-day navigation near each storm:** east–west coastlines on monsoon break days, the main remaining uncertainty.
+- **Navigation for the paper:** use the pooled near-storm correction (−0.5 km E, +2.5 km N) as the monsoon default and quote ±2 km; same-day corrections are not reliable in monsoon cloud.
 - **More South and Central India cases** (only 2–3 usable each).

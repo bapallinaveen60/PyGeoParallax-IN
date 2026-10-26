@@ -83,6 +83,8 @@ def main(argv=None):
     ap.add_argument("--search", type=float, default=25.0, help="km around each GPM cell to look for the cold core")
     ap.add_argument("--min-cells", type=int, default=8, help="smallest deep-echo cell, in 0.02 deg grid cells")
     ap.add_argument("--suffix", default="", help="case-name suffix of the runs to analyse, e.g. _era5")
+    ap.add_argument("--nav-tag", default="mnav",
+                    help="navigation runs to use for the nav states: <case><suffix>_<tag>_nav_*.nc (default mnav)")
     args = ap.parse_args(argv)
 
     table = pd.read_csv("05_validation/gpm_colocation/all_cases.csv")
@@ -105,7 +107,7 @@ def main(argv=None):
         raw_cth = grids["uncorrected"]["cth"].values
         # With the monsoon navigation correction (from test_navigation_parallax.py), if available.
         for k, src in (("nav_only", "uncorrected"), ("nav_parallax", "corrected")):
-            f = Path("04_corrected_output/netcdf") / f"{case}{args.suffix}_mnav_nav_{src}.nc"
+            f = Path("04_corrected_output/netcdf") / f"{case}{args.suffix}_{args.nav_tag}_nav_{src}.nc"
             if f.exists():
                 bts[k] = xr.open_dataset(f)["TIR1"].values
         per = {k: [] for k in bts}
@@ -143,9 +145,10 @@ def main(argv=None):
               + "  ".join(f"{k} {row.get(k + '_along_median', float('nan')):+6.1f}" for k in per), flush=True)
 
     out = Path("05_validation/gpm_colocation")
-    pd.DataFrame(rows).to_csv(out / f"core_offsets{args.suffix}.csv", index=False)
-    pd.DataFrame(cells_out).to_csv(out / f"core_offsets{args.suffix}_cells.csv", index=False)
-    print(f"wrote {out}/core_offsets{args.suffix}.csv and core_offsets{args.suffix}_cells.csv")
+    tag = args.suffix + ("" if args.nav_tag == "mnav" else f"_{args.nav_tag}")
+    pd.DataFrame(rows).to_csv(out / f"core_offsets{tag}.csv", index=False)
+    pd.DataFrame(cells_out).to_csv(out / f"core_offsets{tag}_cells.csv", index=False)
+    print(f"wrote {out}/core_offsets{tag}.csv and core_offsets{tag}_cells.csv")
 
 
 if __name__ == "__main__":
