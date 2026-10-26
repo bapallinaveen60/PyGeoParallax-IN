@@ -1,6 +1,7 @@
 # PyGeoParallax-IN
 
 [![tests](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml/badge.svg)](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23666957.svg)](https://doi.org/10.5281/zenodo.23666957)
 
 PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. It estimates cloud-top heights, traces each pixel's line of sight back to the cloud top on the WGS84 ellipsoid, and regrids the scene at the corrected positions. Optional terrain heights (DEM) and a coastline-based navigation correction are applied in the same pass.
 

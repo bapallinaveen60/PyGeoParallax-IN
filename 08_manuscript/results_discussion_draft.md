@@ -1,6 +1,6 @@
 # Results and Discussion (draft)
 
-*Draft of 26 Oct 2026, following `methods_draft.md` (Sections 2–4). Figures are `07_figures/paper/fig1`–`fig6`; citations as in the Methods reference list. All numbers come from `05_validation/` and match `pygeoparallax` v0.2.0. Offsets are GPM minus INSAT along the line of sight; positive means INSAT must move towards the satellite to match GPM.*
+*Draft of 26 Oct 2026, following `methods_draft.md` (Sections 2–4). Figures are `07_figures/paper/fig1`–`fig6`; citations as in the Methods reference list. All numbers come from `05_validation/` and match `pygeoparallax` v0.2.1. Offsets are GPM minus INSAT along the line of sight; positive means INSAT must move towards the satellite to match GPM.*
 
 ---
 

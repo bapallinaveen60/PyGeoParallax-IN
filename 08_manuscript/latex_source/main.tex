@@ -29,6 +29,7 @@
 % Pandoc output helpers.
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \newcommand{\passthrough}[1]{#1}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{doi:#1}}
 \setlength{\LTcapwidth}{\textwidth}
 
 \title{Parallax and navigation correction of INSAT-3DR imagery over India:\\an open-source tool and validation against GPM radar}
@@ -54,7 +55,7 @@
 \input{sections/conclusions}
 
 \section*{Code and data availability}
-PyGeoParallax-IN (version 0.2.0, MIT licence) and the scripts and case lists used in this study are available at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN} \citep{pygeoparallax}. INSAT-3DR data are from MOSDAC (\url{https://www.mosdac.gov.in}), GPM 2A Ku data from NASA GES DISC \citep{gpm2aku_v08}, ERA5 from the Copernicus Climate Data Store \citep{c3s2018} and SRTM from OpenTopography.
+PyGeoParallax-IN (version 0.2.1, MIT licence) and the scripts and case lists used in this study are archived on Zenodo, \doi{10.5281/zenodo.23666958} \citep{pygeoparallax}; the concept DOI \doi{10.5281/zenodo.23666957} always resolves to the latest version. Development continues at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}. INSAT-3DR data are from MOSDAC (\url{https://www.mosdac.gov.in}), GPM 2A Ku data from NASA GES DISC \citep{gpm2aku_v08}, ERA5 from the Copernicus Climate Data Store \citep{c3s2018} and SRTM from OpenTopography.
 
 \section*{Acknowledgements}
 [To be added.]
