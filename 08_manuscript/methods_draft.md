@@ -30,14 +30,14 @@ GPM 2A gives each footprint's position at the surface. An echo at height $h$ lie
 
 ### 2.4 Study period and regions
 
-The study covers the monsoon season (June–September) of 2022, 2023 and 2024. Validation cases come from four regions that span the range of INSAT-3DR viewing angles over India:
+Validation cases come from the monsoon seasons (June–September) of 2018–2024, in four regions that span the range of INSAT-3DR viewing angles over India. The navigation series (Section 3.6) covers March 2022 to December 2024.
 
 **Table R.** Validation regions.
 
 | Region | Box (lat, lon) | Viewing zenith angle |
 | :--- | :--- | :--- |
 | South India (Kerala, Karnataka, Tamil Nadu) | 8–17°N, 74–80.5°E | 9–20° |
-| Central India (Madhya Pradesh, Chhattisgarh) | 19–26°N, 76–85°E | 21–30° |
+| Central India (Madhya Pradesh, Chhattisgarh) | 19–26°N, 76–85°E | 22–33° |
 | Himalaya (Uttarakhand, Himachal, Nepal) | 27–33°N, 75–89°E | 31–38° |
 | Northeast India and Bangladesh | 22–29°N, 89–97°E | 33–37° |
 
@@ -73,7 +73,7 @@ Cloud-top height is estimated per pixel from TIR1 brightness temperature. For an
 1. **Cloud mask.** A pixel is cloudy if its BT is more than 8 K below the ISRO clear-sky BT, sampled to the pixel by nearest neighbour. Where no clear-sky BT is available, a pixel is cloudy if BT < 270 K. Clear pixels get no height and are not moved.
 2. **Height lookup.** BT is interpolated linearly in the AFGL tropical profile between the surface and the cold-point tropopause (17 km, 194.8 K). BT colder than the tropopause minimum, as in overshooting tops, is assigned the tropopause height.
 
-As an alternative, ERA5 profiles are interpolated bilinearly to each pixel, with geopotential converted to geometric height. The lookup then runs downwards from each column's cold-point tropopause (searched up to 70 hPa), so low-level inversions cannot capture high clouds. On the 14 validation cases, ERA5 changes cold-core heights by −0.15 km (median) and the INSAT–GPM offsets by under 0.5 km relative to the standard atmosphere.
+As an alternative, ERA5 profiles are interpolated bilinearly to each pixel, with geopotential converted to geometric height. The lookup then runs downwards from each column's cold-point tropopause (searched up to 70 hPa), so low-level inversions cannot capture high clouds. On the first 14 validation cases (2022–2024), ERA5 changes cold-core heights by −0.15 km (median) and the INSAT–GPM offsets by under 0.5 km relative to the standard atmosphere.
 
 Profile heights are above mean sea level. We treat them as ellipsoidal heights. The difference (the geoid undulation, −50 to −100 m over India) changes the shift by less than 1%.
 
@@ -115,7 +115,7 @@ Ellipsoid-navigated data misplace not only clouds but also elevated ground: over
 
 The ground height must be taken at the corrected position, which is not known in advance. We solve this by fixed-point iteration (three steps): look up the ground at the current position, correct, and repeat. The iteration converges where the terrain is less steep than the line of sight, which holds for VZA below about 70°.
 
-With SRTM over India, the ground shift reaches 3–4 km over the Himalaya and the Tibetan Plateau, 1–2 km over the Northeast hills and under 0.5 km over the Western Ghats and Deccan. Cloud tops are far above the ground, so terrain changes the position of storm cores negligibly; in the 14 validation cases the offsets with and without terrain are identical to 0.1 km. In clear sky, ground pixels in Himalayan scenes move by 1.3–2.5 km (median), up to about 6 km.
+With SRTM over India, the ground shift reaches 3–4 km over the Himalaya and the Tibetan Plateau, 1–2 km over the Northeast hills and under 0.5 km over the Western Ghats and Deccan. Cloud tops are far above the ground, so terrain changes the position of storm cores negligibly; in the first 14 validation cases the offsets with and without terrain are identical to 0.1 km. In clear sky, ground pixels in Himalayan scenes move by 1.3–2.5 km (median), up to about 6 km.
 
 ### 3.5 Resampling onto a regular grid
 
@@ -150,7 +150,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 **Correction field.** Accepted window offsets are spread over the scene by inverse-distance weighting (power 2, great-circle distance, minimum distance 1 km). The north component uses only windows that measured it. The resulting east and north offsets are added to each pixel's position before cloud-top height and parallax correction.
 
-**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the satellite's yaw flip. During the monsoon the error is small and cannot be measured reliably for a single day: night-time matching fails because land and sea have nearly the same TIR1 temperature, and daytime matches from scans 1–2 h apart scatter by about 9–10 km. We therefore apply one monsoon correction, the median of daytime matches near the validation storms (36 matches with r ≥ 0.7 within ±25 km): −0.5 km east and +2.5 km north, uncertain by about ±2 km. (The median of all monsoon measurements across India, +1.8 km east and +4.8 km north, is used as a sensitivity test.)
+**Seasonal behaviour.** Measurements from March 2022 to December 2024 show two states. From late September to mid-March, positions need a 7–20 km westward correction. From mid-April to September the error is small. The switch near the equinoxes is consistent with the satellite's yaw flip. During the monsoon the error is small and cannot be measured reliably for a single day: night-time matching fails because land and sea have nearly the same TIR1 temperature, and daytime matches from scans 1–2 h apart scatter by about 9–10 km. We therefore apply one correction per monsoon: the median of that year's daytime matches near the validation storms (r ≥ 0.7, not at the search edge, both components within 25 km). The values are small, −2.0 to +3.0 km east and −0.8 to +2.5 km north. A year with fewer than 8 such matches (2018, with 2) uses the value pooled over all years, +0.5 km east and +1.5 km north. The north component is uncertain by several kilometres: different coasts give −2.5 to +8.8 km.
 
 ### 3.7 Implementation
 
@@ -164,7 +164,9 @@ The method is implemented in the open-source Python package `pygeoparallax` (v0.
 
 1. **Coincident overpasses.** For every GPM orbit whose swath centre line crosses a region box between 1 June and 20 September, we estimate when the INSAT-3DR scan reaches that latitude (Section 2.1). Crossings within 5 min of an INSAT scan are kept.
 2. **Convection screening.** Each candidate GPM file is screened for convection before INSAT data are downloaded. The densest convective cluster is found by counting GPM convective footprints in 1° bins and taking all convective footprints within about 150 km of the densest bin. A case needs at least 100 convective footprints in this cluster.
-3. **Files per case:** the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and the day's 04:15 and 06:15 UTC L1C scans for navigation.
+3. **Files per case:** the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and daytime L1C scans of the case day and the days before and after for navigation.
+
+Cases were selected in two rounds: 2022–2024 for all four regions, then 2018–2021 for South and Central India, where the first round had few usable cases. In total 63 cases were processed.
 
 ### 4.2 Colocation
 
@@ -203,11 +205,14 @@ Each case is run in four states:
 | State | Navigation correction | Parallax correction |
 | :--- | :--- | :--- |
 | Raw | no | no |
-| Navigation only | monsoon correction (−0.5 km E, +2.5 km N) | no |
+| Navigation only | per-year monsoon correction (Section 3.6) | no |
 | Parallax only | no | yes |
-| Navigation + parallax | monsoon correction | yes |
+| Navigation + parallax | per-year monsoon correction | yes |
 
-As a sensitivity test, the navigation states are repeated with the all-India monsoon median (+1.8 km E, +4.8 km N).
+Two further tests address the residual offset:
+
+- **Navigation from GPM.** If the residual cell offset after parallax correction were a navigation error, a navigation correction fitted to it should improve both offset measures. For each case we take the median cell offset (converted to east and north) of all *other* cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
+- **Synthetic storm.** A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
 

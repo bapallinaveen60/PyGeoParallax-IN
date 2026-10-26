@@ -141,26 +141,34 @@ def fig2_navigation():
 
 
 def fig3_cases():
+    """Uncorrected offset against the parallax the correction applies: how much of it does GPM see?"""
     t = pd.read_csv(VAL / "all_cases.csv")
-    u = t[(t.nav == "no_nav") & t.status.str.startswith("usable") & (t.top_valid250 == True)].copy()  # noqa: E712
-    u["region"] = u.case.str.split("_").str[0]
-    u = u.sort_values("vza").reset_index(drop=True)
-    fig, ax = plt.subplots(figsize=(6.4, 0.32 * len(u) + 1.4))
-    ax.axvline(0, color=INK2, lw=0.9)
-    for i, r in u.iterrows():
-        name, color, marker, _ = REGIONS[r.region]
-        ax.annotate("", xy=(r.top_along250_after, i), xytext=(r.top_along250_before, i),
-                    arrowprops={"arrowstyle": "-|>", "color": MUTED, "lw": 1.0, "shrinkA": 4, "shrinkB": 4})
-        ax.scatter(r.top_along250_before, i, s=40, marker=marker, facecolor="white", edgecolor=color, lw=1.5, zorder=3)
-        ax.scatter(r.top_along250_after, i, s=40, marker=marker, color=color, ec="white", lw=0.8, zorder=3)
-    labels = [f"{REGIONS[r.region][0]}  {datetime.strptime(r.case.split('_')[1], '%Y%m%d'):%d %b %Y}  ({r.vza:.0f}°)"
-              for r in u.itertuples()]
-    ax.set_yticks(range(len(u)), labels, fontsize=8, color=INK2)
-    ax.grid(axis="y", visible=False)
-    ax.set_xlabel("Line-of-sight offset, GPM minus INSAT [km]  (positive: INSAT must move towards the satellite)")
-    ax.set_title("Per-case offset before (open) and after (filled) parallax correction", loc="left")
-    handles = [plt.Line2D([], [], marker=m, ls="", color=c, mec="white", ms=7, label=n) for n, c, m, _ in REGIONS.values()]
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.4, -0.13), fontsize=8, ncol=4)
+    u = t[(t.nav == "no_nav") & t.status.str.startswith("usable")].set_index("case")
+    cells = pd.read_csv(VAL / "core_offsets_cells.csv")
+    raw_cells = cells[cells.kind == "uncorrected"].groupby("case").along_km.median()
+    field = u[u.top_valid250 == True].top_along250_before  # noqa: E712
+    panels = [(field, "(a) Storm-top field (250 km)"), (raw_cells, "(b) Deep-echo cells (case median)")]
+    fig, axes = plt.subplots(1, 2, figsize=(8.6, 4.0), sharey=True)
+    for ax, (off, title) in zip(axes, panels):
+        d = pd.DataFrame({"shift": u.deep_shift_km, "off": off}).dropna()
+        d["region"] = d.index.str.split("_").str[0]
+        ax.plot([0, 13], [0, 13], color=INK2, lw=1.0, ls="--")
+        ax.text(12.6, 11.4, "parallax fully\nvisible", ha="right", fontsize=7, color=INK2)
+        ax.axhline(0, color=MUTED, lw=0.8)
+        for key, (name, color, marker, _) in REGIONS.items():
+            r = d[d.region == key]
+            ax.scatter(r["shift"], r.off, s=30, marker=marker, color=color, ec="white", lw=0.7,
+                       label=f"{name} ({len(r)})", zorder=3)
+        k = np.polyfit(d["shift"], d.off, 1)
+        x = np.array([d["shift"].min(), d["shift"].max()])
+        ax.plot(x, np.polyval(k, x), color="#eb6834", lw=1.4)
+        ax.set_title(f"{title}\n{len(d)} cases, median {d.off.median():+.1f} km, fitted slope {k[0]:+.2f}",
+                     loc="left", fontsize=9)
+        ax.set_xlim(0, 13)
+        ax.set_xlabel("Shift applied to deep cores (BT < 220 K) [km]")
+    axes[0].set_ylabel("Uncorrected offset along the line of sight [km]\n(positive: INSAT must move towards the satellite)")
+    axes[0].set_ylim(-16, 18)
+    axes[1].legend(loc="lower right", fontsize=7)
     save(fig, "fig3_cases")
 
 
@@ -174,14 +182,14 @@ def field_offsets(rad=250):
     t = pd.read_csv(VAL / "all_cases.csv")
     rows = []
     for case in t[(t.nav == "no_nav") & t.status.str.startswith("usable")].case:
-        files = {s: VAL / f"{case}{s}.json" for s in ("", "_mnav", "_ynav")}
+        files = {s: VAL / f"{case}{s}.json" for s in ("", "_mnav", "_ynav", "_gnav")}
         if not all(f.exists() for f in files.values()):
             continue
         runs = {s: json.loads(f.read_text()) for s, f in files.items()}
         near = {s: r["runs"]["no_nav" if s == "" else "nav"][f"near_{rad}km"] for s, r in runs.items()}
         st = {"raw": near[""]["uncorrected"], "parallax": near[""]["corrected"],
               "nav_near": near["_ynav"]["uncorrected"], "both_near": near["_ynav"]["corrected"],
-              "both_monsoon": near["_mnav"]["corrected"]}
+              "both_monsoon": near["_mnav"]["corrected"], "both_gpm": near["_gnav"]["corrected"]}
         st = {k: v["top"] for k, v in st.items()}
         if all(max(abs(x) for x in v["lag_cells_s_e"]) < 9.5 for v in st.values()):
             _, vaa = satellite_view_angles(*runs[""]["gpm_convection_centre"], SAT_LON)
@@ -192,13 +200,13 @@ def field_offsets(rad=250):
 def fig4_states():
     base = pd.read_csv(VAL / "core_offsets_cells.csv")
     near = pd.read_csv(VAL / "core_offsets_ynav_cells.csv")
+    gpm = pd.read_csv(VAL / "core_offsets_gnav_cells.csv")
     field = field_offsets()
     # (cell table, cell kind, field column, label)
     states = [(base, "uncorrected", "raw", "Raw"),
-              (near, "nav_only", "nav_near", "Navigation\nonly"),
               (base, "corrected", "parallax", "Parallax\nonly"),
-              (near, "nav_parallax", "both_near", "Navigation\n+ parallax"),
-              (base, "nav_parallax", "both_monsoon", "All-India nav.\n+ parallax")]
+              (near, "nav_parallax", "both_near", "Coastline nav.\n+ parallax"),
+              (gpm, "nav_parallax", "both_gpm", "GPM nav.\n+ parallax")]
     n = len(states)
     fig, ax = plt.subplots(figsize=(7.0, 3.9))
     ax.axhline(0, color=INK2, lw=0.9)
@@ -218,8 +226,8 @@ def fig4_states():
                plt.Line2D([], [], marker="D", ls="", color="#eb6834", mec="white", ms=6, label=f"Field correlation, mean of {len(field)} cases")]
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.2), fontsize=8, ncol=2)
     ax.set_xlim(-0.8, n - 0.4)
-    ax.set_title("Offsets by correction state. Navigation: pooled monsoon value of each year;\n"
-                 "shaded: all-India monsoon median (+1.8 km E, +4.8 km N)", loc="left", fontsize=9)
+    ax.set_title("Offsets by correction state. Coastline navigation: pooled monsoon value of each year;\n"
+                 "shaded: navigation fitted to the GPM cells of the other cases (leave one out)", loc="left", fontsize=9)
     save(fig, "fig4_states")
 
 

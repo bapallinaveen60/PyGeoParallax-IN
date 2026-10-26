@@ -12,8 +12,10 @@
 \item
   \textbf{Convection screening.} Each candidate GPM file is screened for convection before INSAT data are downloaded. The densest convective cluster is found by counting GPM convective footprints in 1° bins and taking all convective footprints within about 150 km of the densest bin. A case needs at least 100 convective footprints in this cluster.
 \item
-  \textbf{Files per case:} the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and the day's 04:15 and 06:15 UTC L1C scans for navigation.
+  \textbf{Files per case:} the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and daytime L1C scans of the case day and the days before and after for navigation.
 \end{enumerate}
+
+Cases were selected in two rounds: 2022--2024 for all four regions, then 2018--2021 for South and Central India, where the first round had few usable cases. In total 63 cases were processed.
 
 \subsection{Colocation}\label{sec:4.2}
 
@@ -66,12 +68,20 @@ State & Navigation correction & Parallax correction \\*
 \bottomrule\noalign{}
 \endlastfoot
 Raw & no & no \\*
-Navigation only & monsoon correction (−0.5 km E, +2.5 km N) & no \\*
+Navigation only & per-year monsoon correction (Section~\ref{sec:3.6}) & no \\*
 Parallax only & no & yes \\*
-Navigation + parallax & monsoon correction & yes \\*
+Navigation + parallax & per-year monsoon correction & yes \\*
 \end{longtable}
 
-As a sensitivity test, the navigation states are repeated with the all-India monsoon median (+1.8 km E, +4.8 km N).
+Two further tests address the residual offset:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Navigation from GPM.} If the residual cell offset after parallax correction were a navigation error, a navigation correction fitted to it should improve both offset measures. For each case we take the median cell offset (converted to east and north) of all \emph{other} cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
+\item
+  \textbf{Synthetic storm.} A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
+\end{itemize}
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
 
