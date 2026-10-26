@@ -1,6 +1,6 @@
 # Project Index: PyGeoParallax-IN
 
-This index acts as a reference for the directory structure and processing pipeline of the `PyGeoParallax-IN` project. The project focuses on correcting cloud parallax errors in INSAT-3DR satellite observations over India using Cloud-Top Height (CTH) datasets, ERA5 atmospheric reanalysis, GPM-DPR satellite radar overpasses, and IMD Doppler Weather Radar (DWR) grids.
+This index acts as a reference for the directory structure and processing pipeline of the `PyGeoParallax-IN` project. The project focuses on correcting cloud parallax errors in INSAT-3DR satellite observations over India using Cloud-Top Height (CTH) datasets, ERA5 atmospheric reanalysis, and GPM-DPR satellite radar overpasses. IMD Doppler Weather Radar (DWR) validation is future work; its folders are kept for it.
 
 ---
 

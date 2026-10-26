@@ -4,7 +4,7 @@
 
 PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. It estimates cloud-top heights, traces each pixel's line of sight back to the cloud top on the WGS84 ellipsoid, and regrids the scene at the corrected positions. Optional terrain heights (DEM) and a coastline-based navigation correction are applied in the same pass.
 
-The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission, and later against ground-based Doppler Weather Radar (DWR) from the India Meteorological Department (IMD).
+The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission. Validation against ground-based Doppler Weather Radar from the India Meteorological Department (IMD) is left for future work; the comparison code supports it.
 
 ## Status (v0.2.0)
 
@@ -132,7 +132,7 @@ PyGeoParallax-IN/
 1. **Ingest Raw Data**: Standardize datasets to the 0.04-degree grid using the ingest scripts under `src/pygeoparallax/ingest/`.
 2. **Compute Geometry & Fallbacks**: Calculate satellite viewing angles and perform ERA5 vertical interpolation for missing cloud heights under `src/pygeoparallax/geometry/`.
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
-4. **Validation & Assessment**: Evaluate corrected outputs against IMD DWR and GPM radar overpasses using validation modules.
+4. **Validation & Assessment**: Evaluate corrected outputs against GPM radar overpasses (and, in future, IMD ground radar) using the validation modules.
 
 ### Quick example: one INSAT-3DR L1C file
 

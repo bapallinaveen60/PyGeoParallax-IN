@@ -8,12 +8,12 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 
 ## 📈 Overall Project Health
 *   **Current Phase**: 🔬 Validation done with GPM (Month 3) → moving to Month 4 (U-Net comparison, manuscript)
-*   **Completed Tasks**: 🟢 11 / 16 Weeks done, 🟡 2 partly done (waiting on IMD data, or release)
-*   **Overall Progress**: `██████████████░░░░░░ 75%` (partly done weeks counted as half)
+*   **Completed Tasks**: 🟢 11 / 15 Weeks done, 🟡 1 partly done (paper submission); Week 10 (IMD ground radar) dropped from scope
+*   **Overall Progress**: `███████████████░░░░░ 77%` (of the 15 weeks in scope; partly done weeks counted as half)
 *   **Next Milestone**: Week 13 - U-Net comparison, uncorrected vs corrected (needs the existing model and its training data)
-*   **Key result so far**: the correction moves features by the computed amount along the line of sight and lowers the median INSAT–GPM offset from 5.4 to 3.0 km (storm top, 10 of 12 cases). In monsoon data a navigation error of ~3–4 km partly masks the parallax, so navigation and parallax are corrected together. See `validation_summary.md`.
+*   **Key result so far**: the correction moves features by the computed amount along the line of sight. Against GPM (12 cases), the median INSAT–GPM storm-top offset falls from 5.5 km to 3.1 km with parallax correction and to 1.8 km with the monsoon navigation correction as well (−0.5 km E, +2.5 km N, ±2 km). See `validation_summary.md`.
 
-**Legend:** `[x]` done · `[~]` partly done · `[ ]` not started
+**Legend:** `[x]` done · `[~]` partly done · `[ ]` not started · `[–]` dropped from scope
 
 ---
 
@@ -39,7 +39,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | Status | Week | Task Description | Target Deliverables / Verification | Notes |
 | :---: | :---: | :--- | :--- | :--- |
 | `[x]` | **Week 9** | Spaceborne Radar (GPM DPR) Cross-Alignment | • Colocation module between INSAT TIR1 and GPM DPR orbit tracks.<br>• Compute spatial cross-correlation & mutual information. | Done: `validation/colocate.py`, `metrics.py` (IoU, Pearson, MI, sub-cell shift). **34 cases, 4 regions, 14 usable.** Storm-top field within 250 km: median line-of-sight offset **5.4 → 3.0 km**, 10 of 12 improve; cross-look unchanged. Cell cores: raw −0.1, parallax only −5.7, both −3.3 km. The overshoot comes from navigation (~3–4 km) and BT heights (~1–2 km); the GPM beam slant adds scatter only. See `validation_summary.md`, `validation_cases.md`. |
-| `[~]` | **Week 10** | Ground Radar (IMD DWR) Validation | • Volume scan extractor for Mumbai, Goa, Kochi, Agartala.<br>• Compute Intersection-over-Union (IoU) with DWR cores. | Code ready: `range_mask` and `compare` for IoU with DWR cores. **Waits on the IMD data request** and a DWR reader. |
+| `[–]` | **Week 10** | Ground Radar (IMD DWR) Validation | • Volume scan extractor for Mumbai, Goa, Kochi, Agartala.<br>• Compute Intersection-over-Union (IoU) with DWR cores. | **Dropped from scope (26 Oct 2026); future work.** Not required by the thesis or the U-Net, and data access is slow and uncertain. GPM (34 cases, 4 regions) is the validation. The comparison code (`range_mask`, `compare`) is ready if IMD data become available. |
 | `[x]` | **Week 11** | Regional Statistical Dissection | • Detailed statistics tables partitioned by regime.<br>• Validation of shift direction and distance trends. | Done for GPM: Northeast, Himalaya, Central and South India boxes (`REGION_BOX`). Applied shift (deep cores, median): South 4.2, Central 7.3, Himalaya 9.8, Northeast 10.5 km, following tan(VZA). Raw INSAT–GPM offset does **not** grow with VZA, because of the navigation error. Gain is clearest at VZA ≥ 30°. |
 | `[x]` | **Week 12** | Sensitivity & Error Budget Analysis | • Monte Carlo simulation script perturbing CTH (+/- 1-2 km).<br>• Error propagation bounds. | Done: `monte_carlo_shift`, `bias_sweep`: error ≈ ΔCTH × tan(VZA) (~0.4 km per km at Mumbai, ~0.7 km at Agartala). **Navigation** (`navigation.py`, 13 coastline windows): seasonal; late Sep–mid Mar 7–20 km west, monsoon median +1.8 km E / +4.8 km N; same-day correction 8.8 → 4.3 km. Error budget for the overshoot in `validation_summary.md`. |
 
@@ -87,7 +87,7 @@ Measured values are medians over the usable GPM cases (`05_validation/gpm_coloca
 | **Cross-look offset unchanged** | — | no change | 7.8 → 7.9 km | 🟢 Met |
 | **GPM DPR deep-core IoU** | 0.42 – 0.48 | 0.68 – 0.75 | 0.34 → 0.39 (7 of 13 improve) | 🟠 Below target |
 | **GPM storm-top field correlation (r)** | — | — | 0.64 → 0.64 | ⚪ No change |
-| **IMD DWR Core Cross-Correlation** | 0.51 | 0.82 | *TBD* | ⚪ Waits on IMD data |
+| **IMD DWR Core Cross-Correlation** | 0.51 | 0.82 | – | ➖ Dropped (future work) |
 | **Mean Geolocation Shift Distance** | 0.0 km | 4.2 km (Ghats) / 8.6 km (Himalayas) | South 4.2 / Central 7.3 / Himalaya 9.8 / Northeast 10.5 km | 🟢 Matches geometry |
 | **Downstream U-Net Edge Precision** | 0.45 | 0.62 | *TBD* | ⚪ Pending (Week 13) |
 

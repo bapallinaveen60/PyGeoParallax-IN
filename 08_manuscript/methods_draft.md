@@ -215,6 +215,7 @@ An error $\delta h$ in cloud-top height shifts the corrected position by about $
 
 - Confirm the INSAT-3DR yaw-flip dates from IMD's SatMet SOP before stating them as fact.
 - The U-Net comparison (Model A uncorrected, Model B corrected) will need its own section.
+- Validation is against GPM only. In the Discussion, name ground-radar (IMD DWR) validation as future work: denser sampling in time and fixed sites at known viewing angles.
 
 ---
 
