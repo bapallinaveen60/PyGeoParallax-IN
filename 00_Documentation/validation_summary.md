@@ -201,9 +201,19 @@ Batch 4 added 2018–2021 cases over South and Central India (50 GPM passes scre
 4. **ISRO's own geolocation checks support a large navigation error towards the satellite.** MOSDAC data-quality reports for five INSAT-3DR full-disk L1B images on 19 June 2020 (ground control points north-west of India) give positions that must move **1.7–2.7 IR pixels north and 1.0–3.3 pixels west**, i.e. roughly 8–12 km north and 5–15 km west. Our coastline value for the 2020 monsoon is −1.0 km E, 0.0 km N. (L1B vs our L1C, and control points outside the storm regions, so this is supporting evidence, not proof.)
 5. **GPM itself gives a navigation estimate:** after parallax correction the cells are offset by −4.7 km (95 % interval −6.8 … −0.9) along the line of sight, i.e. INSAT positions sit ~5 km towards the satellite.
 
-**Leading explanation:** INSAT-3DR monsoon positions carry a navigation error towards the satellite (south-west) of roughly 5–10 km, several times larger than the coastline estimate, which cancels most of the parallax of deep convection. The parallax correction is geometrically right; applying it without the true navigation correction worsens the alignment. Not yet excluded: a storm-structure offset between the coldest tops and the radar cells.
+6. **Navigation measured against GPM, tested leave-one-case-out** (`scripts/gpm_navigation.py`, runs `<case>_gnav`): the median cell offset after parallax correction of all *other* cases gives +5.0 km E (95 % interval +1.4 … +5.8) and +5.8 km N (+2.9 … +8.7). Applied to each case:
 
-**Status:** this is the most important result of the validation. Candidate explanations to test: (1) an undocumented height reference or correction in INSAT-3DR L1C geolocation; (2) a systematic storm-structure offset between the coldest IR tops and the radar's deep-echo cells along the line of sight; (3) a problem in the comparison method. Checks: visual overlays of raw INSAT and GPM for high-VZA cases; an independent geostationary view of the same storms (e.g. Meteosat IODC at 45.5°E, which sees the parallax in a different direction); asking ISRO/SAC how L1C geolocation is done.
+   | | Raw | Parallax only | GPM navigation + parallax |
+   | :--- | ---: | ---: | ---: |
+   | Cells, median [km] | −0.1 | −4.7 | −0.5 (−2.6 … +2.9) |
+   | Field, median absolute [km] (31 cases) | 4.8 | 3.7 | 6.0 (4.1 … 7.8) |
+   | Field, cases improved vs raw | – | 18 of 31 | 10 of 31 (Wilcoxon p = 0.027, worse) |
+
+   It centres the cell measure but makes the field measure significantly worse. A real navigation error would shift both measures together, so **the ~5 km gap between them is not navigation.** (The east component also disagrees with ISRO's June 2020 reports, which point west.)
+
+**Conclusion of the investigation:** the INSAT–GPM comparison is limited by storm structure, not by the correction or by navigation alone. At the scale of the whole storm (field measure), parallax correction removes the bias (mean +2.1 → −1.9 km) but the per-case improvement is not significant. At the scale of the coldest cores (cell measure), uncorrected cold cores already coincide with the radar's deep-echo cells, and correcting them with the full brightness-temperature height (median 16.9 km, half at the 17 km cap) overshoots by ~5 km. The coldest infrared tops and the deepest radar echoes are not the same physical target, and the ~5 km difference between the two measures is as large as the parallax being tested. A GPM-based validation of absolute position is therefore limited to about ±3–5 km for monsoon convection.
+
+**Status:** this is the most important result of the validation, and it changes the paper's framing (decision pending, 26 Oct 2026). Candidate explanations to test: (1) an undocumented height reference or correction in INSAT-3DR L1C geolocation; (2) a systematic storm-structure offset between the coldest IR tops and the radar's deep-echo cells along the line of sight; (3) a problem in the comparison method. Checks: visual overlays of raw INSAT and GPM for high-VZA cases; an independent geostationary view of the same storms (e.g. Meteosat IODC at 45.5°E, which sees the parallax in a different direction); asking ISRO/SAC how L1C geolocation is done.
 
 ## For the paper
 

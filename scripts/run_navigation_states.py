@@ -5,7 +5,9 @@ For each usable case in ``all_cases.csv``:
 - ``<case>_ynav``: navigation from ``nav_corrections/pooled_<year>.json``
   (``yearly_navigation.py``), with and without parallax correction;
 - ``<case>_mnav``: the all-India monsoon median (+1.8 km E, +4.8 km N), as a
-  sensitivity test.
+  sensitivity test;
+- ``<case>_gnav`` (with ``--tags gnav``): navigation measured against GPM on all
+  the *other* cases (``gpm_navigation.py``).
 
 Existing runs are kept unless ``--rerun`` is given.
 
@@ -36,6 +38,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--base", required=True)
     ap.add_argument("--rerun", action="store_true")
+    ap.add_argument("--tags", nargs="+", default=["ynav", "mnav"], choices=["ynav", "mnav", "gnav"],
+                    help="navigation states to run (gnav: GPM-derived, leave-one-case-out)")
     args = ap.parse_args(argv)
 
     mnav = NAV / "monsoon_median.json"
@@ -49,7 +53,9 @@ def main(argv=None):
         folder = Path(args.base) / case
         common = ["--dir", str(folder), "--scan", run_all_cases.case_scan(folder),
                   "--bbox", *map(str, run_all_cases.REGION_BOX[region]), "--nav-only"]
-        for tag, nav in (("ynav", NAV / f"pooled_{year}.json"), ("mnav", mnav)):
+        states = {"ynav": NAV / f"pooled_{year}.json", "mnav": mnav,
+                  "gnav": NAV / f"gpm_loo_{case}.json"}  # GPM-derived, leave-one-case-out (gpm_navigation.py)
+        for tag, nav in ((t_, states[t_]) for t_ in args.tags):
             if not nav.exists():
                 print(f"{case}: no {nav.name}, {tag} skipped", flush=True)
                 continue
