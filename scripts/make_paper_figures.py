@@ -167,31 +167,59 @@ def fig3_cases():
     save(fig, "fig3_cases")
 
 
+def field_offsets(rad=250):
+    """Per-case line-of-sight offset (storm-top field) in each state; only cases valid in all of them."""
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).parent))
+    from run_all_cases import split
+
+    t = pd.read_csv(VAL / "all_cases.csv")
+    rows = []
+    for case in t[(t.nav == "no_nav") & t.status.str.startswith("usable")].case:
+        runs = {s: json.loads((VAL / f"{case}{s}.json").read_text()) for s in ("", "_mnav", "_pnav")}
+        near = {s: r["runs"]["no_nav" if s == "" else "nav"][f"near_{rad}km"] for s, r in runs.items()}
+        st = {"raw": near[""]["uncorrected"], "parallax": near[""]["corrected"],
+              "nav_near": near["_pnav"]["uncorrected"], "both_near": near["_pnav"]["corrected"],
+              "both_monsoon": near["_mnav"]["corrected"]}
+        st = {k: v["top"] for k, v in st.items()}
+        if all(max(abs(x) for x in v["lag_cells_s_e"]) < 9.5 for v in st.values()):
+            _, vaa = satellite_view_angles(*runs[""]["gpm_convection_centre"], SAT_LON)
+            rows.append({k: split(v["offset_km_s_e"], float(vaa))[0] for k, v in st.items()})
+    return pd.DataFrame(rows)
+
+
 def fig4_states():
-    cells = pd.read_csv(VAL / "core_offsets_cells.csv")
-    test = pd.read_csv(VAL / "nav_parallax_test.csv")
-    field = test[(test.field == "top") & (test.window_km == 250) & test.valid]
-    states = [("uncorrected", "raw", "Raw"), ("nav_only", "navigation", "Navigation only"),
-              ("corrected", "parallax", "Parallax only"), ("nav_parallax", "both", "Navigation\n+ parallax")]
-    fig, ax = plt.subplots(figsize=(6.4, 3.8))
+    base = pd.read_csv(VAL / "core_offsets_cells.csv")
+    near = pd.read_csv(VAL / "core_offsets_pnav_cells.csv")
+    field = field_offsets()
+    # (cell table, cell kind, field column, label)
+    states = [(base, "uncorrected", "raw", "Raw"),
+              (near, "nav_only", "nav_near", "Navigation\nonly"),
+              (base, "corrected", "parallax", "Parallax\nonly"),
+              (near, "nav_parallax", "both_near", "Navigation\n+ parallax"),
+              (base, "nav_parallax", "both_monsoon", "All-India nav.\n+ parallax")]
+    n = len(states)
+    fig, ax = plt.subplots(figsize=(7.0, 3.9))
     ax.axhline(0, color=INK2, lw=0.9)
-    data = [cells[cells.kind == k].along_km.dropna().values for k, _, _ in states]
-    bp = ax.boxplot(data, positions=range(4), widths=0.45, whis=(10, 90), showfliers=False, patch_artist=True,
+    ax.axvspan(n - 1.5, n - 0.5, color="#f0efec", lw=0, zorder=0)
+    data = [tab[tab.kind == k].along_km.dropna().values for tab, k, _, _ in states]
+    bp = ax.boxplot(data, positions=range(n), widths=0.45, whis=(10, 90), showfliers=False, patch_artist=True,
                     medianprops={"color": INK, "lw": 1.6}, whiskerprops={"color": MUTED}, capprops={"color": MUTED})
     for patch in bp["boxes"]:
         patch.set(facecolor=BLUE_RAMP[1], edgecolor=BLUE_RAMP[4], lw=1.0)
-    for i, (_, f, _) in enumerate(states):
-        m = field[f"along_{f}"].mean()
-        ax.scatter(i + 0.33, m, marker="D", s=36, color="#eb6834", ec="white", lw=0.8, zorder=4)
+    for i, (_, _, f, _) in enumerate(states):
+        ax.scatter(i + 0.33, field[f].mean(), marker="D", s=36, color="#eb6834", ec="white", lw=0.8, zorder=4)
         ax.text(i - 0.3, np.median(data[i]), f"{np.median(data[i]):+.1f}", ha="right", va="center", fontsize=8, color=INK)
-    ax.set_xticks(range(4), [s[2] for s in states], color=INK2)
+    ax.set_xticks(range(n), [s[3] for s in states], color=INK2)
     ax.grid(axis="x", visible=False)
     ax.set_ylabel("Line-of-sight offset, GPM minus INSAT [km]")
     handles = [plt.Rectangle((0, 0), 1, 1, fc=BLUE_RAMP[1], ec=BLUE_RAMP[4], label=f"Cell cores (n≈{len(data[0])}; box 25–75 %, whiskers 10–90 %)"),
                plt.Line2D([], [], marker="D", ls="", color="#eb6834", mec="white", ms=6, label=f"Field correlation, mean of {len(field)} cases")]
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.16), fontsize=8, ncol=2)
-    ax.set_xlim(-0.8, 3.6)
-    ax.set_title("Offsets in the four correction states (monsoon navigation +1.8 km E, +4.8 km N)", loc="left")
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.2), fontsize=8, ncol=2)
+    ax.set_xlim(-0.8, n - 0.4)
+    ax.set_title("Offsets by correction state. Navigation: near-storm monsoon value (−0.5 km E, +2.5 km N);\n"
+                 "shaded: all-India monsoon median (+1.8 km E, +4.8 km N)", loc="left", fontsize=9)
     save(fig, "fig4_states")
 
 

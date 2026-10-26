@@ -8,7 +8,8 @@
 - **Case scans pinned** in `00_Documentation/events/case_scans.csv`; the file-name fallback now only accepts L1C files from the case date outside navigation time slots (navigation scans from neighbouring days were being picked).
 - **Near-storm navigation:** `scripts/near_storm_navigation.py` measures daytime coastline offsets around each case date and writes per-case and pooled corrections; `analyze_core_offsets.py --nav-tag` selects which navigation runs to analyse.
 - **Benchmark:** `scripts/benchmark_scenes.py` (148 scenes: 1.8 s per scene, no failures; `00_Documentation/benchmark.md`). A test checks that clear cells are identical in corrected and uncorrected grids.
-- **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6).
+- **Paired dataset builder:** `scripts/build_paired_dataset.py` writes Model A (uncorrected) and Model B (corrected) NetCDF per scene on the same grid, with a manifest; parallel and resumable, optional ERA5 heights and DEM. `scripts/design_benchmark_set.py` chooses the 96-scene benchmark / test set.
+- **Paper figures:** `scripts/make_paper_figures.py` (Figs. 1–6); Fig. 4 shows the near-storm and all-India navigation corrections.
 
 ### Findings
 - ERA5 instead of the AFGL standard atmosphere changes cold-core heights by −0.15 km and the INSAT–GPM offsets by under 0.5 km; the overshoot is not a profile error.
