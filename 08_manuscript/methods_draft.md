@@ -58,7 +58,7 @@ with semi-major axis $a$ and eccentricity $e$. The inverse transform uses three 
 
 The satellite is at $\mathbf{s} = R_{\mathrm{geo}}(\cos\lambda_s, \sin\lambda_s, 0)$, with $R_{\mathrm{geo}} = 42\,164$ km and $\lambda_s = 74.0^\circ$. The unit line-of-sight vector from the ground to the satellite is $\hat{\mathbf{d}} = (\mathbf{s} - \mathbf{p})/\lVert\mathbf{s} - \mathbf{p}\rVert$. The viewing zenith angle (VZA) is the angle between $\hat{\mathbf{d}}$ and the local vertical; the viewing azimuth angle (VAA) comes from its east and north components. These agree with pyorbital [Raspaud et al., 2018] within 0.01°.
 
-A cloud at height $h$ appears displaced away from the satellite by approximately
+A cloud at height $h$ appears displaced away from the satellite (Fig. S) by approximately
 
 $$
 \Delta \approx h \tan(\mathrm{VZA}).

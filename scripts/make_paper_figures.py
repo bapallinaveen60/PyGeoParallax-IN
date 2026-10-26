@@ -283,6 +283,67 @@ def fig6_terrain(dem_path=Path("02_standardized_grid/srtm_0p01deg.nc"), damaged=
     save(fig, "fig6_terrain")
 
 
+def fig0_schematic(vza_deg=35.0):
+    """Cross-section (not to scale) of cloud and terrain parallax for a geostationary view."""
+    from matplotlib.patches import Arc, FancyArrowPatch, Polygon
+
+    t = np.tan(np.radians(vza_deg))
+    los = np.array([np.sin(np.radians(vza_deg)), -np.cos(np.radians(vza_deg))])  # downwards, away from the satellite
+    blue, orange = "#2a78d6", "#eb6834"
+    fig, ax = plt.subplots(figsize=(7.2, 3.9))
+    ax.set_axis_off()
+    ax.plot([-6, 66], [0, 0], color=INK2, lw=1.2)
+    ax.text(-6, -0.9, "ellipsoid\n(navigation\nsurface)", ha="left", va="top", fontsize=8, color=INK2)
+
+    # Cloud: anvil with its top at height h above the true position T.
+    h, xt = 12.0, 16.0
+    anvil = np.array([[xt - 9, h - 1.6], [xt - 7, h - 0.2], [xt - 3, h + 0.4], [xt, h], [xt + 3, h + 0.4],
+                      [xt + 7, h - 0.2], [xt + 9, h - 1.6], [xt + 2.5, h - 2.4], [xt + 2, 1.0], [xt - 2, 1.0], [xt - 2.5, h - 2.4]])
+    ax.add_patch(Polygon(anvil, closed=True, fc="#e7f1fb", ec=blue, lw=1.0))
+    xa = xt + h * t  # apparent position
+    top = (xt - (23 - h) * t, 23.0)  # where the line of sight leaves the frame, towards the satellite
+    ax.plot(*zip(top, (xt, h)), color=blue, lw=1.4)
+    ax.plot([xt, xa], [h, 0], color=blue, lw=1.4, ls=(0, (4, 3)))
+    ax.plot(xt, h, "o", color=INK, ms=4, zorder=5)
+    ax.annotate("cloud top", (xt, h), xytext=(xt + 1.2, h + 1.6), fontsize=8, color=INK)
+    ax.plot([xt, xt], [0, h], color=MUTED, lw=0.8, ls=":")
+    ax.annotate("", xy=(xt - 3.5, h), xytext=(xt - 3.5, 0), arrowprops={"arrowstyle": "<->", "color": INK2, "lw": 0.8})
+    ax.text(xt - 4.3, h / 2, "$h$", ha="right", va="center", fontsize=10, color=INK)
+    ax.plot(xt, 0, "^", color=INK, ms=7, zorder=5)
+    ax.text(xt - 0.6, -1.0, "true position\n(corrected)", ha="right", va="top", fontsize=8, color=INK)
+    ax.plot(xa, 0, "v", color=blue, ms=7, zorder=5)
+    ax.text(xa + 0.6, -1.0, "apparent position\n(as navigated)", ha="left", va="top", fontsize=8, color=blue)
+    ax.add_patch(FancyArrowPatch((xa, 2.2), (xt, 2.2), arrowstyle="-|>", mutation_scale=10, color=orange, lw=1.4))
+    ax.text(xa + 1.0, 2.2, "parallax shift\n" + r"$\approx h\,\tan(\mathrm{VZA})$", ha="left", va="center", fontsize=8, color=orange)
+    ax.add_patch(Arc((xa, 0), 9, 9, theta1=90, theta2=90 + vza_deg, color=INK2, lw=0.8))
+    ax.plot([xa, xa], [0, 5.2], color=MUTED, lw=0.8, ls=":")
+    ax.text(xa - 1.1, 5.4, "VZA", fontsize=8, color=INK2, ha="right")
+
+    # Terrain: a ridge whose summit is also seen displaced away from the satellite.
+    xr = np.linspace(40, 58, 60)
+    zr = 4.0 * np.exp(-((xr - 48) / 4.0) ** 2)
+    ax.fill_between(xr, 0, zr, color="#e1e0d9", lw=0)
+    ax.plot(xr, zr, color=INK2, lw=1.0)
+    zg, xg = 4.0, 48.0
+    xga = xg + zg * t
+    ax.plot([xg - 7 * los[0] * 1.6, xg], [zg - 7 * los[1] * 1.6, zg], color=blue, lw=1.4)
+    ax.plot([xg, xga], [zg, 0], color=blue, lw=1.4, ls=(0, (4, 3)))
+    ax.plot(xg, zg, "o", color=INK, ms=4, zorder=5)
+    ax.plot(xga, 0, "v", color=blue, ms=7, zorder=5)
+    ax.add_patch(FancyArrowPatch((xga, -0.5), (xg, -0.5), arrowstyle="-|>", mutation_scale=9, color=orange, lw=1.2))
+    ax.text(xg + 1.5, -1.3, "terrain parallax\n(clear sky)", ha="center", va="top", fontsize=8, color=orange)
+    ax.text(xg, zg + 0.7, "summit", ha="center", fontsize=8, color=INK)
+
+    ax.text(top[0] + 3.0, top[1] - 0.6, "line of sight to INSAT-3DR\n(36 000 km above 74°E)", fontsize=8, color=blue,
+            ha="left", va="top")
+    ax.text(64, 21, "away from the satellite\n(northwards over India)", ha="right", va="center", fontsize=8, color=INK2)
+    ax.annotate("", xy=(64, 18.6), xytext=(52, 18.6), arrowprops={"arrowstyle": "-|>", "color": INK2, "lw": 0.8})
+    ax.set_xlim(-7, 66)
+    ax.set_ylim(-5, 25)
+    ax.set_title("Cloud and terrain parallax in geostationary imagery (not to scale)", loc="left")
+    save(fig, "fig0_schematic")
+
+
 #: SRTM tiles that could not be read in full (lat0, lat1, lon0, lon1); hatched on the map. None at present.
 DAMAGED_SRTM = []
 

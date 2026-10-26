@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "PyGeoParallax-IN: cloud parallax correction for INSAT-3DR imagery over India"
+abstract: >-
+  Open-source Python tool that corrects INSAT-3DR geostationary imagery for cloud
+  parallax by ray tracing on the WGS84 ellipsoid (optionally with terrain), applies a
+  navigation correction measured from coastlines, and writes uncorrected and corrected
+  datasets on the same grid. Includes readers for INSAT-3DR L1C/L2B, GPM 2A Ku, ERA5
+  and SRTM, and validation tools against GPM radar.
+type: software
+authors:
+  - family-names: Bapalli
+    given-names: Naveen
+version: 0.2.0
+date-released: 2026-10-26
+license: MIT
+repository-code: "https://github.com/bapallinaveen60/PyGeoParallax-IN"
+keywords:
+  - parallax correction
+  - INSAT-3DR
+  - geostationary satellite
+  - navigation
+  - GPM
+  - Indian monsoon

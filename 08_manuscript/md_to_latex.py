@@ -46,6 +46,7 @@ CITATIONS = [
     (r"\[Lam et al\., 2015\]", r"\\citep{lam2015}"),
     (r"Vicente et al\. \(2002\)", r"\\citet{vicente2002}"),
     (r"Bieliński \(2020\)", r"\\citet{bielinski2020}"),
+    (r"Wiltink et al\. \(2025\)", r"\\citet{wiltink2025}"),
     (r"ISRO's data-quality reports already measure", r"ISRO's data-quality reports \\citep{mosdac_dqe2020} already measure"),
     (r"satpy offers an open-source", r"satpy \\citep{satpy_parallax} offers an open-source"),
     (r"the GOES Hydro-Estimator has applied", r"the GOES Hydro-Estimator \\citep{scofield2003} has applied"),
@@ -53,6 +54,7 @@ CITATIONS = [
 
 #: Figure and table mentions -> cross-references
 REFERENCES = [
+    (r"Fig\. S\b", r"Fig.~\\ref{fig:schematic}"),
     (r"\(Fig\. (\d)\)", r"(Fig.~\\ref{fig:\1})"),
     (r"Fig\. (\d)", r"Fig.~\\ref{fig:\1}"),
     (r"Table (\d)", r"Table~\\ref{tab:\1}"),

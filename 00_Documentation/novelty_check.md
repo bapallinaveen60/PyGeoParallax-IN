@@ -18,7 +18,13 @@ Searched: web search over Mausam, Current Science, Journal of the Indian Society
 
 - **Introduction:** cite Vicente et al. (2002) and the GOES Hydro-Estimator as precedent, satpy as the existing open-source correction, and the MOSDAC DQE reports as the operational geolocation baseline. State the gap: no correction or validation for INSAT-3DR, and no assessment of how its navigation error interacts with parallax.
 - **Comparison with ISRO's DQE:** ISRO's June 2020 L1B error (about 10 km north) is larger than our 2022–2024 monsoon L1C estimate (2.5–5 km north). The products, years and methods differ (L1B vs L1C; GCP chips vs coastlines). Worth one sentence in the Discussion.
-- **Still to check:** Google Scholar / Scopus; ISRO's Hydro-Estimator ATBD (does it correct parallax?); INSAT-3DS literature (launched 17 Feb 2024).
+- **Still to check:** Google Scholar / Scopus; ISRO's Hydro-Estimator ATBD (does it correct parallax?).
+
+## Follow-up (26 Oct 2026)
+
+- **ISRO Hydro-Estimator ATBD:** found — "Hydro-Estimator (Modified)", Varma & Gairola, SAC/EPSA/AOSG/SR/04/2015 (https://dr.mosdac.gov.in/docs/HEM_rain-revised-atbd.pdf). The MOSDAC server did not respond to automated download, so whether it applies a parallax correction is **not yet checked**; open it in a browser and search for "parallax". MOSDAC's product page says the INSAT implementation follows the NOAA/NESDIS Hydro-Estimator (which uses the Vicente et al. 2002 correction).
+- **INSAT-3DS:** no parallax or geolocation-correction study found for INSAT-3DS (2024–2025). The closest INSAT work is an EGU 2026 abstract on INSAT-3D cloud-fraction biases (Ramachandran & Dey), which does not address parallax. The claim "no published parallax correction for INSAT-3D/3DR" can be extended to INSAT-3DS.
+- **Related method worth citing:** Wiltink, Deneke, van Heerwaarden & Meirink (2025), "Evaluating parallax and shadow correction methods for global horizontal irradiance retrievals from Meteosat SEVIRI", AMT 18, 3917–3936, https://doi.org/10.5194/amt-18-3917-2025 (verified in Crossref). It compares geometric parallax correction with an empirical shift that maximises correlation with ground observations — the same idea as our field-correlation offset measure.
 
 ## Sources
 

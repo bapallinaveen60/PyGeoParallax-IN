@@ -4,6 +4,8 @@
 
 ### Added
 - **Validation statistics:** `scripts/validation_statistics.py` (bootstrap intervals, cluster bootstrap for cells, Wilcoxon and sign tests, viewing-angle trend).
+- **Citation files:** `CITATION.cff` (validated) and `.zenodo.json` for a Zenodo DOI.
+- **Ray-tracing schematic** (`make_paper_figures.py`, `fig0_schematic`).
 - **LaTeX manuscript** (`08_manuscript/latex_source/`, generated sections via `08_manuscript/md_to_latex.py`).
 
 ### Findings
