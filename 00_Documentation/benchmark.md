@@ -46,7 +46,15 @@ Peak memory 454 MB (median), 469 MB (max). The 148 scenes took 4.7 minutes in to
 
 **14 scenes, 11–14 June 2023, are partial scans:** up to 57 % of the TIR1 array is the fill value (only rows 665–1302 of 3207 hold data in the 12 June 04:15 file). The pipeline handles them (missing pixels stay missing). The two validation cases on these dates (South 12 Jun, Northeast 13 Jun 2023) are unaffected, because their storms lie in the scanned band and comparisons use only pixels with data.
 
+## Designed test set (89 scenes)
+
+A second, designed set is the U-Net test set and will repeat this benchmark: 2 days per month, June–September 2022–2024, at 00:15, 06:15, 12:15 and 18:15 UTC, avoiding the validation-case days (`scripts/design_benchmark_set.py`).
+
+- **96 slots designed, 89 scenes available:** 81 as designed and 8 substitutes 30 min from the slot (`events/benchmark_substitutes.csv`). The final list is `events/benchmark_final.csv`.
+- **7 slots have no scan at all:** 18:15 UTC on 5 and 9 Sep 2022, 3 and 4 Sep 2023, and 21 Aug, 9 and 12 Sep 2024. Neither the slot nor the scans 30 min either side exist on MOSDAC. They most likely reflect the equinox eclipse season (not confirmed against an ISRO schedule), when the satellite passes through Earth's shadow around local midnight at 74°E (about 19:00 UTC), so the 18:15 slot is under-represented (17 of 24 days).
+- **Paired dataset:** Model A (uncorrected) and Model B (corrected) files for all 89 scenes in `04_corrected_output/paired/` (5 channels, `cth`, `fill_flag`, 0.04° grid; 3.2 GB). Every pair has the same grid and is identical in clear sky in all channels.
+
 ## Limits
 
-- Scenes are concentrated in daytime and on the 50 case-related days. A designed set (all hours, spread over the seasons) would be better for the paper and could double as the U-Net test set.
+- The 148-scene benchmark above is concentrated in daytime and on the 50 case-related days; the designed set fixes this.
 - Times exclude writing NetCDF output.
