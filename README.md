@@ -7,7 +7,7 @@ PyGeoParallax-IN is a Python-based processing pipeline designed to correct **clo
 
 The corrected output is validated against spaceborne radar overpasses from the Global Precipitation Measurement (GPM) mission. Validation against ground-based Doppler Weather Radar from the India Meteorological Department (IMD) is left for future work; the comparison code supports it.
 
-## Status (v0.3.0)
+## Status (v0.4.0)
 
 | Part | State |
 | :--- | :--- |
@@ -15,9 +15,11 @@ The corrected output is validated against spaceborne radar overpasses from the G
 | Viewing and solar angles, ECEF transforms, ellipsoid ray-tracing solver (numpy and Numba; 0.5 s per full disk) | done |
 | Cloud-top height from TIR1 BT (AFGL tropical profile or per-pixel ERA5 profiles) | done |
 | Terrain-aware correction with SRTM | done |
-| Occlusion-aware bucket resampling with gap filling | done |
+| Occlusion-aware bucket resampling with gap filling, onto a lat/lon grid or the L1C pixel grid | done |
+| Effective (lower) correction height for precipitation work | done |
 | Coastline-based INSAT navigation correction | done |
-| CLI (`correct`, `batch`, `navigation`) | done |
+| CLI (`l1c` straight from L1C files, `correct`, `batch`, `navigation`) | done |
+| Tutorial notebook ([notebooks/quickstart.ipynb](notebooks/quickstart.ipynb)) | done |
 | Validation metrics (IoU, correlation, mutual information, sub-cell displacement) | done |
 
 **Validation against GPM** (63 monsoon cases 2018–2024, 38 usable, 4 regions): the correction moves features by the computed amount, only along the line of sight. It reverses the mean storm-scale INSAT–GPM offset (+2.2 → −1.9 km), but the per-case gain is not significant (18 of 30 cases). At convective cores, uncorrected cold cores already sit on the GPM radar cells, and only about 5 % of the computed parallax is visible. A synthetic test confirms the method; navigation alone cannot explain the result (no single shift centres both offset measures). GPM can therefore verify absolute position only to about ±3–5 km. Details: [validation_summary.md](00_Documentation/validation_summary.md).
@@ -99,7 +101,7 @@ PyGeoParallax-IN/
 ├── tests/                           # Unit tests (pytest)
 ├── scripts/                         # Standalone utilities (e.g. GPM overpass finder)
 ├── .github/workflows/               # CI: tests on every push
-├── notebooks/                       # Exploratory Jupyter Notebooks
+├── notebooks/                       # Tutorial (quickstart.ipynb)
 │
 ├── pyproject.toml                   # Package metadata and dependencies
 ├── LICENSE                          # MIT License
@@ -137,6 +139,19 @@ PyGeoParallax-IN/
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
 4. **Validation & Assessment**: Evaluate corrected outputs against GPM radar overpasses (and, in future, IMD ground radar) using the validation modules.
 
+### Quickest: L1C files from the command line
+
+```bash
+# corrected, on a regular 0.04 deg grid over South Asia (0-40N, 60-100E)
+pygeoparallax l1c "L1C/3RIMG_*_L1C_SGP_V01R00.h5" -o corrected/ -j 4
+# on the files' own pixel grid (same shape as the input), gaps filled
+pygeoparallax l1c "L1C/*.h5" -o corrected_native/ --native --fill-empty
+# uncorrected baseline on the same grid
+pygeoparallax l1c "L1C/*.h5" -o uncorrected/ --no-correction
+```
+
+Cloud-top height comes from TIR1 (BT < 270 K is cloud) with the AFGL tropical atmosphere, or ERA5 profiles with `--era5 era5_pl.nc`. Other options: `--bbox`, `--channels`, `--dem`, `--nav-correction`, and `--height-offset 3` (km) or `--height-scale` to correct with a lower, effective height for precipitation products (the infrared top lies a median 3.2 km above the GPM radar storm top in our validation). The tutorial [notebooks/quickstart.ipynb](notebooks/quickstart.ipynb) walks through the same steps in Python.
+
 ### Quick example: one INSAT-3DR L1C file
 
 ```python
@@ -152,6 +167,10 @@ grid = Grid(21, 29, 88, 97, res=0.02)
 channels = {"TIR1": ds["TIR1"].values, "WV": ds["WV"].values}
 corrected = correct_scene(ds["lat"].values, ds["lon"].values, channels, cth, grid=grid)
 uncorrected = correct_scene(ds["lat"].values, ds["lon"].values, channels, cth, grid=grid, correct=False)
+
+# or keep the file's own pixel grid (corrected and uncorrected line up pixel for pixel)
+from pygeoparallax import correct_native
+native = correct_native(ds["lat"].values, ds["lon"].values, channels, cth, fill_empty=True)
 ```
 
 ### Lower-level example

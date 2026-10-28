@@ -1,4 +1,4 @@
-# API Reference (v0.3.0)
+# API Reference (v0.4.0)
 
 Public functions of the `pygeoparallax` package, grouped by module. Each function has a full docstring with parameters and units; this page is the map.
 
@@ -12,6 +12,7 @@ Conventions:
 | Name | Purpose |
 | :--- | :--- |
 | `correct_scene(lat, lon, channels, cth, sat_lon=74.0, grid=SOUTH_ASIA_0P04, surface_height=None, correct=True, fill_radius=1)` | Whole pipeline for one scene: parallax (and optional terrain) correction, then occlusion-aware regridding. Returns an `xarray.Dataset` with the channels, `cth`, `shift_km`, `height`, `count` and `fill_flag`. `correct=False` gives the uncorrected scene on the same grid. |
+| `correct_native(lat, lon, channels, cth, sat_lon=74.0, grid=None, surface_height=None, correct=True, fill_radius=1, fill_empty=False)` | The same correction, put back on the input's own pixel grid (dims `y`, `x`; same shape and pixel centres). The grid defaults to that of `lat`/`lon` (an L1C file read without navigation correction); pass a `NativeGrid` if the positions were shifted. `fill_empty=True` fills cells no pixel reached with the nearest corrected value (they keep `fill_flag` 2). |
 
 ## `pygeoparallax.ingest`
 
@@ -34,6 +35,7 @@ Conventions:
 | `cloud_top_height_profiles(bt, lat, lon, profiles, clear_sky_bt=None, min_pressure=70)` | Same with gridded profiles (e.g. ERA5), interpolated to each pixel; the lookup runs down from each column's cold point. |
 | `height_from_temperature(t, profile)`, `height_from_pressure(p, profile)` | Profile lookups (AFGL tropical by default, capped at the 17 km tropopause). |
 | `cloud_mask(bt, clear_sky_bt=None, delta=8.0, threshold=270.0)` | The cloud mask on its own. |
+| `effective_height(cth, scale=1.0, offset=0.0)` | `scale * cth - offset` [m], floored at 0, NaN kept: a lower height for precipitation work (offset about 3000 m, or scale about 0.7, from the GPM comparison). |
 | `Profile`, `TROPICAL` | Atmospheric profile type and the default profile. |
 
 ## `pygeoparallax.geometry`
@@ -55,6 +57,8 @@ Conventions:
 | `Grid(lat_min, lat_max, lon_min, lon_max, res)` | Regular lat/lon grid. `SOUTH_ASIA_0P04` is 0–40°N, 60–100°E at 0.04°. |
 | `resample(grid, lat, lon, height, values, fill_radius=1)` | Bucket resampling: the highest cloud wins each cell; small gaps are filled by IDW. |
 | `bucket_max_height`, `idw_fill` | The two steps on their own. |
+| `NativeGrid.from_2d(lat, lon)`, `NativeGrid.from_coords(lat_1d, lon_1d)` | A product's own separable pixel grid, regular in WGS84 Mercator northing (L1C) or in latitude. `fractional_index(lat, lon)` gives row/column; `index_space()` lets `resample` work on it. |
+| `mercator_y(lat)`, `mercator_lat(y)` | Ellipsoidal (WGS84) Mercator northing and its inverse. |
 | `sample_nearest(src_lat, src_lon, values, dst_lat, dst_lon, max_distance_km=50)` | Nearest-neighbour lookup between grids (e.g. clear-sky BT onto L1C pixels). |
 | `OBSERVED`, `INTERPOLATED`, `EMPTY` | `fill_flag` values 0, 1, 2. |
 
@@ -89,7 +93,9 @@ Conventions:
 ## Command line
 
 ```bash
-pygeoparallax correct <in.nc> <out.nc> [--dem DEM.nc] [--nav-correction nav.json] [--no-correction] [--grid LAT0 LAT1 LON0 LON1 RES]
+pygeoparallax l1c "<L1C glob>" -o <dir> [-j N] [--native [--fill-empty]] [--bbox LAT0 LAT1 LON0 LON1] [--channels TIR1 TIR2 WV MIR]
+                  [--era5 era5_pl.nc] [--cloud-threshold 270] [--height-offset KM] [--height-scale S] [--dem DEM.nc] [--nav-correction nav.json] [--no-correction] [--grid ...] [--overwrite]
+pygeoparallax correct <in.nc> <out.nc> [--dem DEM.nc] [--nav-correction nav.json] [--no-correction] [--grid LAT0 LAT1 LON0 LON1 RES] [--height-offset KM] [--height-scale S]
 pygeoparallax batch "<glob>" -o <dir> [-j N] [--overwrite] [same options]
 pygeoparallax navigation "<L1C glob>" -o nav.json [--land ne_10m_land.geojson] [--windows ...] [--min-r 0.6]
 pygeoparallax --version

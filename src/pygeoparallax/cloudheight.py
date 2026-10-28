@@ -194,3 +194,21 @@ def cloud_top_height_profiles(bt, lat, lon, profiles, clear_sky_bt=None, min_pre
         prof[name] = RegularGridInterpolator(grid, values, bounds_error=False, fill_value=None)(pts)
     out[mask] = height_from_temperature_profiles(bt[mask], prof["temperature"], prof["height"], top)
     return out
+
+
+def effective_height(cth, scale=1.0, offset=0.0):
+    """Height to correct with when the target is not the infrared cloud top [m].
+
+    ``scale * cth - offset``, floored at 0 m; NaN (clear sky) stays NaN.
+
+    The BT-derived height is the top of the cloud, which is right for cloud
+    products. Precipitation sits lower: against GPM DPR over India, the
+    coldest convective tops were a median 3.2 km above the Ku-band storm top
+    (this project's GPM validation, 2018-2024: medians 16.6 and 11.9 km in
+    206 cells). For rain-related products an ``offset`` of about 3000 m, or a
+    ``scale`` near 0.7, moves the signal to the precipitating level instead.
+    These values are a starting point, not a calibration.
+    """
+    cth = np.asarray(cth, float)
+    with np.errstate(invalid="ignore"):
+        return np.where(np.isfinite(cth), np.maximum(scale * cth - offset, 0.0), np.nan)

@@ -1,4 +1,8 @@
-"""Command-line interface: ``pygeoparallax correct`` and ``pygeoparallax batch``.
+"""Command-line interface: ``pygeoparallax l1c``, ``correct``, ``batch`` and ``navigation``.
+
+``l1c`` corrects INSAT-3DR L1C files directly: it reads the channels, derives
+cloud-top height from TIR1 and writes corrected NetCDF, on a regular lat/lon
+grid or on the file's own pixel grid (``--native``).
 
 ``correct`` and ``batch`` read *standard scene* NetCDF files, which the
 ingest step writes. ``navigation`` measures an INSAT geolocation correction
@@ -22,11 +26,13 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
+import numpy as np
 import xarray as xr
 
 from . import __version__
+from .cloudheight import effective_height
 from .geometry.constants import SATELLITE_LONGITUDES
-from .pipeline import correct_scene
+from .pipeline import correct_native, correct_scene
 from .resample.grid import SOUTH_ASIA_0P04, Grid
 
 
@@ -37,12 +43,36 @@ def _grid_from_args(args) -> Grid:
     return Grid(lat_min, lat_max, lon_min, lon_max, res)
 
 
+def _surface(dem, dem_var):
+    if dem is None:
+        return None
+    from .terrain import surface_height_from_dataset
+
+    return surface_height_from_dataset(dem, dem_var)
+
+
+def _height_attrs(ds, height_scale, height_offset_km):
+    if height_scale != 1.0 or height_offset_km != 0.0:
+        ds.attrs["effective_height"] = f"{height_scale:g} * cth - {height_offset_km:g} km"
+
+
+def _write(ds, out_path):
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    encoding = {name: {"zlib": True, "complevel": 4} for name in ds.data_vars}
+    ds.to_netcdf(out_path, encoding=encoding)
+    return out_path
+
+
 def process_file(in_path, out_path, channels=None, sat_lon=None, dem=None, dem_var="elevation",
-                 correct=True, grid=SOUTH_ASIA_0P04, fill_radius=1, nav_correction=None):
+                 correct=True, grid=SOUTH_ASIA_0P04, fill_radius=1, nav_correction=None,
+                 height_scale=1.0, height_offset_km=0.0):
     """Correct one standard-scene file and write the gridded result to ``out_path``.
 
     ``nav_correction`` is a JSON file from ``pygeoparallax navigation``. It is
     applied to the pixel positions before parallax correction.
+    ``height_scale`` and ``height_offset_km`` turn the scene's cloud-top height
+    into an effective height (:func:`pygeoparallax.cloudheight.effective_height`).
     """
     with xr.open_dataset(in_path) as scene:
         lat = scene["lat"].values
@@ -60,28 +90,77 @@ def process_file(in_path, out_path, channels=None, sat_lon=None, dem=None, dem_v
             ]
         if sat_lon is None:
             sat_lon = float(scene.attrs.get("sub_satellite_longitude", SATELLITE_LONGITUDES["INSAT-3DR"]))
-        surface = None
-        if dem is not None:
-            from .terrain import surface_height_from_dataset
-
-            surface = surface_height_from_dataset(dem, dem_var)
-
+        cth = effective_height(scene["cth"].values, height_scale, height_offset_km * 1000.0)
         ds = correct_scene(
-            lat, lon, {c: scene[c].values for c in channels}, scene["cth"].values,
-            sat_lon=sat_lon, grid=grid, surface_height=surface, correct=correct, fill_radius=fill_radius,
+            lat, lon, {c: scene[c].values for c in channels}, cth,
+            sat_lon=sat_lon, grid=grid, surface_height=_surface(dem, dem_var), correct=correct,
+            fill_radius=fill_radius,
         )
+        _height_attrs(ds, height_scale, height_offset_km)
         for key in ("time", "start_time", "satellite"):
             if key in scene.attrs:
                 ds.attrs[key] = scene.attrs[key]
         ds.attrs["source_file"] = Path(in_path).name
         if nav_correction is not None:
             ds.attrs["navigation_correction"] = Path(nav_correction).name
+    return _write(ds, out_path)
 
-    out_path = Path(out_path)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    encoding = {name: {"zlib": True, "complevel": 4} for name in ds.data_vars}
-    ds.to_netcdf(out_path, encoding=encoding)
-    return out_path
+
+def process_l1c(in_path, out_path, channels=("TIR1", "TIR2", "WV", "MIR"), bbox=None, native=False,
+                grid=SOUTH_ASIA_0P04, era5=None, cloud_threshold=270.0, dem=None, dem_var="elevation",
+                correct=True, fill_radius=1, fill_empty=False, nav_correction=None,
+                height_scale=1.0, height_offset_km=0.0):
+    """Correct one INSAT-3DR L1C file and write the result to ``out_path``.
+
+    Cloud-top height comes from TIR1: BT below ``cloud_threshold`` [K] is
+    cloud, and its height is looked up in the AFGL tropical atmosphere or, with
+    ``era5`` (a pressure-level NetCDF), in the ERA5 profile nearest in time.
+    With ``native`` the output stays on the file's own pixel grid; otherwise it
+    goes on ``grid``.
+    """
+    from .cloudheight import cloud_top_height, cloud_top_height_profiles
+    from .ingest.insat import read_insat_l1c, shift_positions
+    from .resample.native import NativeGrid
+
+    channels = list(dict.fromkeys(channels))
+    scene = read_insat_l1c(in_path, channels=list(dict.fromkeys(["TIR1", *channels])), bbox=bbox)
+    lat = scene["lat"].values
+    lon = scene["lon"].values
+    native_grid = NativeGrid.from_2d(lat, lon) if native else None
+    if nav_correction is not None:
+        from .navigation import NavigationCorrection
+
+        east, north = NavigationCorrection.from_json(nav_correction)(lat, lon)
+        lat, lon = shift_positions(lat, lon, east, north)
+
+    bt = scene["TIR1"].values
+    if era5 is not None:
+        from .ingest.era5 import read_era5_profiles
+
+        profiles = read_era5_profiles(era5, time=np.datetime64(scene.attrs["time"]))
+        cth = cloud_top_height_profiles(bt, lat, lon, profiles, threshold=cloud_threshold)
+    else:
+        cth = cloud_top_height(bt, threshold=cloud_threshold)
+    cth = effective_height(cth, height_scale, height_offset_km * 1000.0)
+
+    values = {c: scene[c].values for c in channels}
+    common = dict(sat_lon=scene.attrs["sub_satellite_longitude"], surface_height=_surface(dem, dem_var),
+                  correct=correct, fill_radius=fill_radius)
+    if native:
+        ds = correct_native(lat, lon, values, cth, grid=native_grid, fill_empty=fill_empty, **common)
+    else:
+        ds = correct_scene(lat, lon, values, cth, grid=grid, **common)
+    for c in channels:
+        ds[c].attrs = scene[c].attrs
+    for key in ("satellite", "sensor", "product", "start_time", "end_time", "time"):
+        ds.attrs[key] = scene.attrs[key]
+    ds.attrs["source_file"] = Path(in_path).name
+    ds.attrs["cloud_top_height"] = (f"TIR1 BT < {cloud_threshold:g} K, "
+                                    + ("ERA5 profile" if era5 is not None else "AFGL tropical atmosphere"))
+    _height_attrs(ds, height_scale, height_offset_km)
+    if nav_correction is not None:
+        ds.attrs["navigation_correction"] = Path(nav_correction).name
+    return _write(ds, out_path)
 
 
 def _common_options(p):
@@ -95,13 +174,17 @@ def _common_options(p):
                    help="target grid (default: 0-40N, 60-100E at 0.04 deg)")
     p.add_argument("--fill-radius", type=int, default=1, help="largest gap in cells to interpolate (0 = none)")
     p.add_argument("--nav-correction", help="navigation correction JSON from `pygeoparallax navigation`")
+    p.add_argument("--height-scale", type=float, default=1.0,
+                   help="correct with height-scale * cloud-top height - height-offset (default 1)")
+    p.add_argument("--height-offset", type=float, default=0.0, metavar="KM",
+                   help="subtract this from the cloud-top height [km], e.g. 3 for precipitation (default 0)")
 
 
 def _options(args):
     return dict(
         channels=args.channels, sat_lon=args.sat_lon, dem=args.dem, dem_var=args.dem_var,
         correct=not args.no_correction, grid=_grid_from_args(args), fill_radius=args.fill_radius,
-        nav_correction=args.nav_correction,
+        nav_correction=args.nav_correction, height_scale=args.height_scale, height_offset_km=args.height_offset,
     )
 
 
@@ -112,6 +195,21 @@ def _cmd_correct(args):
 
 
 def _cmd_batch(args):
+    return _run_batch(args, process_file, _options(args))
+
+
+def _cmd_l1c(args):
+    opts = dict(
+        channels=args.channels, bbox=args.bbox, native=args.native, grid=_grid_from_args(args), era5=args.era5,
+        cloud_threshold=args.cloud_threshold, dem=args.dem, dem_var=args.dem_var, correct=not args.no_correction,
+        fill_radius=args.fill_radius, fill_empty=args.fill_empty, nav_correction=args.nav_correction,
+        height_scale=args.height_scale, height_offset_km=args.height_offset,
+    )
+    return _run_batch(args, process_l1c, opts)
+
+
+def _run_batch(args, func, opts):
+    """Run ``func(input, output, **opts)`` for every input file, in parallel processes."""
     inputs = sorted({p for pattern in args.inputs for p in glob.glob(pattern)})
     if not inputs:
         print("no input files matched", file=sys.stderr)
@@ -126,14 +224,13 @@ def _cmd_batch(args):
             continue
         jobs[path] = out
 
-    opts = _options(args)
     failures = 0
     start = time.perf_counter()
     # "spawn", not fork: forking after Numba's parallel kernels have started a
     # thread pool can crash the workers on Linux.
     ctx = multiprocessing.get_context("spawn")
     with ProcessPoolExecutor(max_workers=args.workers, mp_context=ctx) as pool:
-        futures = {pool.submit(process_file, path, out, **opts): path for path, out in jobs.items()}
+        futures = {pool.submit(func, path, out, **opts): path for path, out in jobs.items()}
         for fut in as_completed(futures):
             path = futures[fut]
             try:
@@ -186,6 +283,35 @@ def main(argv=None):
     parser = argparse.ArgumentParser(prog="pygeoparallax", description="Cloud parallax correction for INSAT-3DR.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("l1c", help="correct INSAT-3DR L1C files (HDF5) directly")
+    p.add_argument("inputs", nargs="+", help="3RIMG_*_L1C_SGP*.h5 files or glob patterns")
+    p.add_argument("-o", "--output-dir", required=True)
+    p.add_argument("-j", "--workers", type=int, default=None, help="parallel processes (default: CPU count)")
+    p.add_argument("--overwrite", action="store_true", help="redo files whose output already exists")
+    p.add_argument("--channels", nargs="+", default=["TIR1", "TIR2", "WV", "MIR"],
+                   help="channels to correct (default: TIR1 TIR2 WV MIR; also VIS, SWIR)")
+    p.add_argument("--bbox", nargs=4, type=float, metavar=("LAT_MIN", "LAT_MAX", "LON_MIN", "LON_MAX"),
+                   help="read only this region of the file")
+    p.add_argument("--native", action="store_true",
+                   help="keep the file's own pixel grid instead of regridding to a regular lat/lon grid")
+    p.add_argument("--fill-empty", action="store_true",
+                   help="with --native: fill cells no pixel reached with the nearest corrected value")
+    p.add_argument("--era5", help="ERA5 pressure-level NetCDF for cloud-top height (default: AFGL tropical)")
+    p.add_argument("--cloud-threshold", type=float, default=270.0, help="TIR1 BT below this is cloud [K]")
+    p.add_argument("--dem", help="DEM NetCDF on a regular lat/lon grid, for terrain-aware correction")
+    p.add_argument("--dem-var", default="elevation", help="elevation variable in the DEM file")
+    p.add_argument("--no-correction", action="store_true",
+                   help="regrid without parallax correction (uncorrected baseline)")
+    p.add_argument("--grid", nargs=5, type=float, metavar=("LAT_MIN", "LAT_MAX", "LON_MIN", "LON_MAX", "RES"),
+                   help="target grid without --native (default: 0-40N, 60-100E at 0.04 deg)")
+    p.add_argument("--fill-radius", type=int, default=1, help="largest gap in cells to interpolate (0 = none)")
+    p.add_argument("--nav-correction", help="navigation correction JSON from `pygeoparallax navigation`")
+    p.add_argument("--height-scale", type=float, default=1.0,
+                   help="correct with height-scale * cloud-top height - height-offset (default 1)")
+    p.add_argument("--height-offset", type=float, default=0.0, metavar="KM",
+                   help="subtract this from the cloud-top height [km], e.g. 3 for precipitation (default 0)")
+    p.set_defaults(func=_cmd_l1c)
 
     p = sub.add_parser("correct", help="correct one standard-scene NetCDF file")
     p.add_argument("input")

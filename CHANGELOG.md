@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 (unreleased)
+
+Easier use of the tool: L1C files can be corrected in one command, on a regular grid or on their own pixel grid, and the correction height can be lowered for precipitation work. The correction itself is unchanged.
+
+### Added
+- **`pygeoparallax l1c`:** corrects INSAT-3DR L1C files directly: reads the channels, derives cloud-top height from TIR1 (AFGL tropical atmosphere, or ERA5 with `--era5`) and writes NetCDF. Options for a region (`--bbox`), terrain (`--dem`), navigation correction, an uncorrected baseline and parallel processing.
+- **Correction on the native pixel grid:** `correct_native` (also `pygeoparallax l1c --native`) puts the corrected scene back on the input's own pixels, with the same occlusion-aware resampling. `NativeGrid` describes an L1C-style grid (regular in WGS84 Mercator northing). This is the method used for the U-Net patches (`scripts/build_unet_patches.py`), now in the library.
+- **Effective height:** `cloudheight.effective_height(cth, scale, offset)` and the CLI options `--height-scale` / `--height-offset` (for `l1c`, `correct` and `batch`). They correct with a lower height than the infrared top, which suits precipitation products better (median infrared top 3.2 km above the GPM storm top).
+- **Tutorial:** `notebooks/quickstart.ipynb`, from one L1C file to corrected output, with figures.
+- **Tests** for the native grid, the native-grid correction, the effective height and the `l1c` command (64 tests).
+
 ## 0.3.0 (2026-10-26)
 
 Full GPM validation (38 usable cases, 2018–2024), the investigation of why most of the parallax is not visible against GPM, and the U-Net A/B retraining package. No changes to the correction itself.

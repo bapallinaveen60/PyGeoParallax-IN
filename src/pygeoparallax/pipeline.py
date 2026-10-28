@@ -1,15 +1,21 @@
-"""End-to-end scene processing: parallax correction followed by regridding."""
+"""End-to-end scene processing: parallax correction followed by regridding.
+
+:func:`correct_scene` puts the corrected scene on a regular lat/lon grid;
+:func:`correct_native` puts it back on the input's own pixel grid.
+"""
 
 from __future__ import annotations
 
 import numpy as np
 import xarray as xr
+from scipy import ndimage
 
 from . import __version__
 from .geometry.constants import SATELLITE_LONGITUDES
 from .geometry.parallax import parallax_correct, parallax_correct_terrain, parallax_shift
-from .resample.bucket import resample
+from .resample.bucket import EMPTY, resample
 from .resample.grid import SOUTH_ASIA_0P04, Grid
+from .resample.native import NativeGrid
 
 
 def correct_scene(lat, lon, channels: dict, cth, sat_lon=SATELLITE_LONGITUDES["INSAT-3DR"],
@@ -50,6 +56,75 @@ def correct_scene(lat, lon, channels: dict, cth, sat_lon=SATELLITE_LONGITUDES["I
         and, when ``correct`` is True, ``shift_km`` (how far each winning
         pixel moved).
     """
+    lat_c, lon_c, height, values, attrs = _prepare(lat, lon, channels, cth, sat_lon, surface_height, correct,
+                                                   terrain_iterations)
+    ds = resample(grid, lat_c, lon_c, height, values, fill_radius=fill_radius, attrs=attrs)
+    _set_attrs(ds, correct)
+    return ds
+
+
+def correct_native(lat, lon, channels: dict, cth, sat_lon=SATELLITE_LONGITUDES["INSAT-3DR"],
+                   grid: NativeGrid | None = None, surface_height=None, correct=True, fill_radius=1,
+                   fill_empty=False, terrain_iterations=3) -> xr.Dataset:
+    """Parallax-correct one scene and put it back on its own pixel grid.
+
+    The output has the input's shape and pixel centres, so corrected and
+    uncorrected scenes line up pixel for pixel (for example as inputs to a
+    model trained on L1C tiles). The correction and the occlusion-aware
+    resampling are the same as in :func:`correct_scene`.
+
+    Parameters
+    ----------
+    lat, lon, channels, cth, sat_lon, surface_height, correct, fill_radius, terrain_iterations
+        As in :func:`correct_scene`. ``lat``/``lon`` are the pixel positions
+        to correct, after any navigation correction.
+    grid : NativeGrid, optional
+        The output grid. Defaults to the grid of ``lat``/``lon`` themselves,
+        which must then be separable and regular (true of L1C files read
+        without a navigation correction). Pass it explicitly when the
+        positions were shifted, e.g. ``NativeGrid.from_2d(*file_lat_lon)``.
+    fill_empty : bool, optional
+        Fill the channels in cells that no pixel reached (``fill_flag`` 2,
+        behind tall clouds or at the edges) with the nearest corrected value.
+        Useful for models that need a complete image; the cells stay flagged.
+
+    Returns
+    -------
+    xarray.Dataset
+        Dimensions ``(y, x)`` with 2-D ``lat``/``lon`` coordinates (the pixel
+        centres), the channels, ``cth``, ``height``, ``count``, ``fill_flag``
+        and, when ``correct`` is True, ``shift_km``.
+    """
+    if grid is None:
+        grid = NativeGrid.from_2d(lat, lon)
+    lat_c, lon_c, height, values, attrs = _prepare(lat, lon, channels, cth, sat_lon, surface_height, correct,
+                                                   terrain_iterations)
+    to_index, index_grid = grid.index_space()
+    rows, cols = to_index(lat_c, lon_c)
+    gridded = resample(index_grid, rows, cols, height, values, fill_radius=fill_radius, attrs=attrs)
+
+    fill_flag = gridded["fill_flag"].values
+    if fill_empty:
+        empty = fill_flag == EMPTY
+        if empty.any() and not empty.all():
+            idx = ndimage.distance_transform_edt(empty, return_distances=False, return_indices=True)
+            for name in channels:
+                gridded[name].values[...] = gridded[name].values[idx[0], idx[1]]
+        attrs["empty_cells_filled"] = "nearest"
+
+    lat2d, lon2d = np.meshgrid(grid.lats, grid.lons, indexing="ij")
+    ds = xr.Dataset({name: (("y", "x"), da.values, da.attrs) for name, da in gridded.data_vars.items()},
+                    coords={"lat": (("y", "x"), lat2d), "lon": (("y", "x"), lon2d)}, attrs=gridded.attrs)
+    ds.attrs.pop("grid_resolution_deg", None)
+    ds.attrs["grid"] = f"native ({grid.kind}), {grid.shape[0]} x {grid.shape[1]} pixels"
+    ds["lat"].attrs = {"units": "degrees_north", "standard_name": "latitude"}
+    ds["lon"].attrs = {"units": "degrees_east", "standard_name": "longitude"}
+    _set_attrs(ds, correct)
+    return ds
+
+
+def _prepare(lat, lon, channels, cth, sat_lon, surface_height, correct, terrain_iterations):
+    """Corrected positions, occlusion heights, values to grid and global attributes."""
     lat = np.asarray(lat, float)
     lon = np.asarray(lon, float)
     cth = np.asarray(cth, float)
@@ -77,8 +152,10 @@ def correct_scene(lat, lon, channels: dict, cth, sat_lon=SATELLITE_LONGITUDES["I
         "parallax_corrected": int(bool(correct)),
         "terrain_corrected": int(bool(correct and surface_height is not None)),
     }
-    ds = resample(grid, lat_c, lon_c, height, values, fill_radius=fill_radius, attrs=attrs)
+    return lat_c, lon_c, height, values, attrs
+
+
+def _set_attrs(ds, correct):
     ds["cth"].attrs = {"units": "m", "long_name": "cloud-top height"}
     if correct:
         ds["shift_km"].attrs = {"units": "km", "long_name": "parallax displacement of the pixel"}
-    return ds
