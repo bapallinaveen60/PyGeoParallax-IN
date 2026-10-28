@@ -5,9 +5,8 @@ are scored on the same pixels, and the B - A differences are tested with a
 paired bootstrap that resamples whole scenes (patches of one INSAT/GPM pair
 stay together).
 
-Reported metrics: accuracy, macro F1, and per-class F1 and CSI. They are given
-for the full test split, for its validation subset, and for the test-only
-remainder.
+Reported metrics: accuracy, macro F1, and per-class F1 and CSI, on the test
+split (no validation split is used).
 
 Writes ``<runs>/comparison_<task>.json`` and prints a table.
 
@@ -72,17 +71,13 @@ def main(argv=None):
     ra, rb = (np.load(runs / f"{args.task}_{m}" / "test_confusion_by_patch.npz") for m in "AB")
     assert np.array_equal(ra["patches"], rb["patches"]), "A and B were scored on different patches"
     classes = list(json.loads((runs / f"{args.task}_A" / "test_metrics.json").read_text())["per_class"])
-    names, scenes, in_val = ra["patches"], ra["scene"], ra["in_val"]
-
-    result = {"task": args.task}
-    for label, sel in (("test", np.ones(len(names), bool)), ("val_subset", in_val), ("test_only", ~in_val)):
-        result[label] = compare(ra["confusion"][sel], rb["confusion"][sel], scenes[sel], classes)
-        r = result[label]
-        print(f"\n{args.task}, {label}: {r['patches']} patches, {r['scenes']} scenes (scene bootstrap, n={N_BOOT})")
-        print(f"  {'metric':<24}{'A':>8}{'B':>8}{'B-A':>9}   95% interval       p")
-        for k, m in r["metrics"].items():
-            ci = m["ci95"] or [np.nan, np.nan]
-            print(f"  {k:<24}{m['A']:8.4f}{m['B']:8.4f}{m['B_minus_A']:+9.4f}   [{ci[0]:+.4f}, {ci[1]:+.4f}]  {m['p_two_sided']:.3f}")
+    result = {"task": args.task, "test": compare(ra["confusion"], rb["confusion"], ra["scene"], classes)}
+    r = result["test"]
+    print(f"\n{args.task}, test: {r['patches']} patches, {r['scenes']} scenes (scene bootstrap, n={N_BOOT})")
+    print(f"  {'metric':<24}{'A':>8}{'B':>8}{'B-A':>9}   95% interval       p")
+    for k, m in r["metrics"].items():
+        ci = m["ci95"] or [np.nan, np.nan]
+        print(f"  {k:<24}{m['A']:8.4f}{m['B']:8.4f}{m['B_minus_A']:+9.4f}   [{ci[0]:+.4f}, {ci[1]:+.4f}]  {m['p_two_sided']:.3f}")
     out = runs / f"comparison_{args.task}.json"
     out.write_text(json.dumps(result, indent=2))
     print(f"\nwrote {out}")

@@ -9,8 +9,10 @@ Model B input). Writes ``<out>/train.npz`` and ``<out>/test.npz`` with:
 - ``precip_type``: (N, 128, 128) int8, the patches' GPM label, set to -99
   where the corrected field had no data, so that A and B are scored on the
   same pixels;
-- ``scene``, ``patch``: names; ``in_val`` (test only): patch is also in the
-  notebooks' validation folder.
+- ``scene``, ``patch``: names.
+
+Only the train and test folders are used. The notebooks' validation folder is
+not: its patches are part of test.
 
 float16 keeps the normalised BT to about 0.1 K.
 
@@ -47,13 +49,9 @@ def pack(patches, corrected, split, out):
         lab = d["precip_type"].copy()
         lab[c["ignore"]] = -99
         y[k] = lab
-    extra = {}
-    if split == "test":
-        val = {p.name for p in (Path(patches) / "final_patches_val").glob("*.npz")}
-        extra["in_val"] = np.array([nm in val for nm in names])
     scene = np.array([nm.rsplit("_patch_", 1)[0] for nm in names])
     path = Path(out) / f"{split}.npz"
-    np.savez(path, x_A=x_a, x_B=x_b, precip_type=y, patch=np.array(names), scene=scene, **extra)
+    np.savez(path, x_A=x_a, x_B=x_b, precip_type=y, patch=np.array(names), scene=scene)
     print(f"{path}: {n} patches, {len(set(scene))} scenes, {path.stat().st_size / 1e9:.2f} GB", flush=True)
 
 

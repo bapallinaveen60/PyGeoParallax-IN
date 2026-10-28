@@ -23,10 +23,10 @@ Tasks (labels from the patches' ``precip_type``):
 - ``stratconv``: stratiform (1) / convective (>= 2);
 - ``rain``: no rain (-1) / rain (>= 1).
 
-Splits are the notebooks' folders: train for training; test for the final
-scores. The validation patches are a subset of test and are scored every
-``--val-every`` epochs for the learning curve only. Nothing is selected on
-them.
+Two splits only: train for training, test for the final scores. The test
+patches are not read until training has finished, so nothing about them
+(not even a learning curve) can influence the model. The notebooks'
+validation folder is not used: its patches are part of test.
 
 A checkpoint is written every epoch, so an interrupted run resumes.
 
@@ -222,7 +222,6 @@ def main(argv=None):
     ap.add_argument("--epochs", type=int, default=100)
     ap.add_argument("--batch", type=int, default=1)
     ap.add_argument("--lr", type=float, default=1e-6)
-    ap.add_argument("--val-every", type=int, default=5)
     ap.add_argument("--deterministic", action="store_true", help="deterministic ops (slower on GPU)")
     ap.add_argument("--max-train", type=int, help="use only the first N training patches (timing tests)")
     args = ap.parse_args(argv)
@@ -244,18 +243,16 @@ def main(argv=None):
 
     X_tr, Y_tr, _ = load_split(args.data, "train", args.model, args.task)
     X_tr, Y_tr = X_tr[:args.max_train], Y_tr[:args.max_train]
-    X_te, Y_te, te = load_split(args.data, "test", args.model, args.task)
-    val = te["in_val"]
-    print(f"{args.task} model {args.model}: {len(X_tr)} train, {int(val.sum())} val, {len(X_te)} test patches", flush=True)
+    print(f"{args.task} model {args.model}: {len(X_tr)} train patches", flush=True)
 
     to_float = lambda x, y: (tf.cast(x, tf.float32), y)  # noqa: E731
     train_ds = (tf.data.Dataset.from_tensor_slices((X_tr, Y_tr))
                 .shuffle(2048, seed=SEED, reshuffle_each_iteration=True)
                 .batch(args.batch).map(to_float).prefetch(tf.data.AUTOTUNE))
-    val_ds = tf.data.Dataset.from_tensor_slices((X_te[val], Y_te[val])).batch(8).map(to_float)
 
     ckpt, hist_path = run / "checkpoint.keras", run / "history.json"
-    history = json.loads(hist_path.read_text()) if hist_path.exists() else {"epoch": [], "loss": [], "acc": [], "val": [], "seconds": []}
+    history = json.loads(hist_path.read_text()) if hist_path.exists() else {"epoch": [], "loss": [], "acc": [], "seconds": []}
+    history.pop("val", None)  # runs started with the earlier version recorded validation scores; not used
     model = unet_model(num_classes=len(classes))
     model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=args.lr), loss=weighted_loss(weights),
                   metrics=[masked_accuracy])
@@ -272,26 +269,23 @@ def main(argv=None):
     for epoch in range(start + 1, args.epochs + 1):
         t0 = time.perf_counter()
         h = model.fit(train_ds, epochs=epoch, initial_epoch=epoch - 1, verbose=2)
-        v = None
-        if epoch % args.val_every == 0 or epoch == args.epochs:
-            v = [float(x) for x in model.evaluate(val_ds, verbose=0)]
         history["epoch"].append(epoch)
         history["loss"].append(float(h.history["loss"][-1]))
         history["acc"].append(float(h.history["masked_accuracy"][-1]))
-        history["val"].append(v)
         history["seconds"].append(time.perf_counter() - t0)
         tmp = run / "checkpoint_tmp.keras"  # write then rename, so a disconnect never leaves a broken checkpoint
         model.save(tmp)
         tmp.replace(ckpt)
         hist_path.write_text(json.dumps(history))
-        print(f"epoch {epoch}: loss {history['loss'][-1]:.4f} acc {history['acc'][-1]:.4f} "
-              f"val [loss, acc] {v} ({history['seconds'][-1]:.0f} s)", flush=True)
+        print(f"epoch {epoch}: train loss {history['loss'][-1]:.4f} acc {history['acc'][-1]:.4f} "
+              f"({history['seconds'][-1]:.0f} s)", flush=True)
 
     model.save(run / "model.keras")
     del X_tr, Y_tr, train_ds
+    # The test split is read only now, after training.
+    X_te, Y_te, te = load_split(args.data, "test", args.model, args.task)
     cm = confusion_by_patch(model, X_te, Y_te, len(classes))
-    np.savez_compressed(run / "test_confusion_by_patch.npz", confusion=cm, patches=te["patch"],
-                        scene=te["scene"], in_val=val)
+    np.savez_compressed(run / "test_confusion_by_patch.npz", confusion=cm, patches=te["patch"], scene=te["scene"])
     metrics = {"task": args.task, "model": args.model, "test_patches": len(X_te), **scores(cm.sum(0), classes)}
     (run / "test_metrics.json").write_text(json.dumps(metrics, indent=2))
     print(json.dumps({k: metrics[k] for k in ("accuracy", "macro_f1")}), flush=True)
