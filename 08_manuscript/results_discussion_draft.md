@@ -207,16 +207,40 @@ Our results add a caution to radar-based validation of geostationary parallax co
 
 ### 6.8 Effect on precipitation-type classification
 
-*In progress.* The group's attention U-Net for precipitation type is trained on 128 × 128 patches of four INSAT-3DR channels (TIR1, TIR2, WV, MIR), with GPM DPR precipitation type as label. It is being retrained twice, with identical architecture, labels, pixel mask, initial weights and training schedule:
+Section 6.4 leaves open whether correcting with the infrared height helps a precipitation product. Table 4 compares the U-Net trained on uncorrected input (Model A) with the same network trained on parallax-corrected input (Model B), for the three tasks of Section 4.8.
 
-- **Model A** on the original (uncorrected) patches;
-- **Model B** on the same patches after parallax correction on their own pixel grid.
+**Table 4.** Test-set scores of Model A (uncorrected input) and Model B (parallax-corrected input): 2,197 patches from 347 scenes. B − A is given with its 95 % interval from a paired bootstrap over scenes.
 
-The data are 5,082 training patches from 823 scenes (2018, 2021–2023) and 2,197 test patches from 347 scenes (September 2023, 2024). The correction moves cloud by a median of 4.4 km per patch, about one pixel, and changes TIR1 by more than 1 K on 34 % of pixels. Because GPM labels are at ground positions, only the input differs between A and B. The comparison (accuracy, macro F1, per-class CSI, with a paired bootstrap over test scenes) is the application test of Section 6.4. Results will be added here.
+| Task | Score | A | B | B − A (95 % interval) | p |
+| :--- | :--- | ---: | ---: | :--- | ---: |
+| Four classes | Accuracy | XX | XX | XX (XX … XX) | XX |
+| | Macro F1 | XX | XX | XX (XX … XX) | XX |
+| | CSI stratiform | XX | XX | XX (XX … XX) | XX |
+| | CSI deep convective | XX | XX | XX (XX … XX) | XX |
+| | CSI shallow isolated | XX | XX | XX (XX … XX) | XX |
+| | CSI shallow non-isolated | XX | XX | XX (XX … XX) | XX |
+| Stratiform / convective | Accuracy | XX | XX | XX (XX … XX) | XX |
+| | Macro F1 | XX | XX | XX (XX … XX) | XX |
+| | CSI convective | XX | XX | XX (XX … XX) | XX |
+| Rain / no rain | Accuracy | XX | XX | XX (XX … XX) | XX |
+| | Macro F1 | XX | XX | XX (XX … XX) | XX |
+| | CSI rain | XX | XX | XX (XX … XX) | XX |
+
+For the four-class task, macro F1 changes from XX with uncorrected input to XX with corrected input (B − A = XX, 95 % interval XX to XX, p = XX). The deep convective class has the coldest, highest tops and so the largest computed shift. Its CSI changes from XX to XX (B − A = XX, XX to XX).
+
+Separating stratiform from convective rain, macro F1 changes by XX (XX to XX). Detecting rain, it changes by XX (XX to XX).
+
+Both models reach a similar training loss after 100 epochs (XX for A and XX for B in the four-class task), so the difference comes from the input rather than from unequal training.
 
 ---
 
 ## Notes for revision
 
 - Section 6.6: check whether ISRO's Hydro-Estimator applies a parallax correction (MOSDAC ATBD); run a Google Scholar / Scopus novelty search.
-- Section 6.8: fill in after the Colab runs (`compare_unet_ab.py` output).
+- Section 6.8: fill in every XX from `runs/comparison_<task>.json` (A, B, B_minus_A, ci95, p_two_sided) and the training loss from `runs/<task>_<model>/history.json`. Use three decimals, for example 0.412, and differences with a sign, for example +0.008.
+- Section 6.8: add one closing paragraph after the results.
+  - **If B is significantly better** (the interval excludes 0), especially for deep convective CSI: the correction helps a rain product even with the full infrared height. Link this to the field measure in Section 5.4.
+  - **If there is no significant difference:** a one-pixel median shift is within what the network absorbs through its receptive field. This is consistent with the cell result (Section 5.5), where only about 5 % of the parallax is visible against GPM. An effective height (Section 6.4) is the next test.
+  - **If B is worse:** this is consistent with the cell result, where correction moves the cold signal past the rain, and supports an effective height for precipitation.
+  - In every case, update the abstract, the last item of the conclusions, and the sentence "The effect on a precipitation-type classifier is being tested" in Section 6.4.
+- Section 4.8: cite the group's U-Net work (paper or thesis) and the GPM product of the labels (2A.DPR or 2A.Ku `typePrecip`); confirm the class definitions with the group.

@@ -102,3 +102,29 @@ An error \(\delta h\) in cloud-top height shifts the corrected position by about
 
 Uncertainties are 95 \% percentile bootstrap intervals from 10 000 resamples. For the field measure, cases are resampled; for the cell measure, cases are resampled with all their cells (a cluster bootstrap), because cells of one storm are not independent. Paired comparisons between correction states use the absolute offset of each case: the median change with its bootstrap interval, the Wilcoxon signed-rank test and the exact sign test on the number of cases that improve. For the cell measure the paired test uses the per-case medians. The dependence of the raw offset on viewing angle is tested with the Spearman rank correlation and the least-squares slope against tan(VZA), with a bootstrap interval.
 
+\subsection{Precipitation-type classification experiment}\label{sec:4.8}
+
+To test whether the correction helps a downstream precipitation product, we retrain an existing attention U-Net for precipitation type twice: once on uncorrected input (Model A) and once on parallax-corrected input (Model B). Only the input differs between the two.
+
+\textbf{Data.} The U-Net works on 128 × 128 tiles of the INSAT-3DR L1C Mercator grid, with four channels: TIR1, TIR2, WV and MIR. Brightness temperatures are scaled as (BT − 180 K) / 150 K and clipped to {[}0, 1{]}. Each pixel carries the GPM DPR precipitation type of the footprint matched to it. Pixels without a GPM label are ignored in the loss and in the scores. GPM positions are on the ground, so parallax displaces the input but not the labels.
+
+\textbf{Correction.} For Model B, all tiles of a scene are mosaicked, and the grid (regular in Mercator y and in longitude) is fitted from the tile coordinates to within \(10^{-4}\) pixel. Cloud-top height comes from TIR1 with the tropical standard atmosphere, with BT \textless{} 270 K taken as cloud. Every pixel is then corrected with the solver of Section~\ref{sec:3.3} and resampled onto the original pixel grid with the occlusion-aware method of Section~\ref{sec:3.5}, before the tiles are cut out again. Cells that receive no corrected pixel (0.06 \% of labelled pixels) are filled with the nearest corrected value for the input, and their labels are dropped for both models, so A and B are scored on the same pixels. The correction moves cloud by a median of 4.4 km, about one pixel, and changes TIR1 by more than 1 K on 34 \% of pixels.
+
+\textbf{Splits.} The training set has 5,082 patches from 823 scenes (2018 and 2021--2023); the test set has 2,197 patches from 347 scenes (September 2023 and 2024). No scene, day or GPM overpass appears in both. There is no validation split: nothing is tuned, there is no early stopping, and the test set is read only after training has finished.
+
+\textbf{Training.} Both models use the same network (about 1.1 million parameters, with layer normalisation), class-weighted cross-entropy, the Adam optimiser at a learning rate of \(10^{-6}\), a batch size of 1 and 100 epochs. They also start from the same initial weights and see the patches in the same order (seed 42). There are three tasks:
+
+\begin{itemize}
+\tightlist
+\item
+  four classes: stratiform, deep convective, shallow isolated and shallow non-isolated (class weights 1, 2, 3, 3);
+\item
+  stratiform versus convective (1, 2.2);
+\item
+  rain versus no rain (1, 3).
+\end{itemize}
+
+This gives six models.
+
+\textbf{Scores.} Scores are computed per pixel on the test set: accuracy, macro F1, and per-class F1 and critical success index, CSI = TP / (TP + FP + FN). The difference B − A is tested with a paired bootstrap over test scenes (2,000 resamples), which keeps all patches of a scene together. The two-sided p-value is taken from the bootstrap distribution of the difference.
+
