@@ -26,7 +26,7 @@ The corrected output is validated against spaceborne radar overpasses from the G
 
 **U-Net comparison:** scripts to retrain the precipitation-type U-Net on uncorrected (Model A) and parallax-corrected (Model B) patches, with a Colab notebook ([colab/unet_ab_colab.ipynb](colab/unet_ab_colab.ipynb)); results pending.
 
-Speed: 1.8 s per India scene ([benchmark.md](00_Documentation/benchmark.md)). API overview: [api_reference.md](00_Documentation/api_reference.md). Changes: [CHANGELOG.md](CHANGELOG.md).
+Speed: 1.8 s per India scene ([benchmark.md](00_Documentation/benchmark.md)). API overview: [api_reference.md](00_Documentation/api_reference.md). Changes: [CHANGELOG.md](CHANGELOG.md). Questions, bug reports and contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
