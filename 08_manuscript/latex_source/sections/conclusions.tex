@@ -10,11 +10,11 @@ We have presented PyGeoParallax-IN, an open-source tool that corrects INSAT-3DR 
   \item \textbf{Navigation alone cannot explain the result.} A navigation correction fitted to the GPM cells centres the cell measure but leaves the storm-scale agreement worse than uncorrected. No single translation centres both measures, which differ by 2--5\,km depending on the navigation applied. We attribute this mainly to storm structure: the coldest infrared tops and the deepest radar echoes are different targets. It limits GPM-based validation of absolute position to about $\pm$3--5\,km, comparable to the parallax over most of India.
   \item \textbf{Navigation, cloud height and terrain.}
   \begin{itemize}
-    \item INSAT-3DR L1C navigation errors are seasonal, 7--20\,km to the west from late September to mid-March. In the monsoon they are small and cannot be measured per day from coastlines.
+    \item INSAT-3DR L1C navigation errors are seasonal, 7--20\,km to the west from late September to mid-March, consistent with the yaw flip. In the monsoon they are small and cannot be measured per day from coastlines.
     \item Brightness-temperature heights of the coldest tops lie at the tropopause, about 3\,km above the GPM echo tops, with either the standard atmosphere or ERA5.
     \item In the 14 cases of 2022--2024, ERA5 profiles change the offsets by less than 0.5\,km and terrain by less than 0.1\,km; terrain moves clear-sky ground in the Himalaya by up to 6\,km.
   \end{itemize}
-  \item \textbf{Correcting the input does not improve a precipitation-type classifier.} A U-Net retrained on corrected input scores the same as on uncorrected input in three tasks (accuracy and macro F1 within 0.12 percentage points). Its convective scores fall slightly (deep convective CSI from 0.041 to 0.038), consistent with item 3; the changes are small and come from one training run per model.
+  \item \textbf{Correcting the input does not improve a precipitation-type classifier.} A U-Net retrained on corrected input scores the same as on uncorrected input in three tasks (accuracy and macro F1 within 0.12 percentage points). Its convective scores fall slightly (deep convective CSI from 0.041 to 0.038), consistent with item 3 and with an earlier SEVIRI study in which the uncorrected network also performed better \citep{dadderio2023}; the changes are small and come from one training run per model.
   \item \textbf{The tool is fast and ready for downstream use.} It processes an India scene in 1.8\,s and writes uncorrected and corrected datasets that are identical in clear sky.
 \end{enumerate}
 

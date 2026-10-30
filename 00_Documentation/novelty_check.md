@@ -1,5 +1,7 @@
 # Novelty Check (26 Oct 2026)
 
+> **Superseded on 30 Oct 2026** by the fuller literature search in [`reports/INSAT parallax correction novelty.md`](../reports/INSAT%20parallax%20correction%20novelty.md). Main changes: ISRO's INSAT-3D Hydro-Estimator applies a parallax shift (2015 ATBD); D'Adderio et al. (2023) already compared a U-Net on corrected and uncorrected SEVIRI input; Jindal et al. (2014) compared INSAT-3D geolocation before and after a yaw flip. The manuscript was reworded accordingly.
+
 **Two of the four claims hold as written and two need narrowing. No published parallax correction or parallax validation for INSAT-3D/3DR was found. INSAT-3DR geolocation error, however, is already measured routinely by ISRO, and open-source parallax correction exists in satpy.**
 
 Searched: web search over Mausam, Current Science, Journal of the Indian Society of Remote Sensing, MOSDAC/ISRO documents, Copernicus journals and software documentation, with queries combining INSAT-3D/3DR, Kalpana-1, parallax, navigation, geolocation, GPM/DPR and Hydro-Estimator. This is a web search, not a database search: **a Google Scholar / Scopus check of "INSAT" + "parallax" is still needed before submission.**
