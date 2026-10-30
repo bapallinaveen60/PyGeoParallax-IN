@@ -1,4 +1,6 @@
-% PyGeoParallax-IN manuscript (draft).
+% PyGeoParallax-IN manuscript, prepared for Atmospheric Measurement Techniques (AMT, Copernicus).
+% Back matter follows AMT's required sections. For submission, move the text into the Copernicus
+% LaTeX template (copernicus.cls) from https://publications.copernicus.org/for_authors/manuscript_preparation.html
 % Compile with pdfLaTeX + BibTeX (Overleaf default). Sections 2-6 are generated from the
 % Markdown drafts by 08_manuscript/md_to_latex.py; edit those drafts or the .tex files here.
 \documentclass[11pt,a4paper]{article}
@@ -33,9 +35,8 @@
 \setlength{\LTcapwidth}{\textwidth}
 
 \title{Parallax correction of INSAT-3DR imagery over India:\\an open-source tool and the limits of validation against GPM radar}
-\author{Naveen Bapalli\thanks{[Affiliation, address, e-mail]}\\[2pt]
-  \small [Co-authors and affiliations to be added]}
-\date{Draft, \today}
+\author{Naveen Bapalli\thanks{Independent researcher, India. Correspondence: Naveen Bapalli ([e-mail to be added]).}}
+\date{Manuscript for \textit{Atmospheric Measurement Techniques}, \today}
 
 \begin{document}
 \maketitle
@@ -54,12 +55,26 @@
 \input{sections/discussion}
 \input{sections/conclusions}
 
-\section*{Code and data availability}
+\section*{Code availability}
 {\sloppy
-PyGeoParallax-IN (version 0.3.0, MIT licence), with the scripts and case lists used in this study, is archived on Zenodo \citep{pygeoparallax}: \doi{10.5281/zenodo.23672246}. The concept DOI, \doi{10.5281/zenodo.23666957}, always resolves to the latest version. Development continues at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}. INSAT-3DR data are from MOSDAC (\url{https://www.mosdac.gov.in}), GPM 2A Ku data from NASA GES DISC \citep{gpm2aku_v08}, ERA5 from the Copernicus Climate Data Store \citep{c3s2018} and SRTM from OpenTopography.\par}
+PyGeoParallax-IN (version 0.4.0, MIT licence), with the scripts, case lists and U-Net training and comparison scripts used in this study, is archived on Zenodo \citep{pygeoparallax}: \doi{10.5281/zenodo.23812270}. The concept DOI, \doi{10.5281/zenodo.23666957}, always resolves to the latest version. Development continues at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}.\par}
+
+\section*{Data availability}
+{\sloppy
+INSAT-3DR Imager L1C and L2B products are available from MOSDAC, Space Applications Centre, ISRO (\url{https://www.mosdac.gov.in}) after free registration. GPM DPR 2A Ku version 8 data are available from NASA GES DISC \citep{gpm2aku_v08}. ERA5 pressure-level data are available from the Copernicus Climate Data Store \citep{c3s2018}. SRTM elevation data \citep{farr2007} were obtained through OpenTopography, and coastlines from Natural Earth \citep{naturalearth}. The validation case list (GPM orbits and INSAT scan times) is part of the code archive above.\par}
+
+\section*{Author contributions}
+NB designed the study, wrote the software, carried out the validation and the U-Net experiments, and wrote the manuscript.
+
+\section*{Competing interests}
+The author has declared that there are no competing interests.
 
 \section*{Acknowledgements}
-[To be added.]
+{\sloppy
+INSAT-3D and INSAT-3DR data were provided by the Meteorological and Oceanographic Satellite Data Archival Centre (MOSDAC), Space Applications Centre, ISRO. GPM data were provided by the NASA/JAXA Global Precipitation Measurement mission through the NASA Goddard Earth Sciences Data and Information Services Center (GES DISC). ERA5 was produced by the European Centre for Medium-Range Weather Forecasts (ECMWF) and made available by the Copernicus Climate Change Service. SRTM data were provided by NASA and USGS through OpenTopography, and coastlines by Natural Earth. The software builds on NumPy, SciPy, xarray, pyproj, Numba, h5py and TensorFlow; satpy and pyorbital were used for independent checks. The author thanks the developers of the attention U-Net and of the labelled INSAT--GPM patches used in Section~\ref{sec:4.8}. An AI assistant (Claude, Anthropic) was used to help write code and edit the text; the author reviewed all of it and takes full responsibility for the content.\par}
+
+\section*{Financial support}
+This research received no external funding.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
