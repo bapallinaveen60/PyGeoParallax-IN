@@ -183,7 +183,7 @@ Brightness-temperature heights put the coldest convective tops at the tropopause
 - For **cloud products** (cloud masks, cloud-top properties), the infrared top is the right height, and the correction places the cloud top where geometry says it is.
 - For **precipitation products**, the rain-relevant level lies below the infrared top, and our cell results suggest that correcting cores with the full infrared height moves the cold signal past the rain. An effective height between the echo top and the infrared top could suit precipitation better.
 
-The effect on a precipitation-type classifier is being tested (Section 6.8).
+A precipitation-type classifier trained on input corrected with the full infrared height does not improve, and its convective scores fall slightly (Section 6.8).
 
 ISRO's operational cloud-top pressure product placed deep cores 2–3 km lower than the BT heights in our first case (Kochi, 6 June 2022; r = 0.86 overall). It was not used for the correction.
 
@@ -209,38 +209,45 @@ Our results add a caution to radar-based validation of geostationary parallax co
 
 Section 6.4 leaves open whether correcting with the infrared height helps a precipitation product. Table 4 compares the U-Net trained on uncorrected input (Model A) with the same network trained on parallax-corrected input (Model B), for the three tasks of Section 4.8.
 
-**Table 4.** Test-set scores of Model A (uncorrected input) and Model B (parallax-corrected input): 2,197 patches from 347 scenes. B − A is given with its 95 % interval from a paired bootstrap over scenes.
+**Table 4.** Test-set scores of Model A (uncorrected input) and Model B (parallax-corrected input): 2,197 patches from 347 scenes. B − A is given with its 95 % interval from a paired bootstrap over scenes, and p is two-sided.
 
-| Task | Score | A | B | B − A (95 % interval) | p |
-| :--- | :--- | ---: | ---: | :--- | ---: |
-| Four classes | Accuracy | XX | XX | XX (XX … XX) | XX |
-| | Macro F1 | XX | XX | XX (XX … XX) | XX |
-| | CSI stratiform | XX | XX | XX (XX … XX) | XX |
-| | CSI deep convective | XX | XX | XX (XX … XX) | XX |
-| | CSI shallow isolated | XX | XX | XX (XX … XX) | XX |
-| | CSI shallow non-isolated | XX | XX | XX (XX … XX) | XX |
-| Stratiform / convective | Accuracy | XX | XX | XX (XX … XX) | XX |
-| | Macro F1 | XX | XX | XX (XX … XX) | XX |
-| | CSI convective | XX | XX | XX (XX … XX) | XX |
-| Rain / no rain | Accuracy | XX | XX | XX (XX … XX) | XX |
-| | Macro F1 | XX | XX | XX (XX … XX) | XX |
-| | CSI rain | XX | XX | XX (XX … XX) | XX |
+| Task | Score | A | B | B − A | 95 % interval | p |
+| :------------ | :-------------------- | ----: | ----: | -------: | :------------------------- | ----: |
+| Four classes | Accuracy | 0.675 | 0.674 | −0.0004 | −0.0011 to +0.0004 | 0.290 |
+|  | Macro F1 | 0.421 | 0.420 | −0.0012 | −0.0024 to 0.0000 | 0.050 |
+|  | CSI stratiform | 0.700 | 0.701 | +0.0003 | −0.0004 to +0.0012 | 0.431 |
+|  | CSI deep convective | 0.041 | 0.038 | −0.0030 | −0.0055 to −0.0007 | 0.008 |
+|  | CSI shallow isolated | 0.265 | 0.264 | −0.0006 | −0.0019 to +0.0007 | 0.388 |
+|  | CSI shallow non-isolated | 0.221 | 0.222 | +0.0010 | −0.0001 to +0.0020 | 0.070 |
+| Stratiform / convective | Accuracy | 0.709 | 0.709 | +0.0000 | −0.0012 to +0.0013 | 0.920 |
+|  | Macro F1 | 0.686 | 0.685 | −0.0004 | −0.0014 to +0.0007 | 0.494 |
+|  | CSI stratiform | 0.628 | 0.628 | +0.0006 | −0.0010 to +0.0022 | 0.481 |
+|  | CSI convective | 0.429 | 0.428 | −0.0012 | −0.0023 to −0.0001 | 0.039 |
+| Rain / no rain | Accuracy | 0.863 | 0.863 | +0.0001 | −0.0002 to +0.0005 | 0.412 |
+|  | Macro F1 | 0.718 | 0.717 | −0.0002 | −0.0007 to +0.0002 | 0.329 |
+|  | CSI rain | 0.347 | 0.346 | −0.0005 | −0.0012 to +0.0001 | 0.120 |
 
-For the four-class task, macro F1 changes from XX with uncorrected input to XX with corrected input (B − A = XX, 95 % interval XX to XX, p = XX). The deep convective class has the coldest, highest tops and so the largest computed shift. Its CSI changes from XX to XX (B − A = XX, XX to XX).
+Correcting the input does not improve the classifier. In all three tasks, accuracy and macro F1 of Model B are within 0.0012 of Model A. Only the convective classes change consistently, and they get slightly worse:
 
-Separating stratiform from convective rain, macro F1 changes by XX (XX to XX). Detecting rain, it changes by XX (XX to XX).
+- deep convective CSI falls from 0.041 to 0.038 (B − A = −0.0030, 95 % interval −0.0055 to −0.0007, p = 0.008);
+- convective CSI in the stratiform/convective task falls from 0.429 to 0.428 (−0.0012, −0.0023 to −0.0001, p = 0.039);
+- four-class macro F1 falls by 0.0012 (p = 0.05).
 
-Both models reach a similar training loss after 100 epochs (XX for A and XX for B in the four-class task), so the difference comes from the input rather than from unequal training.
+Stratiform scores and rain detection do not change significantly.
+
+Three points qualify this result:
+
+- **Size.** The changes are small. The largest relative change, 7 % of deep convective CSI, is in a class that the network barely detects with either input (F1 0.08).
+- **Multiple tests.** With 22 scores tested, one or two p-values below 0.05 are expected by chance. None would pass a Bonferroni correction (p < 0.002).
+- **One run per model.** Each model was trained once, and run-to-run variation (for example from non-deterministic GPU operations) was not measured. It may be of similar size.
+
+The pattern is nevertheless consistent with Section 5.5. Uncorrected cold cores already sit on the GPM convective cells, so moving them by the full infrared parallax pulls the cold signal away from the convective labels, and convective scores drop slightly. Stratiform rain is horizontally extensive and insensitive to a one-pixel shift. For this classifier, correcting with the full infrared height brings no benefit. An effective height closer to the radar echo top (Section 6.4) can be tested with the same set-up.
 
 ---
 
 ## Notes for revision
 
 - Section 6.6: check whether ISRO's Hydro-Estimator applies a parallax correction (MOSDAC ATBD); run a Google Scholar / Scopus novelty search.
-- Section 6.8: fill in every XX from `runs/comparison_<task>.json` (A, B, B_minus_A, ci95, p_two_sided) and the training loss from `runs/<task>_<model>/history.json`. Use three decimals, for example 0.412, and differences with a sign, for example +0.008.
-- Section 6.8: add one closing paragraph after the results.
-  - **If B is significantly better** (the interval excludes 0), especially for deep convective CSI: the correction helps a rain product even with the full infrared height. Link this to the field measure in Section 5.4.
-  - **If there is no significant difference:** a one-pixel median shift is within what the network absorbs through its receptive field. This is consistent with the cell result (Section 5.5), where only about 5 % of the parallax is visible against GPM. An effective height (Section 6.4) is the next test.
-  - **If B is worse:** this is consistent with the cell result, where correction moves the cold signal past the rain, and supports an effective height for precipitation.
-  - In every case, update the abstract, the last item of the conclusions, and the sentence "The effect on a precipitation-type classifier is being tested" in Section 6.4.
+- Section 6.8: the training-loss histories (`history.json`) were not returned with the results; add a sentence on training loss if they are available.
+- Section 6.8: to separate the A/B difference from run-to-run variation, retrain each model with two or three more seeds. A Model C with an effective height (`--height-offset 3`) would test Section 6.4 directly.
 - Section 4.8: cite the group's U-Net work (paper or thesis) and the GPM product of the labels (2A.DPR or 2A.Ku `typePrecip`); confirm the class definitions with the group.

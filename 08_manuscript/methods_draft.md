@@ -234,7 +234,7 @@ To test whether the correction helps a downstream precipitation product, we retr
 
 **Splits.** The training set has 5,082 patches from 823 scenes (2018 and 2021–2023); the test set has 2,197 patches from 347 scenes (September 2023 and 2024). No scene, day or GPM overpass appears in both. There is no validation split: nothing is tuned, there is no early stopping, and the test set is read only after training has finished.
 
-**Training.** Both models use the same network (about 1.1 million parameters, with layer normalisation), class-weighted cross-entropy, the Adam optimiser at a learning rate of $10^{-6}$, a batch size of 1 and 100 epochs. They also start from the same initial weights and see the patches in the same order (seed 42). There are three tasks:
+**Training.** Both models use the same network (about 1.1 million parameters, with layer normalisation), class-weighted cross-entropy, the Adam optimiser at a learning rate of $10^{-6}$, a batch size of 1 and 100 epochs. They also start from the same initial weights and see the patches in the same order (seed 42). Each model is trained once. There are three tasks:
 
 - four classes: stratiform, deep convective, shallow isolated and shallow non-isolated (class weights 1, 2, 3, 3);
 - stratiform versus convective (1, 2.2);
