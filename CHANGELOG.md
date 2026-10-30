@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **`pygeoparallax demo`** (also `pygeoparallax.demo.run_demo`): a self-test that needs no data. Three storms with known heights and positions over Northeast India are seen through an exact simulation of the INSAT-3DR view, corrected, and checked against their true positions (each within one pixel). Writes NetCDF files and a before/after figure.
+- **Colab notebook** `colab/try_pygeoparallax.ipynb` with a README button: install, demo, and correction of an uploaded L1C file, in the browser.
+- **`CONTRIBUTING.md`** (issues, development setup, tests, support) and a JOSS paper draft (`paper/`).
+
 ## 0.4.0 (2026-10-30)
 
 Easier use of the tool: L1C files can be corrected in one command, on a regular grid or on their own pixel grid, and the correction height can be lowered for precipitation work. The correction itself is unchanged.

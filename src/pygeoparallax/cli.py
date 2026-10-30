@@ -1,4 +1,7 @@
-"""Command-line interface: ``pygeoparallax l1c``, ``correct``, ``batch`` and ``navigation``.
+"""Command-line interface: ``pygeoparallax demo``, ``l1c``, ``correct``, ``batch`` and ``navigation``.
+
+``demo`` runs a self-test on a synthetic scene with storms at known positions
+(no data needed) and saves a before/after figure.
 
 ``l1c`` corrects INSAT-3DR L1C files directly: it reads the channels, derives
 cloud-top height from TIR1 and writes corrected NetCDF, on a regular lat/lon
@@ -279,10 +282,21 @@ def _cmd_navigation(args):
     return 0
 
 
+def _cmd_demo(args):
+    from .demo import run_demo
+
+    return 0 if run_demo(args.output_dir, plot=not args.no_plot)["passed"] else 1
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="pygeoparallax", description="Cloud parallax correction for INSAT-3DR.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("demo", help="self-test on a synthetic scene (no data needed); saves a before/after figure")
+    p.add_argument("-o", "--output-dir", default="pygeoparallax_demo", help="where to write the demo files")
+    p.add_argument("--no-plot", action="store_true", help="skip the figure (no matplotlib needed)")
+    p.set_defaults(func=_cmd_demo)
 
     p = sub.add_parser("l1c", help="correct INSAT-3DR L1C files (HDF5) directly")
     p.add_argument("inputs", nargs="+", help="3RIMG_*_L1C_SGP*.h5 files or glob patterns")

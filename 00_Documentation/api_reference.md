@@ -93,6 +93,7 @@ Conventions:
 ## Command line
 
 ```bash
+pygeoparallax demo [-o pygeoparallax_demo] [--no-plot]      # self-test on a synthetic scene, no data needed
 pygeoparallax l1c "<L1C glob>" -o <dir> [-j N] [--native [--fill-empty]] [--bbox LAT0 LAT1 LON0 LON1] [--channels TIR1 TIR2 WV MIR]
                   [--era5 era5_pl.nc] [--cloud-threshold 270] [--height-offset KM] [--height-scale S] [--dem DEM.nc] [--nav-correction nav.json] [--no-correction] [--grid ...] [--overwrite]
 pygeoparallax correct <in.nc> <out.nc> [--dem DEM.nc] [--nav-correction nav.json] [--no-correction] [--grid LAT0 LAT1 LON0 LON1 RES] [--height-offset KM] [--height-scale S]

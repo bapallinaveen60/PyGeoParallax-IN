@@ -2,6 +2,7 @@
 
 [![tests](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml/badge.svg)](https://github.com/bapallinaveen60/PyGeoParallax-IN/actions/workflows/tests.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23666957.svg)](https://doi.org/10.5281/zenodo.23666957)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/bapallinaveen60/PyGeoParallax-IN/blob/main/colab/try_pygeoparallax.ipynb)
 
 PyGeoParallax-IN is a Python-based processing pipeline designed to correct **cloud parallax errors** in INSAT-3DR geostationary satellite observations over the Indian Subcontinent. It estimates cloud-top heights, traces each pixel's line of sight back to the cloud top on the WGS84 ellipsoid, and regrids the scene at the corrected positions. Optional terrain heights (DEM) and a coastline-based navigation correction are applied in the same pass.
 
@@ -138,6 +139,18 @@ PyGeoParallax-IN/
 2. **Compute Geometry & Fallbacks**: Calculate satellite viewing angles and perform ERA5 vertical interpolation for missing cloud heights under `src/pygeoparallax/geometry/`.
 3. **Parallax Correction**: Run the ray-tracing ellipsoid solver to reposition pixels.
 4. **Validation & Assessment**: Evaluate corrected outputs against GPM radar overpasses (and, in future, IMD ground radar) using the validation modules.
+
+### Try it first
+
+**In the browser:** open the [Colab notebook](https://colab.research.google.com/github/bapallinaveen60/PyGeoParallax-IN/blob/main/colab/try_pygeoparallax.ipynb). It installs the package, runs the demo below and can correct an L1C file you upload. Nothing is installed on your computer.
+
+**Locally:** after installing, run the self-test. It needs no data:
+
+```bash
+pygeoparallax demo
+```
+
+It places three storms (16, 12 and 8 km tops) at known positions over Northeast India, simulates what INSAT-3DR sees, corrects the image and checks that every storm returns to within one pixel of its true position. It writes `pygeoparallax_demo/demo.png` with the before/after images.
 
 ### Quickest: L1C files from the command line
 
