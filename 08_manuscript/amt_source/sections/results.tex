@@ -1,0 +1,283 @@
+\section{Results}
+\label{sec:results}
+\label{sec:5}
+
+\subsection{Expected parallax over India}\label{sec:5.1}
+
+The parallax shift grows with distance from the sub-satellite point at 74° E (Fig.~\ref{fig:1}). For a 12 km cloud top:
+
+\begin{itemize}
+\tightlist
+\item
+  about 2.5--3 km over the southern peninsula (VZA 12--15°);
+\item
+  5--7 km over central India (VZA 22--30°);
+\item
+  8--9 km over the Himalaya and Northeast India (VZA 33--38°); for a 16 km top it reaches 11--12 km there.
+\end{itemize}
+
+The shift points away from the satellite, which over India is roughly northwards; over the Northeast it turns towards the north-east (VAA up to 217°).
+
+In the validation cases the correction moved deep convective cores (BT \textless{} 220 K) by a median of:
+
+\begin{itemize}
+\tightlist
+\item
+  3.9 km in South India;
+\item
+  7.3 km in Central India;
+\item
+  9.8 km over the Himalaya;
+\item
+  10.5 km over Northeast India.
+\end{itemize}
+
+The median over all usable cases is 7.2 km. These shifts follow tan(VZA) as expected. The solver itself agrees with pyproj, pyorbital and satpy to within 1 mm, 0.01° and 25 m respectively (Section~\ref{sec:3}).
+
+\subsection{INSAT-3DR navigation}\label{sec:5.2}
+
+Coastline matching shows that INSAT-3DR L1C positions carry a navigation error that changes with the season (Fig.~\ref{fig:2}). From late September to mid-March, positions need a correction of 7--20 km to the west. From mid-April to September the error is small. The switch near the equinoxes is consistent with the yaw flip of the INSAT-3D-series spacecraft, a 180° rotation about the yaw axis in March and September of every year \citep{prakash2014}.
+
+During the monsoon the error cannot be measured reliably for a single day:
+
+\begin{itemize}
+\tightlist
+\item
+  Night-time matching fails because land and sea have almost the same TIR1 temperature (r \textless{} 0.4 for every night-time case scan).
+\item
+  Daytime matching works, but the same coast in scans 1--2 h apart differs by about 9--10 km. The best correlation is typically only 0.01--0.05 above the unshifted one.
+\end{itemize}
+
+Pooling the reliable daytime matches near the validation storms of each monsoon gives small corrections: −2.0 to +3.0 km east and −0.8 to +2.5 km north. 2018 had too few matches, so it uses the all-years value, +0.5 km east and +1.5 km north. These per-year values are used as the navigation correction.
+
+The north component, which matters most for the parallax over India, is only weakly constrained. Individual coasts give anything from −2.5 km (Chennai) to +8.8 km (Kutch), with 5--8 km spread within one coast.
+
+\subsection{Validation cases}\label{sec:5.3}
+
+We processed 63 coincident INSAT--GPM cases from the monsoons of 2018--2024. GPM was within 5 min of the INSAT scan at the storm; for the usable cases the median was 1.0 min and the maximum 2.9 min.
+
+\begin{itemize}
+\tightlist
+\item
+  38 cases are usable (Table~\ref{tab:1}).
+\item
+  9 had too little convection (fewer than 100 convective footprints in the main cluster).
+\item
+  16 gave no reliable match in any field or window.
+\end{itemize}
+
+The usable cases span all seven years (3--7 per year). In the field measure, 30 cases give a reliable match in every correction state, and these 30 are used for paired comparisons. In the cell measure, 157--167 GPM deep-echo cells in 27--28 cases are matched to an INSAT cold core in each state.
+
+\begin{table*}[t]
+\caption{Validation cases, 2018--2024.}\label{tab:1}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+Region
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+VZA at storm
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Processed
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Usable
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Too little convection
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+No reliable match
+\end{minipage} \\
+\middlehline
+South India & 9--21° & 17 & 14 & 0 & 3 \\
+Central India & 22--33° & 25 & 15 & 0 & 10 \\
+Himalaya & 29--37° & 11 & 4 & 6 & 1 \\
+Northeast India & 31--38° & 10 & 5 & 3 & 2 \\
+\textbf{Total} & & \textbf{63} & \textbf{38} & \textbf{9} & \textbf{16} \\
+\bottomhline
+\end{tabular}
+\end{table*}
+
+\subsection{Storm-scale offsets}\label{sec:5.4}
+
+The correction acts only along the line of sight, as it should. The cross-look offset does not change (median change 0.0 km, 95 \% interval −0.2 to +0.2 km, 30 cases). Cross-look scatter therefore reflects storm structure, storm motion within the up to 3 min between the two observations, and the different quantities the two instruments see. It is not a parallax effect.
+
+Along the line of sight, parallax correction reverses the mean storm-top field offset (Table~\ref{tab:2}): the mean moves from +2.2 km (95 \% interval +0.1 to +4.2 km) to −1.9 km (−4.2 to +0.3 km). The median absolute offset falls from 5.1 to 3.8 km. Case by case, however, the improvement is not significant:
+
+\begin{itemize}
+\tightlist
+\item
+  18 of 30 cases improve;
+\item
+  the median change is −1.1 km (95 \% interval −1.6 to +1.2 km);
+\item
+  sign test p = 0.36, Wilcoxon signed-rank p = 0.66.
+\end{itemize}
+
+Adding the per-year coastline navigation changes little: the mean is −1.0 km and the median absolute offset 4.3 km, with 17 of 30 cases better than parallax alone (p = 0.58).
+
+\begin{table*}[t]
+\caption{Mean line-of-sight offset of the storm-top field (250 km window) by region; cases valid in every state.}\label{tab:2}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 12\tabcolsep) * \real{0.1429}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+Region
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Cases
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Mean VZA
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Applied shift at deep cores, median {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Raw {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Parallax {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Navigation + parallax {[}km{]}
+\end{minipage} \\
+\middlehline
+South India & 10 & 15° & 3.9 & +2.6 & +1.1 & +1.8 \\
+Central India & 12 & 27° & 7.3 & +0.9 & −3.5 & −2.7 \\
+Himalaya & 4 & 34° & 9.8 & +2.0 & −4.9 & −4.3 \\
+Northeast India & 4 & 34° & 10.5 & +5.2 & −1.4 & +0.8 \\
+\textbf{All} & \textbf{30} & & 7.2 & \textbf{+2.2} & \textbf{−1.9} & \textbf{−1.0} \\
+\bottomhline
+\end{tabular}
+\end{table*}
+
+Applied shifts are medians over all 38 usable cases; offsets use the 30 cases valid in every state.
+
+\subsection{Most of the expected parallax is not visible against GPM}\label{sec:5.5}
+
+If the uncorrected INSAT--GPM offset were pure parallax, it would equal the shift that the correction applies. It would grow from about 4 km in South India to about 10 km over the Himalaya and the Northeast. Neither measure shows this (Fig.~\ref{fig:3}).
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Field measure.} The raw offset does not grow with viewing angle: Spearman ρ = −0.01, slope −0.8 km per unit tan(VZA), 95 \% interval −12.9 to +9.4 km. With 30 cases the upper bound (+9.4 km) lies just below the 10--12 km per unit tan(VZA) expected for deep convection. Against the applied shift, the fitted slope is −0.03 (Fig.~\ref{fig:3}a).
+\item
+  \textbf{Cell measure.} Uncorrected INSAT cold cores already sit almost on top of GPM's deep-echo cells: median −0.1 km, 95 \% interval −2.7 to +3.5 km, from a cluster bootstrap over cases. Regional medians stay within ±3 km of zero (South −2.6, Central +1.7, Himalaya −1.6, Northeast +0.4 km), and so do both periods (2018--2021 and 2022--2024). Parallax correction moves them past the cells to −4.7 km (−6.8 to −0.9 km); the per-case change is −4.5 km (p \textless{} 0.001). The median per-case ratio of raw cell offset to applied shift is 0.05 (95 \% interval −0.47 to +0.55): only about 5 \% of the computed parallax is visible. A least-squares fit of the case medians against the applied shift has a slope of +0.22 (Fig.~\ref{fig:3}b; the median of the case medians is +0.1 km).
+\end{itemize}
+
+Table~\ref{tab:3} summarises both measures in each correction state.
+
+\begin{table*}[t]
+\caption{Offsets in each correction state (30--31 cases for the field measure; 157--167 cells in 27--28 cases for the cell measure).}\label{tab:3}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedleft\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Field mean {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Field median absolute {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedleft
+Field cases improved vs raw
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cells, median {[}km{]} (95 \% interval)
+\end{minipage} \\
+\middlehline
+Raw & +2.2 & 5.1 & -- & −0.1 (−2.7 \ldots{} +3.5) \\
+Parallax only & −1.9 & 3.8 & 18 of 30 & −4.7 (−6.8 \ldots{} −0.9) \\
+Coastline navigation + parallax & −1.0 & 4.3 & 15 of 30 & −3.3 (−5.9 \ldots{} +0.2) \\
+GPM navigation + parallax (leave one out) & +4.9 & 6.0 & 10 of 31 & −0.5 (−2.6 \ldots{} +2.9) \\
+\bottomhline
+\end{tabular}
+\end{table*}
+
+The GPM-navigation row uses the 31 cases valid in its own states; in that set the raw field offset is +2.1 km (median absolute 4.8 km) and the parallax-only offset −1.9 km (3.7 km).
+
+\subsection{Why the parallax is not visible}\label{sec:5.6}
+
+We tested four explanations in turn.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{The comparison method.} We put a synthetic storm with a known parallax through the same gridding and cell-matching code. The raw offset equals the full parallax: +10.9 km measured against +10.5 km expected at VZA 35°, and +3.5 against +3.9 km at VZA 15°. After correction it is about zero. Overlays of uncorrected INSAT on GPM storm tops for six high-angle cases show the same as the statistics: the cold cloud masses sit on the deep-echo cells, not 8--10 km beyond them. The method detects parallax when it is there.
+\item
+  \textbf{GPM's slanted beam.} Placing storm tops on the slanted Ku beam instead of at the surface footprint changes the cell medians by at most 0.6 km. This displacement has a median of 1 km and reaches 5 km. It adds scatter, not bias.
+\item
+  \textbf{Cloud-top height.} In 206 matched cells (29 cases) the BT-derived height of the INSAT cold core has a median of 16.6 km, and 46 \% of the cores reach the 17 km tropopause cap. The GPM maximum echo top in the same cells has a median of 11.9 km, and the median difference per cell is 3.2 km (Fig.~\ref{fig:5}). In the 14 cases of 2022--2024, ERA5 profiles instead of the standard atmosphere changed cold-core heights by −0.15 km and every offset by less than 0.5 km. The gap between infrared top and radar echo top is therefore physical: GPM's storm top is the highest range bin with echo above the Ku-band detection threshold (about 14.5--18 dBZ) \citep{hou2014,toyoshima2015}, and the small ice particles at the top of deep convection lie below it. The gap inflates the shift at the rain core by about 1--2 km. It cannot hide 4--10 km.
+\item
+  \textbf{Navigation.} A navigation error towards the satellite would cancel part of the parallax and shift both measures by the same amount.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Coastline values.} The per-year values are only −0.8 to +2.5 km to the north.
+  \item
+    \textbf{ISRO's data-quality reports.} For five full-disk L1B images of 19 June 2020, measured at ground control points north-west of India, positions must move 1.7--2.7 IR pixels north and 1.0--3.3 pixels west. With 4 km IR pixels that is roughly 7--11 km north, enough to cancel most of the parallax.
+  \item
+    \textbf{Navigation fitted to GPM.} We tested this directly by estimating the navigation from GPM itself. Each case got the median cell offset after parallax correction of all other cases (leave one out): +5.0 km east (95 \% interval +1.4 to +5.8 km) and +5.8 km north (+2.9 to +8.7 km).
+  \end{itemize}
+
+  The GPM-fitted navigation centres the cell measure (−0.5 km) but pushes the field measure to +4.9 km and makes it worse than uncorrected (Table~\ref{tab:3}, Fig.~\ref{fig:4}):
+
+  \begin{itemize}
+  \tightlist
+  \item
+    median absolute offset 6.0 km;
+  \item
+    10 of 31 cases better than raw;
+  \item
+    Wilcoxon p = 0.027, sign test p = 0.07; against parallax only, p = 0.28.
+  \end{itemize}
+
+  \textbf{No single translation centres both measures.} The field and cell measures differ by 2--3 km in the raw and coastline-navigation states, and by about 5 km once the navigation is fitted to the cells. Navigation alone therefore cannot explain the result; we attribute the difference mainly to storm structure. The east component of the fitted value also disagrees with ISRO's reports, which point west.
+\end{enumerate}
+
+The two measures compare different parts of the storm. The field measure is driven by the large cold anvil against the radar's rain area, and the cell measure by the coldest tops against the tallest echoes. Their difference, 2--3 km and up to about 5 km depending on the navigation applied, is comparable to the parallax over South India and a third to a half of it at higher viewing angles. At the scale of the storm, parallax correction reverses the mean bias, and the corrected mean is not significantly different from zero. At the scale of the convective core, uncorrected cold cores already coincide with the radar cells, and correcting them with the full infrared height overshoots.
+
+\subsection{Terrain}\label{sec:5.7}
+
+Terrain-aware correction with SRTM moves clear-sky ground by:
+
+\begin{itemize}
+\tightlist
+\item
+  up to 3--4 km over the Himalaya and the Tibetan Plateau;
+\item
+  1--2 km over the Northeast hills;
+\item
+  under 0.5 km over the Western Ghats and the Deccan (Fig.~\ref{fig:6}).
+\end{itemize}
+
+In the Himalayan validation scenes, clear-sky ground pixels move by 1.3--2.5 km (median) and up to 5.8 km, and 9--19 \% of grid cells change.
+
+At the storms (14 cases of 2022--2024), terrain makes no difference: the field and cell offsets are identical to 0.1 km with and without it. Storm tops lie 10--17 km above the ground, so the height of the ground beneath them does not enter the correction.
+
+\subsection{Benchmark}\label{sec:5.8}
+
+The full pipeline processed all 148 available monsoon scenes without a failure. Each scene took 1.8 s (median; 3.2 s at most) on a laptop, with about 450 MB of memory. Processing includes reading two channels over 0--40° N, 60--100° E, cloud-top height, and the corrected and uncorrected grids at 0.04°.
+
+After correction:
+
+\begin{itemize}
+\tightlist
+\item
+  98.7 \% of grid cells hold an observed pixel, 1.3 \% are filled from neighbours and 0.007 \% stay empty behind tall clouds;
+\item
+  corrected clouds cover 2.5 \% of previously clear cells (median);
+\item
+  all other clear cells are identical in the corrected and uncorrected grids, so the two datasets differ only where clouds moved.
+\end{itemize}
+
+Fourteen scenes from 11--14 June 2023 turned out to be partial INSAT-3DR scans, with up to 57 \% of the image missing. The pipeline handles them. The two validation cases on those dates are unaffected because their storms lie inside the scanned part.
+

@@ -1,0 +1,130 @@
+\section{Validation design}
+\label{sec:validation}
+\label{sec:4}
+
+\subsection{Case selection}\label{sec:4.1}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Coincident overpasses.} For every GPM orbit whose swath centre line crosses a region box between 1 June and 20 September, we estimate when the INSAT-3DR scan reaches that latitude (Section~\ref{sec:2.1}). Crossings within 5 min of an INSAT scan are kept.
+\item
+  \textbf{Convection screening.} Each candidate GPM file is screened for convection before INSAT data are downloaded. The densest convective cluster is found by counting GPM convective footprints in 1° bins and taking all convective footprints within about 150 km of the densest bin. A case needs at least 100 convective footprints in this cluster.
+\item
+  \textbf{Files per case:} the GPM 2A Ku orbit, the INSAT L1C scan nearest in time with its L2B CTP file, and daytime L1C scans of the case day and the days before and after for navigation.
+\end{enumerate}
+
+Cases were selected in two rounds: 2022--2024 for all four regions, then 2018--2021 for South and Central India, where the first round had few usable cases. In total 63 cases were processed.
+
+\subsection{Colocation}\label{sec:4.2}
+
+Each case is processed on a 0.02° grid over its region box. INSAT data are corrected (Section~\ref{sec:3}) and also resampled uncorrected. GPM footprints are assigned to grid cells by nearest neighbour within 3.5 km; storm tops use their slanted-beam positions (Section~\ref{sec:2.2}). Only cells inside the GPM swath are compared. Analysis is limited to within 150 km and 250 km of the centre of the densest convective cluster.
+
+\subsection{Offset measures}\label{sec:4.3}
+
+Because the correction is a displacement, we measure displacements directly, using two independent methods.
+
+\textbf{Field correlation.} We find the shift of the INSAT field that best correlates with the GPM field:
+
+\begin{itemize}
+\tightlist
+\item
+  primary pair: \(-\)BT against GPM storm-top height (both describe storm tops);
+\item
+  secondary pair: \(-\)BT against near-surface reflectivity.
+\end{itemize}
+
+Integer shifts up to ±10 cells (±20 km) are tested, and the best one is refined to a fraction of a cell by fitting a parabola through the correlation at the peak and its two neighbours, separately along each axis.
+
+\textbf{Cell cores.} Each GPM deep-echo cell (connected cells with storm top \textgreater{} 10 km, at least 8 grid cells) is paired with the INSAT cold core within 25 km of its centroid. The cold core is the centroid of pixels within 3 K of the local minimum BT. The case value is the median over its cells. This measure does not depend on the shape or extent of the anvil.
+
+\textbf{Along and across the line of sight.} Each offset is split into a component along the line of sight (positive when INSAT must move towards the satellite to match GPM) and a component across it, using the VAA at the cluster centre. Parallax correction should change only the along-look component. The cross-look component is a control.
+
+\textbf{Overlap scores.} We also report:
+
+\begin{itemize}
+\tightlist
+\item
+  intersection over union (IoU) between INSAT deep cores (BT \textless{} 220 K) and GPM deep echoes (storm top \textgreater{} 8 km);
+\item
+  Pearson correlation and mutual information between cold cloud (BT \textless{} 235 K) and echo (reflectivity \textgreater{} 25 dBZ).
+\end{itemize}
+
+\subsection{Usable cases}\label{sec:4.4}
+
+A case is usable if its convective cluster has at least 100 footprints and at least one field and window gives a reliable match. A match is reliable when the best shift is inside the search range (below 9.5 cells) both before and after correction. Matches at the edge of the search usually mean the two fields describe different parts of the storm.
+
+\subsection{Experiments}\label{sec:4.5}
+
+Each case is run in four main states:
+
+\begin{table*}[t]
+\caption{Correction states.}\label{tab:S}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+State
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Navigation correction
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parallax correction
+\end{minipage} \\
+\middlehline
+Raw & no & no \\
+Coastline navigation only & per-year monsoon correction (Section~\ref{sec:3.6}) & no \\
+Parallax only & no & yes \\
+Coastline navigation + parallax & per-year monsoon correction & yes \\
+\bottomhline
+\end{tabular}
+\end{table*}
+
+Two further tests address the residual offset:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Navigation from GPM.} If the residual cell offset after parallax correction were a navigation error, a single translation fitted to it should centre both offset measures. For each case we take the median cell offset (converted to east and north) of all \emph{other} cases and apply it with parallax correction (leave one out, so no case is corrected with its own data).
+\item
+  \textbf{Synthetic storm.} A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
+\end{itemize}
+
+To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
+
+\subsection{Sensitivity}\label{sec:4.6}
+
+An error \(\delta h\) in cloud-top height shifts the corrected position by about \(\delta h\tan(\mathrm{VZA})\): about 0.4 km per km of height error at Mumbai and 0.7 km at Agartala. We quantify this with Monte Carlo perturbations of cloud-top height (standard deviation 1 km, 100 members) and with fixed biases of ±1 and ±2 km.
+
+\subsection{Statistics}\label{sec:4.7}
+
+Uncertainties are 95 \% percentile bootstrap intervals from 10 000 resamples. For the field measure, cases are resampled; for the cell measure, cases are resampled with all their cells (a cluster bootstrap), because cells of one storm are not independent. Paired comparisons between correction states use the absolute offset of each case: the median change with its bootstrap interval, the Wilcoxon signed-rank test and the exact sign test on the number of cases that improve. For the cell measure the paired test uses the per-case medians. The dependence of the raw offset on viewing angle is tested with the Spearman rank correlation and the least-squares slope against tan(VZA), with a bootstrap interval.
+
+\subsection{Precipitation-type classification experiment}\label{sec:4.8}
+
+To test whether the correction helps a downstream precipitation product, we retrain an existing attention U-Net for precipitation type twice: once on uncorrected input (Model A) and once on parallax-corrected input (Model B). Only the input differs between the two.
+
+\textbf{Data.} The U-Net works on 128 × 128 tiles of the INSAT-3DR L1C Mercator grid, with four channels: TIR1, TIR2, WV and MIR. Brightness temperatures are scaled as (BT − 180 K) / 150 K and clipped to {[}0, 1{]}. Each pixel carries the GPM DPR precipitation type of the footprint matched to it. Pixels without a GPM label are ignored in the loss and in the scores. GPM positions are on the ground, so parallax displaces the input but not the labels.
+
+\textbf{Correction.} For Model B, all tiles of a scene are mosaicked, and the grid (regular in Mercator y and in longitude) is fitted from the tile coordinates to within \(10^{-4}\) pixel. Cloud-top height comes from TIR1 with the tropical standard atmosphere, with BT \textless{} 270 K taken as cloud. Every pixel is then corrected with the solver of Section~\ref{sec:3.3} and resampled onto the original pixel grid with the occlusion-aware method of Section~\ref{sec:3.5}, before the tiles are cut out again. Cells that receive no corrected pixel (0.06 \% of labelled pixels) are filled with the nearest corrected value for the input, and their labels are dropped for both models, so A and B are scored on the same pixels. The correction moves cloud by a median of 4.4 km, about one pixel, and changes TIR1 by more than 1 K on 34 \% of pixels.
+
+\textbf{Splits.} The training set has 5,082 patches from 823 scenes (2018 and 2021--2023); the test set has 2,197 patches from 347 scenes (September 2023 and 2024). No scene, day or GPM overpass appears in both. There is no validation split: nothing is tuned, there is no early stopping, and the test set is read only after training has finished.
+
+\textbf{Training.} Both models use the same network (about 1.1 million parameters, with layer normalisation), class-weighted cross-entropy, the Adam optimiser at a learning rate of \(10^{-6}\), a batch size of 1 and 100 epochs. They also start from the same initial weights and see the patches in the same order (seed 42). Each model is trained once. There are three tasks:
+
+\begin{itemize}
+\tightlist
+\item
+  four classes: stratiform, deep convective, shallow isolated and shallow non-isolated (class weights 1, 2, 3, 3);
+\item
+  stratiform versus convective (1, 2.2);
+\item
+  rain versus no rain (1, 3).
+\end{itemize}
+
+This gives six models.
+
+\textbf{Scores.} Scores are computed per pixel on the test set: accuracy, macro F1, and per-class F1 and critical success index, CSI = TP / (TP + FP + FN). The difference B − A is tested with a paired bootstrap over test scenes (2,000 resamples), which keeps all patches of a scene together. The two-sided p-value is taken from the bootstrap distribution of the difference.
+

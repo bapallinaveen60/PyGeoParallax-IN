@@ -8,13 +8,13 @@
 
 ### 2.1 INSAT-3DR Imager
 
-INSAT-3DR is a geostationary satellite at 74.0°E. Its Imager scans the full disk every 30 minutes (scans start at HH:15 and HH:45) in six channels: visible (VIS, 0.65 µm), shortwave infrared (SWIR, 1.6 µm), mid-wave infrared (MIR, 3.9 µm), water vapour (WV, 6.8 µm) and two thermal infrared channels (TIR1, 10.8 µm; TIR2, 12.0 µm). The sampling interval is 1 km for VIS and SWIR and 4 km for the infrared channels at the sub-satellite point. We used the Level-1C sector product (`3RIMG_*_L1C_SGP`) from MOSDAC; INSAT-3DR products use the INSAT-3D formats [SAC, 2014]. It is on a Mercator grid (`lon_0 = 75°E`) with pixel-centre coordinates. Calibrated counts are converted to brightness temperature (BT) or albedo through the lookup tables in each file.
+INSAT-3DR is a geostationary satellite at 74.0° E. Its Imager scans the full disk every 30 minutes (scans start at HH:15 and HH:45) in six channels: visible (VIS, 0.65 µm), shortwave infrared (SWIR, 1.6 µm), mid-wave infrared (MIR, 3.9 µm), water vapour (WV, 6.8 µm) and two thermal infrared channels (TIR1, 10.8 µm; TIR2, 12.0 µm). The sampling interval is 1 km for VIS and SWIR and 4 km for the infrared channels at the sub-satellite point. We used the Level-1C sector product (`3RIMG_*_L1C_SGP`) from MOSDAC; INSAT-3DR products use the INSAT-3D formats [SAC, 2014]. It is on a Mercator grid (`lon_0 = 75° E`) with pixel-centre coordinates. Calibrated counts are converted to brightness temperature (BT) or albedo through the lookup tables in each file.
 
-The full-disk scan runs north to south, from 81°N to 81°S, in about 26.9 min (from the file start and end times). We estimate the scan time at a given latitude by linear interpolation along this sweep.
+The full-disk scan runs north to south, from 81° N to 81° S, in about 26.9 min (from the file start and end times). We estimate the scan time at a given latitude by linear interpolation along this sweep.
 
 We did not use the satellite elevation and azimuth angles in the L1C files: they differ from the geometric values by about 1°. Viewing angles are computed directly (Section 3.1).
 
-The Level-2B cloud-top pressure product (`3RIMG_*_L2B_CTP`) gives cloud-top pressure and temperature in coarse boxes (about 37 km) and a clear-sky brightness temperature (CSBT) per channel. It contains no cloud-top height. We use its CSBT as the clear-sky reference for the cloud mask (Section 3.2) and its cloud-top pressure only as a cross-check. Its sub-satellite longitude attribute (82°E) is incorrect for INSAT-3DR and is ignored.
+The Level-2B cloud-top pressure product (`3RIMG_*_L2B_CTP`) gives cloud-top pressure and temperature in coarse boxes (about 37 km) and a clear-sky brightness temperature (CSBT) per channel. It contains no cloud-top height. We use its CSBT as the clear-sky reference for the cloud mask (Section 3.2) and its cloud-top pressure only as a cross-check. Its sub-satellite longitude attribute (82° E) is incorrect for INSAT-3DR and is ignored.
 
 ### 2.2 GPM Dual-frequency Precipitation Radar
 
@@ -36,10 +36,10 @@ Validation cases come from the monsoon seasons (June–September) of 2018–2024
 
 | Region | Box (lat, lon) | Viewing zenith angle |
 | :--- | :--- | :--- |
-| South India (Kerala, Karnataka, Tamil Nadu) | 7–18°N, 73–82°E | 8–23° |
-| Central India (Madhya Pradesh, Chhattisgarh) | 18–27°N, 75–86°E | 21–34° |
-| Himalaya (Uttarakhand, Himachal, Nepal) | 24–33°N, 74–90°E | 28–42° |
-| Northeast India and Bangladesh | 21–29°N, 88–97°E | 29–42° |
+| South India (Kerala, Karnataka, Tamil Nadu) | 7–18° N, 73–82° E | 8–23° |
+| Central India (Madhya Pradesh, Chhattisgarh) | 18–27° N, 75–86° E | 21–34° |
+| Himalaya (Uttarakhand, Himachal, Nepal) | 24–33° N, 74–90° E | 28–42° |
+| Northeast India and Bangladesh | 21–29° N, 88–97° E | 29–42° |
 
 ---
 
@@ -125,7 +125,7 @@ After correction, pixels no longer lie on a regular grid: several may land in on
 2. **Small gaps:** cells that receive no pixel because neighbouring pixels spread apart are filled by inverse-distance weighting (power 2) from observed cells within one cell. A filled cell stays clear (no cloud-top height) if most of its neighbour weight comes from clear cells.
 3. **Large gaps:** cells behind tall clouds, which the satellite never saw, are left empty.
 
-Each output cell carries a flag: 0 observed, 1 interpolated, 2 empty. Later analysis can exclude flags 1 and 2. The default grid is 0.04° (0–40°N, 60–100°E); validation uses 0.02°.
+Each output cell carries a flag: 0 observed, 1 interpolated, 2 empty. Later analysis can exclude flags 1 and 2. The default grid is 0.04° (0–40° N, 60–100° E); validation uses 0.02°.
 
 The uncorrected dataset is produced by the same resampling with the apparent positions. Both datasets therefore share exactly the same grid, which is required for the downstream model comparison.
 

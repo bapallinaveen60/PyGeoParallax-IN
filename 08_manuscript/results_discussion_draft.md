@@ -8,7 +8,7 @@
 
 ### 5.1 Expected parallax over India
 
-The parallax shift grows with distance from the sub-satellite point at 74°E (Fig. 1). For a 12 km cloud top:
+The parallax shift grows with distance from the sub-satellite point at 74° E (Fig. 1). For a 12 km cloud top:
 
 - about 2.5–3 km over the southern peninsula (VZA 12–15°);
 - 5–7 km over central India (VZA 22–30°);
@@ -137,7 +137,7 @@ At the storms (14 cases of 2022–2024), terrain makes no difference: the field 
 
 ### 5.8 Benchmark
 
-The full pipeline processed all 148 available monsoon scenes without a failure. Each scene took 1.8 s (median; 3.2 s at most) on a laptop, with about 450 MB of memory. Processing includes reading two channels over 0–40°N, 60–100°E, cloud-top height, and the corrected and uncorrected grids at 0.04°.
+The full pipeline processed all 148 available monsoon scenes without a failure. Each scene took 1.8 s (median; 3.2 s at most) on a laptop, with about 450 MB of memory. Processing includes reading two channels over 0–40° N, 60–100° E, cloud-top height, and the corrected and uncorrected grids at 0.04°.
 
 After correction:
 
@@ -170,7 +170,7 @@ For the uncorrected cold cores to sit on the radar cells, the coldest infrared t
 - **Effective height.** The cold core seen at 10.8 µm is the cloud top at the tropopause (16.6 km median), about 3 km (median 3.2 km) above the radar echo top. If the radiating top of the core is spatially offset from the echo core, the full infrared height is the wrong height for matching rain.
 - **Navigation.** ISRO's own geolocation checks for June 2020 point to an error of 7–11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. We cannot exclude a navigation contribution, but navigation alone cannot reconcile the two measures.
 
-An independent geostationary view of the same storms, for example Meteosat IODC at 45.5°E, which sees the parallax in a different direction, would separate these explanations. So would ground radar at known positions. Both are left for future work.
+An independent geostationary view of the same storms, for example Meteosat IODC at 45.5° E, which sees the parallax in a different direction, would separate these explanations. So would ground radar at known positions. Both are left for future work.
 
 ### 6.3 Navigation
 

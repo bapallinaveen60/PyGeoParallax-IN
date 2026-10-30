@@ -87,3 +87,15 @@ datasets/
 
 # Group U-Net package (models, 2.4 GB of patches); not part of this repository
 U_net_info/
+
+# AMT (Copernicus) build: class files from the Copernicus LaTeX package, and LaTeX outputs
+08_manuscript/amt_source/copernicus.*
+08_manuscript/amt_source/pdfscreen*.sty
+08_manuscript/amt_source/*.aux
+08_manuscript/amt_source/*.bbl
+08_manuscript/amt_source/*.blg
+08_manuscript/amt_source/*.fdb_latexmk
+08_manuscript/amt_source/*.fls
+08_manuscript/amt_source/*.log
+08_manuscript/amt_source/*.out
+08_manuscript/amt_source/*.pdf

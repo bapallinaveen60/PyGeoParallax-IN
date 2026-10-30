@@ -1,0 +1,21 @@
+\conclusions
+\label{sec:conclusions}
+
+We have presented PyGeoParallax-IN, an open-source tool that corrects INSAT-3DR imagery for cloud parallax. It uses exact ray tracing on the WGS84 ellipsoid, with optional terrain and a navigation correction measured from coastlines. We tested it against GPM radar in 38 usable monsoon cases from 2018--2024.
+
+\begin{enumerate}
+  \item \textbf{The correction is exact and behaves as geometry predicts.} It agrees with independent implementations to within millimetres to tens of metres. It moves features only along the line of sight, and it moves deep convection by 4\,km over South India and about 10\,km over the Himalaya and Northeast India.
+  \item \textbf{At storm scale it reverses the mean bias, but GPM cannot show a per-case gain.} The mean INSAT--GPM offset of the storm-top field moves from $+2.2$ to $-1.9$\,km, not significantly different from zero. Only 18 of 30 cases improve, which is not significant.
+  \item \textbf{At convective cores, most of the computed parallax is not visible.} Uncorrected INSAT cold cores already coincide with GPM deep-echo cells ($-0.1$\,km), and correction moves them about 5\,km past ($p<0.001$). Only about 5\,\% of the computed parallax is visible. A synthetic test shows that the method recovers the full parallax when it is present.
+  \item \textbf{Navigation alone cannot explain the result.} A navigation correction fitted to the GPM cells centres the cell measure but leaves the storm-scale agreement worse than uncorrected. No single translation centres both measures, which differ by 2--5\,km depending on the navigation applied. We attribute this mainly to storm structure: the coldest infrared tops and the deepest radar echoes are different targets. It limits GPM-based validation of absolute position to about $\pm$3--5\,km, comparable to the parallax over most of India.
+  \item \textbf{Navigation, cloud height and terrain.}
+  \begin{itemize}
+    \item INSAT-3DR L1C navigation errors are seasonal, 7--20\,km to the west from late September to mid-March, consistent with the yaw flip. In the monsoon they are small and cannot be measured per day from coastlines.
+    \item Brightness-temperature heights of the coldest tops lie at the tropopause, about 3\,km above the GPM echo tops, with either the standard atmosphere or ERA5.
+    \item In the 14 cases of 2022--2024, ERA5 profiles change the offsets by less than 0.5\,km and terrain by less than 0.1\,km; terrain moves clear-sky ground in the Himalaya by up to 6\,km.
+  \end{itemize}
+  \item \textbf{Correcting the input does not improve a precipitation-type classifier.} A U-Net retrained on corrected input scores the same as on uncorrected input in three tasks (accuracy and macro F1 within 0.12 percentage points). Its convective scores fall slightly (deep convective CSI from 0.041 to 0.038), consistent with item 3 and with an earlier SEVIRI study in which the uncorrected network also performed better \citep{dadderio2023}; the changes are small and come from one training run per model.
+  \item \textbf{The tool is fast and ready for downstream use.} It processes an India scene in 1.8\,s and writes uncorrected and corrected datasets that are identical in clear sky.
+\end{enumerate}
+
+For cloud products, the infrared cloud-top height is the right one, and the correction places cloud tops where geometry says they are. For precipitation applications, the rain-relevant level lies below the infrared top. For a precipitation-type U-Net, correcting with the infrared height brought no benefit. An effective height closer to the radar echo top, now an option in the tool, is the natural next test. Verifying absolute positions to better than a few kilometres will need ground radar at known sites or a second geostationary view. Users should not fit navigation corrections to radar cells. The code, scripts and validation case lists are available at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}.
