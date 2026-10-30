@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.4.0 (2026-10-30)
 
 Easier use of the tool: L1C files can be corrected in one command, on a regular grid or on their own pixel grid, and the correction height can be lowered for precipitation work. The correction itself is unchanged.
 
