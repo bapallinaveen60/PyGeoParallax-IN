@@ -110,7 +110,7 @@ def correct_native(lat, lon, channels: dict, cth, sat_lon=SATELLITE_LONGITUDES["
             idx = ndimage.distance_transform_edt(empty, return_distances=False, return_indices=True)
             for name in channels:
                 gridded[name].values[...] = gridded[name].values[idx[0], idx[1]]
-        attrs["empty_cells_filled"] = "nearest"
+        gridded.attrs["empty_cells_filled"] = "nearest"
 
     lat2d, lon2d = np.meshgrid(grid.lats, grid.lons, indexing="ij")
     ds = xr.Dataset({name: (("y", "x"), da.values, da.attrs) for name, da in gridded.data_vars.items()},

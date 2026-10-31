@@ -99,3 +99,16 @@ U_net_info/
 08_manuscript/amt_source/*.log
 08_manuscript/amt_source/*.out
 08_manuscript/amt_source/*.pdf
+
+# IEEE build outputs
+08_manuscript/ieee_source/*.aux
+08_manuscript/ieee_source/*.bbl
+08_manuscript/ieee_source/*.blg
+08_manuscript/ieee_source/*.fdb_latexmk
+08_manuscript/ieee_source/*.fls
+08_manuscript/ieee_source/*.log
+08_manuscript/ieee_source/*.out
+08_manuscript/ieee_source/*.pdf
+
+# Built PDF manual (python docs/build_manual.py)
+docs/*.pdf

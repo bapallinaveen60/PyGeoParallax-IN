@@ -1,0 +1,43 @@
+% Figures 1-6 (from scripts/make_paper_figures.py). Floats; LaTeX places them near Section 5.
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/fig1_geometry.pdf}
+  \caption{INSAT-3DR viewing geometry over South Asia. Colours: parallax shift of a 12\,km cloud top, $h\tan(\mathrm{VZA})$; white lines: viewing zenith angle. Boxes: the four validation regions. The sub-satellite point is at 74\,\textdegree\,E.}
+  \label{fig:1}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2_navigation.pdf}
+  \caption{INSAT-3DR L1C navigation correction from coastline matching, March 2022 to December 2024 (median over the accepted coastal windows of each date). Filled points: three or more windows; open points: one or two. Shading: June--September. Positive values mean INSAT positions must move east or north.}
+  \label{fig:2}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.9\textwidth]{figures/fig3_cases.pdf}
+  \caption{How much of the computed parallax is visible against GPM. Uncorrected line-of-sight offset (GPM minus INSAT; positive: INSAT must move towards the satellite) against the shift the correction applies to deep cores in each case. (a) Storm-top field correlation, 250\,km window (30 cases); (b) median offset of the GPM deep-echo cells and their INSAT cold cores (28 cases). Dashed: parallax fully visible; orange: least-squares fit.}
+  \label{fig:3}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig4_states.pdf}
+  \caption{Line-of-sight offsets in each correction state. Boxes: cell-by-cell offsets between GPM deep-echo cells and INSAT cold cores (box 25--75\,\%, whiskers 10--90\,\%; median labelled). Diamonds: mean field-correlation offset over 30 cases (31 for the GPM-navigation state). Coastline navigation: pooled monsoon value of each year. Shaded: navigation fitted to the GPM cells of all other cases (leave one out); it centres the cells but moves the field measure away from zero.}
+  \label{fig:4}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/fig5_heights.pdf}
+  \caption{Cloud-top height of the INSAT cold core (from TIR1 brightness temperature, AFGL tropical profile) against the GPM maximum echo top in the same cell, for 206 matched cells in 29 cases. Dashed line: the tropopause cap of the profile.}
+  \label{fig:5}
+\end{figure*}
+
+\begin{figure*}[!t]
+  \centering
+  \includegraphics[width=0.8\textwidth]{figures/fig6_terrain.pdf}
+  \caption{Clear-sky terrain parallax: displacement of the ground in ellipsoid-navigated INSAT-3DR imagery, from SRTM elevation averaged to 0.05\,\textdegree. Dashed boxes: validation regions.}
+  \label{fig:6}
+\end{figure*}

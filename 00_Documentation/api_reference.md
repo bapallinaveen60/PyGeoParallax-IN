@@ -1,4 +1,4 @@
-# API Reference (v0.4.0)
+# API Reference (v0.4.1)
 
 Public functions of the `pygeoparallax` package, grouped by module. Each function has a full docstring with parameters and units; this page is the map.
 
@@ -44,7 +44,7 @@ Conventions:
 | :--- | :--- |
 | `parallax_correct(lat, lon, height, sat_lon, h0=0.0, backend="numba")` | Ray intersection with the ellipsoid enlarged by the cloud height, refined by Newton steps (< 1 mm). Numba by default (0.5 s per full disk); `backend="numpy"` takes ~9 s. Returns corrected lat/lon. |
 | `parallax_correct_terrain(lat, lon, cth, sat_lon, surface_height, ...)` | Same, with a DEM: clouds clamped to the ground, clear-sky terrain parallax corrected. |
-| `parallax_shift(lat, lon, lat_c, lon_c)` | Displacement [km] between apparent and corrected positions. |
+| `parallax_shift(lat, lon, lat_c, lon_c)` | Distance [m] and azimuth [degrees from north] from apparent to corrected positions. |
 | `satellite_view_angles(lat, lon, sat_lon, h=0.0)` | Viewing zenith and azimuth angles [degrees]. |
 | `solar_angles(time, lat, lon)` | Solar zenith and azimuth angles. |
 | `geodetic_to_ecef`, `ecef_to_geodetic`, `enu_basis` | WGS84 coordinate transforms. |

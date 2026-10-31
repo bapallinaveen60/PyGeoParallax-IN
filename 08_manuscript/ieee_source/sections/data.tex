@@ -1,0 +1,61 @@
+\section{Data}
+\label{sec:data}
+\label{sec:2}
+
+\subsection{INSAT-3DR Imager}\label{sec:2.1}
+
+INSAT-3DR is a geostationary satellite at 74.0° E. Its Imager scans the full disk every 30 minutes (scans start at HH:15 and HH:45) in six channels: visible (VIS, 0.65 µm), shortwave infrared (SWIR, 1.6 µm), mid-wave infrared (MIR, 3.9 µm), water vapour (WV, 6.8 µm) and two thermal infrared channels (TIR1, 10.8 µm; TIR2, 12.0 µm). The sampling interval is 1 km for VIS and SWIR and 4 km for the infrared channels at the sub-satellite point. We used the Level-1C sector product (\texttt{3RIMG\_*\_L1C\_SGP}) from MOSDAC; INSAT-3DR products use the INSAT-3D formats \citep{sac2014}. It is on a Mercator grid (\texttt{lon\_0\ =\ 75°\ E}) with pixel-centre coordinates. Calibrated counts are converted to brightness temperature (BT) or albedo through the lookup tables in each file.
+
+The full-disk scan runs north to south, from 81° N to 81° S, in about 26.9 min (from the file start and end times). We estimate the scan time at a given latitude by linear interpolation along this sweep.
+
+We did not use the satellite elevation and azimuth angles in the L1C files: they differ from the geometric values by about 1°. Viewing angles are computed directly (Section~\ref{sec:3.1}).
+
+The Level-2B cloud-top pressure product (\texttt{3RIMG\_*\_L2B\_CTP}) gives cloud-top pressure and temperature in coarse boxes (about 37 km) and a clear-sky brightness temperature (CSBT) per channel. It contains no cloud-top height. We use its CSBT as the clear-sky reference for the cloud mask (Section~\ref{sec:3.2}) and its cloud-top pressure only as a cross-check. Its sub-satellite longitude attribute (82° E) is incorrect for INSAT-3DR and is ignored.
+
+\subsection{GPM Dual-frequency Precipitation Radar}\label{sec:2.2}
+
+GPM Core Observatory carries the Dual-frequency Precipitation Radar (DPR) \citep{hou2014}. We used the Ku-band Level-2A product (\texttt{2A.GPM.Ku}, version V08 \citep{gpm2aku_v08}; algorithm in \citet{iguchi2021}) from NASA GES DISC, full-swath (\texttt{FS}) group, about 245 km wide with a footprint of about 5 km. Variables read: storm-top height, near-surface corrected reflectivity, near-surface precipitation rate, precipitation type, bright-band height and the spacecraft position.
+
+GPM 2A gives each footprint's position at the surface. An echo at height \(h\) lies on the slanted radar beam, displaced towards the spacecraft by about \(h\tan\theta_{\mathrm{GPM}}\), where \(\theta_{\mathrm{GPM}}\) is the local zenith angle of the beam. This displacement is up to about 5 km for a 15 km storm top at the swath edge. We place storm tops on the beam by intersecting the line from the footprint to the spacecraft with the ellipsoid surface at height \(h\), using the same Newton refinement as in Section~\ref{sec:3.3}. The median displacement in our cases is 1 km.
+
+\subsection{Ancillary data}\label{sec:2.3}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Coastlines:} Natural Earth 10 m land polygons (public domain) \citep{naturalearth}, used for the navigation check (Section~\ref{sec:3.6}).
+\item
+  \textbf{Atmospheric profiles:} AFGL tropical standard atmosphere \citep{anderson1986}, 0--25 km at 1 km resolution; and ERA5 reanalysis \citep{hersbach2020,c3s2018} temperature and geopotential on 29 pressure levels (1000--50 hPa, 0.25°), at the hour nearest each case scan.
+\item
+  \textbf{Terrain:} SRTM GL1 \citep{farr2007}, 1 arcsecond tiles block-averaged to 0.01° (about 1 km). Heights are above the EGM96 geoid, which lies 50--105 m below the ellipsoid over India; this changes the terrain correction by under 75 m at VZA 35°, so heights are used as they are.
+\end{itemize}
+
+\subsection{Study period and regions}\label{sec:2.4}
+
+Validation cases come from the monsoon seasons (June--September) of 2018--2024, in four regions that span the range of INSAT-3DR viewing angles over India. The navigation series (Section~\ref{sec:3.6}) covers March 2022 to December 2024.
+
+\begin{table*}[!t]
+\centering
+\caption{Validation regions.}\label{tab:R}
+\footnotesize
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\toprule
+\begin{minipage}[b]{\linewidth}\raggedright
+Region
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Box (lat, lon)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Viewing zenith angle
+\end{minipage} \\
+\midrule
+South India (Kerala, Karnataka, Tamil Nadu) & 7--18° N, 73--82° E & 8--23° \\
+Central India (Madhya Pradesh, Chhattisgarh) & 18--27° N, 75--86° E & 21--34° \\
+Himalaya (Uttarakhand, Himachal, Nepal) & 24--33° N, 74--90° E & 28--42° \\
+Northeast India and Bangladesh & 21--29° N, 88--97° E & 29--42° \\
+\bottomrule
+\end{tabular}
+\end{table*}
+

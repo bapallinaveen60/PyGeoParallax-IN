@@ -27,6 +27,8 @@ The corrected output is validated against spaceborne radar overpasses from the G
 
 **U-Net comparison:** scripts to retrain the precipitation-type U-Net on uncorrected (Model A) and parallax-corrected (Model B) patches, with a Colab notebook ([colab/unet_ab_colab.ipynb](colab/unet_ab_colab.ipynb)); results pending.
 
+**Documentation:** [docs/index.md](docs/index.md) (installation, quickstart, command line, Python API, outputs, concepts, data, validation, U-Net, development); a PDF manual is built with `python docs/build_manual.py`.
+
 Speed: 1.8 s per India scene ([benchmark.md](00_Documentation/benchmark.md)). API overview: [api_reference.md](00_Documentation/api_reference.md). Changes: [CHANGELOG.md](CHANGELOG.md). Questions, bug reports and contributions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
@@ -54,7 +56,7 @@ PyGeoParallax-IN/
 │
 ├── 01_raw_data/                     # Raw satellite, reanalysis, and radar inputs
 │   ├── insat3dr_l1c/                # INSAT-3DR Imager Level-1C HDF5 data
-│   ├── insat3dr_cth/                # INSAT-3DR Cloud-Top Height grids
+│   ├── insat3dr_cth/                # INSAT-3DR L2B cloud-top pressure (CTP) and clear-sky BT
 │   ├── era5_reanalysis/             # ERA5 vertical profiles
 │   ├── gpm_dpr_2adpr/               # GPM 2A.DPR orbit overpasses
 │   ├── imd_dwr/                     # IMD Radar grids (Mumbai, Goa, Kochi, Agartala)
@@ -206,10 +208,10 @@ pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_ou
 pygeoparallax batch "02_standardized_grid/insat_0p04deg/*.nc" -o 04_corrected_output/uncorrected --no-correction
 ```
 
-INSAT-3DR L1C geolocation can be off by up to ~15 km, varying by date and region (see `00_Documentation/navigation_check.md`). Measure a same-day correction from coastlines and apply it:
+INSAT-3DR L1C geolocation can be off by up to about 20 km, varying by date and region (see `00_Documentation/navigation_check.md`). Measure a same-day correction from coastlines and apply it:
 
 ```bash
-pygeoparallax navigation "datasets/3RIMG_15FEB2023_*_L1C_SGP_V01R00.h5" -o nav_15FEB2023.json
+pygeoparallax navigation "datasets/insat_nav/3RIMG_15FEB2023_*_L1C_SGP_V01R00.h5" -o nav_15FEB2023.json
 pygeoparallax correct scene.nc scene_corrected.nc --nav-correction nav_15FEB2023.json
 ```
 

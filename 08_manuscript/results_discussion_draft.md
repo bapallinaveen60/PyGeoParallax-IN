@@ -1,6 +1,6 @@
 # Results and Discussion (draft)
 
-*Draft of 26 Oct 2026, reframed for the full set of 38 usable cases (2018–2024), following `methods_draft.md` (Sections 2–4). Figures are `07_figures/paper/fig1`–`fig6`; citations as in the Methods reference list. Numbers come from `05_validation/` (statistics: `05_validation/statistics/statistics_ynav.json` and `statistics_gnav.json`) and `pygeoparallax` v0.3.0. Offsets are GPM minus INSAT along the line of sight; positive means INSAT must move towards the satellite to match GPM.*
+*Draft of 26 Oct 2026, reframed for the full set of 38 usable cases (2018–2024), following `methods_draft.md` (Sections 2–4). Figures are `07_figures/paper/fig1`–`fig6`; citations as in the Methods reference list. Numbers come from `05_validation/` (statistics: `05_validation/statistics/statistics_ynav.json` and `statistics_gnav.json`) and `pygeoparallax` v0.4.0. Offsets are GPM minus INSAT along the line of sight; positive means INSAT must move towards the satellite to match GPM.*
 
 ---
 

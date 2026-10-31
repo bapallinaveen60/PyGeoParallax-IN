@@ -94,6 +94,7 @@ def test_correct_native_moves_cloud_by_its_parallax():
     assert empty.any() and np.isnan(ds["TIR1"].values[empty]).all()
     filled = correct_native(lat, lon, {"TIR1": bt}, cth, fill_radius=0, fill_empty=True)
     assert np.isfinite(filled["TIR1"].values).all()
+    assert filled.attrs["empty_cells_filled"] == "nearest"
     assert ((filled["fill_flag"].values == EMPTY) == empty).all()
 
 

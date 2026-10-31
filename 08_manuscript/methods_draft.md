@@ -1,6 +1,6 @@
 # Methods (draft)
 
-*Draft of 26 Oct 2026 for the PyGeoParallax-IN paper. Equations are in LaTeX math; citations are [Author, year], listed at the end. All numbers match `pygeoparallax` v0.3.0.*
+*Draft of 26 Oct 2026 for the PyGeoParallax-IN paper. Equations are in LaTeX math; citations are [Author, year], listed at the end. All numbers match `pygeoparallax` v0.4.0.*
 
 ---
 
@@ -154,7 +154,7 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 ### 3.7 Implementation
 
-The method is implemented in the open-source Python package `pygeoparallax` (v0.4.0, MIT licence; Zenodo DOI 10.5281/zenodo.23812270). The solver has a vectorised NumPy reference and a parallel Numba kernel [Lam et al., 2015] with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (57) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
+The method is implemented in the open-source Python package `pygeoparallax` (v0.4.0, MIT licence; Zenodo DOI 10.5281/zenodo.23812270). The solver has a vectorised NumPy reference and a parallel Numba kernel [Lam et al., 2015] with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (64 in v0.4.0) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
 
 ---
 
