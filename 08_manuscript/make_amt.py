@@ -61,7 +61,7 @@ PREAMBLE = r"""%% PyGeoParallax-IN manuscript for Atmospheric Measurement Techni
 
 \title{Parallax correction of INSAT-3DR imagery over India: an open-source tool and the limits of validation against GPM radar}
 
-\Author[1][EMAIL-TO-BE-ADDED]{Naveen}{Bapalli}
+\Author[1][baipallinaveen60@gmail.com]{Naveen}{Bapalli}
 \affil[1]{Independent researcher, India}
 
 \runningtitle{Parallax correction of INSAT-3DR imagery over India}

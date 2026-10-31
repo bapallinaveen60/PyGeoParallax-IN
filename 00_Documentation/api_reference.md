@@ -1,4 +1,4 @@
-# API Reference (v0.4.1)
+# API Reference (v0.4.2)
 
 Public functions of the `pygeoparallax` package, grouped by module. Each function has a full docstring with parameters and units; this page is the map.
 

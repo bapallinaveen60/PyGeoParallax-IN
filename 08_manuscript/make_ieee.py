@@ -72,7 +72,7 @@ PREAMBLE = r"""%% PyGeoParallax-IN manuscript, IEEE two-column journal version (
 \title{Parallax Correction of INSAT-3DR Imagery Over India: An Open-Source Tool and the Limits of Validation Against GPM Radar}
 
 \author{Naveen~Bapalli%
-\thanks{N. Bapalli is an independent researcher, India (e-mail: [to be added]).}}
+\thanks{N. Bapalli is an independent researcher, India (e-mail: baipallinaveen60@gmail.com).}}
 
 \markboth{Manuscript draft, \today}{Bapalli: Parallax Correction of INSAT-3DR Imagery Over India}
 

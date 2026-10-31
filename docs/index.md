@@ -2,7 +2,7 @@
 
 PyGeoParallax-IN corrects INSAT-3DR geostationary imagery for cloud parallax. The satellite, at 74° E, sees tall clouds along a slanted line of sight, so they appear displaced away from it: by about 4 km over South India and 8–12 km over the Himalaya and Northeast India for deep convection. The package moves each cloudy pixel back to where the cloud really is, and writes corrected and uncorrected images on the same grid so that the effect of the correction can be measured.
 
-This documentation covers version 0.4.1. A PDF version of all pages can be built with `python docs/build_manual.py` (see [Development](development.md)).
+This documentation covers version 0.4.2. A PDF version of all pages can be built with `python docs/build_manual.py` (see [Development](development.md)).
 
 ## Where to start
 

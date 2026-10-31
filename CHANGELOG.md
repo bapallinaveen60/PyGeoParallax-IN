@@ -1,8 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.4.2 (2026-10-31)
 
-Fixes from the documentation review. The correction itself is unchanged.
+The scripts behind the paper's storm-tilt and Meteosat analyses, and fixes from the documentation review. The correction itself is unchanged.
+
+### Added
+- **Storm tilt from GPM 3-D reflectivity:** `scripts/analyze_storm_tilt.py` places every Ku range bin on its slanted beam and measures how far deep convective cells lean between the 2–4 km core and higher layers (paper Section 5.6).
+- **Meteosat IODC comparison:** `scripts/download_seviri_iodc.py` (EUMETSAT Data Store via eumdac, with retries; crops with satpy) and `scripts/compare_seviri_insat.py` (parallax-corrects Meteosat onto the case grid, corrects for storm motion, and compares INSAT, Meteosat and GPM; paper Section 5.7). eumdac is part of the `download` extra.
+- **Documentation:** `docs/` (twelve pages, PDF manual via `docs/build_manual.py`), an IEEE two-column version of the paper (`08_manuscript/make_ieee.py`) and the AMT version (`make_amt.py`).
 
 ### Changed
 - `pygeoparallax l1c --bbox` without `--grid` now writes a 0.04° grid over the box, instead of the whole 0–40° N, 60–100° E grid with only the box filled.
