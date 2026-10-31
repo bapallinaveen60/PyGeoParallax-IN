@@ -2,7 +2,7 @@
 
 Only the variables needed for validation are read: positions, scan times,
 precipitation type, storm-top and bright-band heights, near-surface
-reflectivity and rain rate. Checked against 2A.GPM.Ku V07 files; the DPR
+reflectivity and rain rate. Checked against 2A.GPM.Ku V07 HDF5 and V08 NetCDF files; the DPR
 product has the same ``FS`` layout.
 """
 

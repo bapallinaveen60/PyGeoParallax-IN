@@ -1,5 +1,6 @@
 """Paper figures from the validation results (PNG at 300 dpi and PDF, in ``07_figures/paper/``).
 
+0. ``fig0_schematic``: cross-section of cloud and terrain parallax (not to scale).
 1. ``fig1_geometry``: INSAT-3DR viewing zenith angle and the parallax shift of a
    12 km cloud top over India, with the four validation regions.
 2. ``fig2_navigation``: INSAT-3DR L1C navigation offsets from coastline
@@ -10,8 +11,11 @@
 5. ``fig5_heights``: INSAT cold-core height vs GPM maximum echo top per cell.
 6. ``fig6_terrain``: clear-sky terrain parallax of the ground from SRTM.
 
-Inputs are the outputs of ``run_all_cases.py``, ``test_navigation_parallax.py``,
-``analyze_core_offsets.py`` and ``pygeoparallax navigation`` runs.
+Inputs are the outputs of ``run_all_cases.py``, ``run_navigation_states.py``
+(the ``_ynav`` and ``_gnav`` runs), ``analyze_core_offsets.py``
+(``core_offsets_cells.csv``, ``core_offsets_ynav_cells.csv`` and
+``core_offsets_gnav_cells.csv``) and ``pygeoparallax navigation`` runs. The
+script takes no options: running it (even with ``--help``) rebuilds every figure.
 
 Usage:
     python scripts/make_paper_figures.py
@@ -360,6 +364,7 @@ DAMAGED_SRTM = []
 
 
 def main():
+    fig0_schematic()
     fig1_geometry()
     fig2_navigation()
     fig3_cases()

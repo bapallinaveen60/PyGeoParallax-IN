@@ -1,5 +1,7 @@
 # Data Access Notes
 
+> **Partly out of date.** The current, tested description of every dataset, where to get it and how the project uses it is in [`docs/data.md`](../docs/data.md). In particular: ERA5 now uses the new CDS API (`https://cds.climate.copernicus.eu/api` with a personal access token, see `scripts/download_era5.py`); GPM 2A Ku V08 came from NASA GES DISC; SRTM came from OpenTopography. Never store passwords or API keys in this repository.
+
 This document contains details on data sources, URLs, authentication steps, API configurations, and rate limits/quotas for the datasets utilized in the project.
 
 ---

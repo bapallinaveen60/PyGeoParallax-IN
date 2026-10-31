@@ -24,6 +24,8 @@ from __future__ import annotations
 import argparse
 import glob
 import multiprocessing
+import os
+import re
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -54,9 +56,15 @@ def _surface(dem, dem_var):
     return surface_height_from_dataset(dem, dem_var)
 
 
+#: Default number of parallel processes: a full L1C sector needs about 1.5 GB per process.
+DEFAULT_WORKERS = min(4, os.cpu_count() or 1)
+
+
 def _height_attrs(ds, height_scale, height_offset_km):
     if height_scale != 1.0 or height_offset_km != 0.0:
-        ds.attrs["effective_height"] = f"{height_scale:g} * cth - {height_offset_km:g} km"
+        rule = f"{height_scale:g} * cloud-top height - {height_offset_km:g} km"
+        ds.attrs["effective_height"] = rule
+        ds["cth"].attrs["long_name"] = f"effective height used for the correction ({rule})"
 
 
 def _write(ds, out_path):
@@ -100,7 +108,9 @@ def process_file(in_path, out_path, channels=None, sat_lon=None, dem=None, dem_v
             fill_radius=fill_radius,
         )
         _height_attrs(ds, height_scale, height_offset_km)
-        for key in ("time", "start_time", "satellite"):
+        for c in channels:
+            ds[c].attrs = dict(scene[c].attrs)
+        for key in ("satellite", "sensor", "product", "start_time", "end_time", "time"):
             if key in scene.attrs:
                 ds.attrs[key] = scene.attrs[key]
         ds.attrs["source_file"] = Path(in_path).name
@@ -192,7 +202,11 @@ def _options(args):
 
 
 def _cmd_correct(args):
-    out = process_file(args.input, args.output, **_options(args))
+    try:
+        out = process_file(args.input, args.output, **_options(args))
+    except Exception as exc:  # a clear one-line message instead of a traceback
+        print(f"error: {Path(args.input).name}: {exc}", file=sys.stderr)
+        return 1
     print(f"wrote {out}")
     return 0
 
@@ -202,8 +216,13 @@ def _cmd_batch(args):
 
 
 def _cmd_l1c(args):
+    grid = _grid_from_args(args)
+    if args.bbox and args.grid is None and not args.native:
+        # Without --grid, a region read with --bbox goes on a 0.04 deg grid over that region only.
+        lat_min, lat_max, lon_min, lon_max = args.bbox
+        grid = Grid(lat_min, lat_max, lon_min, lon_max, SOUTH_ASIA_0P04.res)
     opts = dict(
-        channels=args.channels, bbox=args.bbox, native=args.native, grid=_grid_from_args(args), era5=args.era5,
+        channels=args.channels, bbox=args.bbox, native=args.native, grid=grid, era5=args.era5,
         cloud_threshold=args.cloud_threshold, dem=args.dem, dem_var=args.dem_var, correct=not args.no_correction,
         fill_radius=args.fill_radius, fill_empty=args.fill_empty, nav_correction=args.nav_correction,
         height_scale=args.height_scale, height_offset_km=args.height_offset,
@@ -232,7 +251,7 @@ def _run_batch(args, func, opts):
     # "spawn", not fork: forking after Numba's parallel kernels have started a
     # thread pool can crash the workers on Linux.
     ctx = multiprocessing.get_context("spawn")
-    with ProcessPoolExecutor(max_workers=args.workers, mp_context=ctx) as pool:
+    with ProcessPoolExecutor(max_workers=args.workers or DEFAULT_WORKERS, mp_context=ctx) as pool:
         futures = {pool.submit(func, path, out, **opts): path for path, out in jobs.items()}
         for fut in as_completed(futures):
             path = futures[fut]
@@ -252,7 +271,15 @@ def _cmd_navigation(args):
     if not inputs:
         print("no input files matched", file=sys.stderr)
         return 1
+    unknown = sorted(set(args.windows or ()) - set(WINDOWS))
+    if unknown:
+        print(f"unknown window(s): {', '.join(unknown)}; choose from: {', '.join(WINDOWS)}", file=sys.stderr)
+        return 1
     windows = {k: v for k, v in WINDOWS.items() if not args.windows or k in args.windows}
+    days = {m.group(1) for p in inputs if (m := re.search(r"_(\d{2}[A-Z]{3}\d{4})_", Path(p).name))}
+    if len(days) > 1:
+        print(f"warning: the scans span {len(days)} days ({', '.join(sorted(days))}); the navigation error "
+              "changes from day to day, so one correction for all of them is only an average", file=sys.stderr)
     land = load_land(args.land)
     interps = {k: land_fraction_interpolator(land, b) for k, b in windows.items()}
     matches = []
@@ -301,7 +328,7 @@ def main(argv=None):
     p = sub.add_parser("l1c", help="correct INSAT-3DR L1C files (HDF5) directly")
     p.add_argument("inputs", nargs="+", help="3RIMG_*_L1C_SGP*.h5 files or glob patterns")
     p.add_argument("-o", "--output-dir", required=True)
-    p.add_argument("-j", "--workers", type=int, default=None, help="parallel processes (default: CPU count)")
+    p.add_argument("-j", "--workers", type=int, default=None, help="parallel processes (default: 4 or the CPU count if lower; about 1.5 GB each for a full sector)")
     p.add_argument("--overwrite", action="store_true", help="redo files whose output already exists")
     p.add_argument("--channels", nargs="+", default=["TIR1", "TIR2", "WV", "MIR"],
                    help="channels to correct (default: TIR1 TIR2 WV MIR; also VIS, SWIR)")
@@ -318,7 +345,7 @@ def main(argv=None):
     p.add_argument("--no-correction", action="store_true",
                    help="regrid without parallax correction (uncorrected baseline)")
     p.add_argument("--grid", nargs=5, type=float, metavar=("LAT_MIN", "LAT_MAX", "LON_MIN", "LON_MAX", "RES"),
-                   help="target grid without --native (default: 0-40N, 60-100E at 0.04 deg)")
+                   help="target grid without --native (default: the --bbox region at 0.04 deg, else 0-40N, 60-100E)")
     p.add_argument("--fill-radius", type=int, default=1, help="largest gap in cells to interpolate (0 = none)")
     p.add_argument("--nav-correction", help="navigation correction JSON from `pygeoparallax navigation`")
     p.add_argument("--height-scale", type=float, default=1.0,
@@ -336,7 +363,7 @@ def main(argv=None):
     p = sub.add_parser("batch", help="correct many files in parallel")
     p.add_argument("inputs", nargs="+", help="input files or glob patterns")
     p.add_argument("-o", "--output-dir", required=True)
-    p.add_argument("-j", "--workers", type=int, default=None, help="parallel processes (default: CPU count)")
+    p.add_argument("-j", "--workers", type=int, default=None, help="parallel processes (default: 4 or the CPU count if lower; about 1.5 GB each for a full sector)")
     p.add_argument("--overwrite", action="store_true", help="redo scenes whose output already exists")
     _common_options(p)
     p.set_defaults(func=_cmd_batch)

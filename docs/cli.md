@@ -36,7 +36,7 @@ These apply to all commands.
 - **Units.** Latitude and longitude in degrees (north and east positive). Heights in the files are metres; the `--height-offset` option is in kilometres. Shifts are in kilometres. Brightness temperatures are in kelvin.
 - **Region arguments.** `--bbox` takes 4 numbers and `--grid` takes 5, in the order latitude minimum, latitude maximum, longitude minimum, longitude maximum (and resolution in degrees). Example: `--grid 20 30 85 97 0.04`.
 - **Grid edges.** `--grid` bounds are the outer cell edges. `--grid 20 30 85 97 0.04` gives 250 × 300 cells with centres from 29.98° N down to 20.02° N and from 85.02° E to 96.98° E. Rows run north to south.
-- **Default grid.** Without `--grid`, regular-grid output covers 0–40° N, 60–100° E at 0.04° (1000 × 1000 cells, about 4.4 km).
+- **Default grid.** Without `--grid`, regular-grid output covers 0–40° N, 60–100° E at 0.04° (1000 × 1000 cells, about 4.4 km); with `l1c --bbox`, it covers the box at 0.04°.
 - **Glob patterns.** Commands that take several inputs expand glob patterns themselves (Python `glob`), so quote the pattern: `"L1C/*.h5"`. In cmd on Windows use double quotes; single quotes are not quote characters there. `**` is not recursive. See [troubleshooting.md](troubleshooting.md#no-input-files-matched).
 
 ## demo
@@ -95,7 +95,7 @@ Correct INSAT-3DR L1C files (HDF5) directly. For each file it:
 | :--- | :--- | :--- |
 | `inputs` | required | `3RIMG_*_L1C_SGP*.h5` files or glob patterns. One or more. |
 | `-o`, `--output-dir OUTPUT_DIR` | required | Folder for the output files. Created if missing. |
-| `-j`, `--workers WORKERS` | CPU count | Parallel processes. |
+| `-j`, `--workers WORKERS` | 4, or the CPU count if lower | Parallel processes. A full L1C sector needs about 1.5 GB per process. |
 | `--overwrite` | off | Redo files whose output already exists. |
 | `--channels CHANNELS [CHANNELS ...]` | `TIR1 TIR2 WV MIR` | Channels to correct. Also `VIS`, `SWIR`. TIR1 is always read, for the cloud-top height, but is only written if listed. |
 | `--bbox LAT_MIN LAT_MAX LON_MIN LON_MAX` | whole file | Read only this region of the file. The box is in the file's own (uncorrected) coordinates. |
@@ -114,7 +114,7 @@ Correct INSAT-3DR L1C files (HDF5) directly. For each file it:
 
 Notes:
 
-- **Regular grid and `--bbox`.** `--bbox` limits what is read, not the output grid. Pass a matching `--grid` too, otherwise the output is the full 1000 × 1000 default grid with only the box filled.
+- **Regular grid and `--bbox`.** Without `--grid`, a `--bbox` region is written on a 0.04° grid over that box only (for example `--bbox 20 30 85 97` gives 250 × 300 cells). Pass `--grid` for a different resolution or extent.
 - **Edges of a box.** Pixels near the edge of a `--bbox` region can be moved out of it, and pixels outside it are not there to move in. Make the box about 0.2° larger than the area you need, or ignore cells with `fill_flag` 2 near the edges.
 - **File size with `--native`.** A full L1C sector on its own grid (3207 × 3062 pixels, four channels) gives an output of about 315 MB, against about 18 MB on the default 0.04° grid. Use `--bbox` for native output when you can.
 - **`--native` with `--nav-correction`.** The output keeps the file's original pixel grid; the navigation correction only changes where pixels land on it.
@@ -167,7 +167,7 @@ Correct one [standard-scene](#standard-scene-files) NetCDF file and write the re
 | `--height-scale HEIGHT_SCALE` | `1.0` | Correct with height-scale × cloud-top height − height-offset. |
 | `--height-offset KM` | `0.0` | Subtract this from the cloud-top height [km], e.g. 3 for precipitation. |
 
-`correct` has no `--native` option; native-grid output is only available from `l1c` and from Python (`correct_native`). On success it prints `wrote <output>` and exits with 0. On an error (missing file, missing variable) it prints a Python traceback and exits with 1.
+`correct` has no `--native` option; native-grid output is only available from `l1c` and from Python (`correct_native`). On success it prints `wrote <output>` and exits with 0. On an error (missing file, missing variable) it prints a one-line `error: <file>: <message>` and exits with 1.
 
 Examples:
 
@@ -202,7 +202,7 @@ Correct many standard-scene files in parallel. Each file is processed exactly as
 | :--- | :--- | :--- |
 | `inputs` | required | Input files or glob patterns. One or more. |
 | `-o`, `--output-dir OUTPUT_DIR` | required | Folder for the output files. Created if missing. |
-| `-j`, `--workers WORKERS` | CPU count | Parallel processes. |
+| `-j`, `--workers WORKERS` | 4, or the CPU count if lower | Parallel processes. A full L1C sector needs about 1.5 GB per process. |
 | `--overwrite` | off | Redo scenes whose output already exists. |
 | `--channels`, `--sat-lon`, `--dem`, `--dem-var`, `--no-correction`, `--grid`, `--fill-radius`, `--nav-correction`, `--height-scale`, `--height-offset` | | As for [`correct`](#correct). |
 
@@ -346,7 +346,7 @@ Timing on a laptop, `-j 1`: about 7 s for a 10° × 12° `--bbox` region and abo
 | Code | Meaning |
 | :--- | :--- |
 | 0 | Success. For `l1c` and `batch`: no file failed (also when every output was skipped). For `demo`: the check passed. |
-| 1 | `l1c`, `batch`, `navigation`: `no input files matched`, or at least one file failed. `navigation`: no usable correction. `demo`: the check failed. `correct`: any error (with a traceback). |
+| 1 | `l1c`, `batch`, `navigation`: `no input files matched`, or at least one file failed. `navigation`: no usable correction. `demo`: the check failed. `correct`: any error (one-line message). `navigation`: an unknown `--windows` name. |
 | 2 | Invalid command line (unknown option, missing argument). argparse prints the usage. |
 
 Use the exit code in scripts:

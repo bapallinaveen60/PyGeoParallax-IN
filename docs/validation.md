@@ -33,7 +33,7 @@ The results are summarised from `00_Documentation/validation_summary.md` and `08
 | `04_corrected_output/paired/` | The paired Model A / Model B dataset from `build_paired_dataset.py`. |
 | `05_validation/gpm_colocation/` | One JSON per case run, `all_cases.csv`, `nav_parallax_test.csv`, `core_offsets*.csv`, `era5_comparison.csv`, `dem_comparison.csv`. |
 | `05_validation/nav_corrections/` | Navigation corrections (JSON) and the match tables. |
-| `05_validation/statistics/` | `statistics.json` and `field_offsets_by_case.csv`. |
+| `05_validation/statistics/` | `statistics_<nav-tag>.json` and `field_offsets_by_case_<nav-tag>.csv` (the project has `_ynav` and `_gnav`). |
 | `05_validation/benchmark/` | `benchmark_scenes.csv`. |
 | `05_validation/navigation_check*.json` | Coastline checks from `check_navigation.py`. |
 | `06_deep_learning/` | Empty placeholders. The U-Net runs are described in [unet.md](unet.md). |
@@ -90,7 +90,7 @@ The VZA ranges are those of the usable cases (manuscript Table 1).
 | 8. Navigation-state runs | `run_navigation_states.py` | `<case>_ynav`, `<case>_mnav` runs |
 | 9. Cell offsets | `analyze_core_offsets.py` (`--nav-tag mnav`, then `ynav`) | `core_offsets*.csv` |
 | 10. GPM-derived navigation | `gpm_navigation.py`, then `run_navigation_states.py --tags gnav`, then `analyze_core_offsets.py --nav-tag gnav` | `gpm_loo_<case>.json`, `<case>_gnav` runs |
-| 11. Statistics | `validation_statistics.py` | `statistics.json` |
+| 11. Statistics | `validation_statistics.py` | `statistics_<nav-tag>.json` |
 | 12. Sensitivity | `compare_variants.py` (`era5`, `dem`), `analyze_core_offsets.py --suffix` | `*_comparison.csv` |
 | 13. Diagnostics | `check_parallax_visibility.py`, `near_storm_navigation.py`, `check_navigation.py` | overlays, match tables |
 | 14. Figures | `make_paper_figures.py` | `07_figures/paper/` |
@@ -411,11 +411,11 @@ Confidence intervals and paired tests (see [statistics](#statistics)).
 | `--seed` | [2026] |
 | `--nav-tag` | navigation runs for the navigation states [`ynav`] |
 
-It needs the base, `_mnav` and `_<nav-tag>` case JSON files, `core_offsets_cells.csv` and `core_offsets_<nav-tag>_cells.csv`. It writes `05_validation/statistics/statistics.json` and `field_offsets_by_case.csv`, and prints the tables. The output names do not depend on `--nav-tag`, so a second run overwrites the first. The project keeps the two runs as `statistics_ynav.json` and `statistics_gnav.json` (with `field_offsets_by_case_ynav.csv`, `..._gnav.csv` and the printed tables as `.txt`). Rename the outputs after each run:
+It needs the base, `_mnav` and `_<nav-tag>` case JSON files, `core_offsets_cells.csv` and `core_offsets_<nav-tag>_cells.csv`. It writes `05_validation/statistics/statistics_<nav-tag>.json` and `field_offsets_by_case_<nav-tag>.csv`, and prints the tables. The project keeps two runs, `ynav` (per-year coastline navigation) and `gnav` (GPM-fitted navigation), with the printed tables saved as `.txt`:
 
 ```bash
 python scripts/validation_statistics.py --nav-tag ynav > 05_validation/statistics/statistics_ynav.txt
-mv 05_validation/statistics/statistics.json 05_validation/statistics/statistics_ynav.json
+python scripts/validation_statistics.py --nav-tag gnav > 05_validation/statistics/statistics_gnav.txt
 ```
 
 #### `compare_variants.py`

@@ -127,6 +127,7 @@ PyGeoParallax-IN/
    Without conda, a plain virtual environment works too:
    ```bash
    python -m venv .venv
+   source .venv/bin/activate        # Windows: .venv\Scripts\activate
    pip install -e ".[geo,download,plot,dev]"
    ```
    Run the tests with `pytest`.

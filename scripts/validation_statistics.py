@@ -121,7 +121,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--n-boot", type=int, default=10000)
     ap.add_argument("--seed", type=int, default=2026)
-    ap.add_argument("--nav-tag", default="ynav", help="navigation runs to use: ynav (per-year pooled) or pnav")
+    ap.add_argument("--nav-tag", default="ynav", help="navigation runs to use, e.g. ynav (per-year pooled), gnav (GPM-fitted) or snav (near-storm); "
+                         "also the suffix of the output files")
     args = ap.parse_args(argv)
     rng = np.random.default_rng(args.seed)
     n = args.n_boot
@@ -162,8 +163,8 @@ def main(argv=None):
         }
 
     OUT.mkdir(parents=True, exist_ok=True)
-    f.to_csv(OUT / "field_offsets_by_case.csv", index=False)
-    (OUT / "statistics.json").write_text(json.dumps(res, indent=2))
+    f.to_csv(OUT / f"field_offsets_by_case_{args.nav_tag}.csv", index=False)
+    (OUT / f"statistics_{args.nav_tag}.json").write_text(json.dumps(res, indent=2))
 
     def ci(x):
         return f"[{x[0]:+.1f}, {x[1]:+.1f}]"

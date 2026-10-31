@@ -148,6 +148,7 @@ def resample(grid: Grid, lat, lon, height, values: dict, fill_radius=1, power=2.
         attrs=dict(attrs or {}),
     )
     ds["count"] = (dims, count.astype(np.int32))
+    ds["count"].attrs = {"long_name": "number of pixels that landed in the cell"}
     ds["fill_flag"] = (dims, fill_flag)
     ds["fill_flag"].attrs = {
         "flag_values": [OBSERVED, INTERPOLATED, EMPTY],

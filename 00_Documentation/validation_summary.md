@@ -1,4 +1,6 @@
-# GPM Validation Summary (4 regions, 14 usable cases)
+# GPM Validation Summary
+
+> This file records the validation as it grew, from the first 12–14 cases (2022–2024) to the full set of 63 cases, 38 usable (2018–2024). The opening sections describe the early cases; the final numbers are in the later sections on the full set and in `docs/validation.md`.
 
 **The parallax correction is verified geometrically, and it improves INSAT–GPM alignment on average.** With the GPM storm-top field within 250 km, the median line-of-sight offset falls from 5.4 to 3.0 km and 10 of 12 cases improve; the cross-look offset is unchanged.
 

@@ -124,7 +124,7 @@ def test_l1c_command(tmp_path):
     main(["l1c", str(src), "-o", str(lower), "--channels", "TIR1", "--native", "--height-offset", "3", "-j", "1"])
     with xr.open_dataset(lower / "3RIMG_TEST_L1C_SGP_corrected.nc") as ds:
         assert float(np.nanmax(ds["shift_km"])) < full
-        assert ds.attrs["effective_height"] == "1 * cth - 3 km"
+        assert ds.attrs["effective_height"] == "1 * cloud-top height - 3 km"
 
     reg = tmp_path / "regular"
     grid = ["--grid", "10.0", "20.0", "70.0", "80.0", "0.04"]

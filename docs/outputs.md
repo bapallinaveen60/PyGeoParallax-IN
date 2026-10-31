@@ -79,7 +79,7 @@ The same file from `--native` has dimensions `(y: 306, x: 334)` and 2-D `lat`/`l
 | `cth` | float64 | m | always | Height used for the correction, above the WGS84 ellipsoid. NaN for clear sky. |
 | `shift_km` | float64 | km | corrected output only | How far the pixel in this cell was moved. |
 | `height` | float64 | m | always | Height that decided which pixel won the cell. |
-| `count` | int32 | pixels | always | Number of corrected pixels that landed in the cell. |
+| `count` | int32 | pixels | always | Number of corrected pixels that landed in the cell (`long_name: number of pixels that landed in the cell`). |
 | `fill_flag` | uint8 | – | always | 0 observed, 1 interpolated, 2 empty. |
 
 The CLI writes all data variables with zlib compression (level 4). NaN is the missing value for the float variables. `count` and `fill_flag` have no missing values.
@@ -105,11 +105,11 @@ Every channel is moved with its pixel, using the cloud-top height derived from T
 
 ### `cth`
 
-Height used to correct the pixel [m above the WGS84 ellipsoid]. Attributes: `units: m`, `long_name: cloud-top height`.
+Height used to correct the pixel [m above the WGS84 ellipsoid]. Attributes: `units: m`, `long_name: cloud-top height` (or `effective height used for the correction (...)` when an effective height was used).
 
 - With `l1c`, it comes from the TIR1 brightness temperature: pixels colder than the cloud threshold (270 K by default) are cloudy, and their height is looked up in the AFGL tropical atmosphere or ERA5 profiles. The global attribute `cloud_top_height` records which. Very cold tops are capped at the tropopause (17 km in the AFGL profile).
 - NaN means clear sky. Clear-sky pixels are not moved by the cloud correction.
-- With `--height-scale` or `--height-offset`, `cth` holds the **effective** height that was used, not the original cloud-top height. For example, with `--height-offset 3` the largest value is 14000 m instead of 17000 m. The attribute `effective_height` gives the formula.
+- With `--height-scale` or `--height-offset`, `cth` holds the **effective** height that was used, not the original cloud-top height. For example, with `--height-offset 3` the largest value is 14000 m instead of 17000 m. Its `long_name` says so, and the global attribute `effective_height` gives the formula.
 - On the regular grid, `cth` is the value of the winning (highest) pixel in the cell.
 
 ### `shift_km`
@@ -178,7 +178,8 @@ The uncorrected output (`--no-correction`) also has `fill_flag`. There it only m
 | `time` | `2023-08-01T18:28:53` | `l1c`; `correct`/`batch` if in the input | Scan midpoint, UTC. Stored as a string. |
 | `source_file` | `3RIMG_01AUG2023_1815_L1C_SGP_V01R00.h5` | CLI | Input file name. |
 | `cloud_top_height` | `TIR1 BT < 270 K, AFGL tropical atmosphere` | `l1c` | How `cth` was derived (`ERA5 profile` with `--era5`). |
-| `effective_height` | `1 * cth - 3 km` | CLI, only with `--height-scale`/`--height-offset` | Formula used to turn the cloud-top height into the correction height. |
+| `effective_height` | `1 * cloud-top height - 3 km` | CLI, only with `--height-scale`/`--height-offset` | Formula used to turn the cloud-top height into the correction height. |
+| `empty_cells_filled` | `nearest` | `--native --fill-empty` (`correct_native(..., fill_empty=True)`) | Channels in empty cells were filled with the nearest corrected value; the cells keep `fill_flag` 2. |
 | `navigation_correction` | `nav_15DEC2022.json` | CLI, only with `--nav-correction` | File name of the navigation correction applied. |
 
 Notes:

@@ -226,7 +226,7 @@ print(ctp.sizes, csbt.sizes)     # row: 313, col: 312 and row: 325, col: 325
 print(float(np.nanmedian(ctp["ctp"])))
 ```
 
-`channel` is the suffix of the file's `CSBT_*` variable: `"TIR1"`, `"TIR2"`, `"MIR"` or `"WVR"` (the water-vapour channel is `WVR` in L2B, not `WV`). To use the clear-sky BT as a cloud-mask reference, see [cloudheight](#cloudheight).
+`channel` is the suffix of the file's `CSBT_*` variable: `"TIR1"`, `"TIR2"`, `"MIR"` or `"WVR"` (the water-vapour channel is `WVR` in L2B; `"WV"` is accepted too). To use the clear-sky BT as a cloud-mask reference, see [cloudheight](#cloudheight).
 
 ### ERA5 profiles
 

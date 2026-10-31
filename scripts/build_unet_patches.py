@@ -47,7 +47,7 @@ import numpy as np
 import pandas as pd
 from scipy import ndimage
 
-from pygeoparallax.cloudheight import cloud_top_height
+from pygeoparallax.cloudheight import cloud_top_height, effective_height
 from pygeoparallax.geometry.constants import SATELLITE_LONGITUDES
 from pygeoparallax.geometry.parallax import parallax_correct, parallax_shift
 from pygeoparallax.resample import EMPTY, Grid
@@ -78,7 +78,7 @@ def merc_lat(y, iterations=6):
     return np.degrees(phi)
 
 
-def process_scene(scene, tiles, out):
+def process_scene(scene, tiles, out, height_scale=1.0, height_offset_km=0.0):
     """Correct one scene. ``tiles`` is a list of (split, path); returns manifest rows."""
     t0 = time.perf_counter()
     data = [(split, path, np.load(path)) for split, path in tiles]
@@ -105,7 +105,7 @@ def process_scene(scene, tiles, out):
     lon = np.polyval(al, cc)
 
     have = np.isfinite(bt[0])
-    cth = cloud_top_height(bt[0])
+    cth = effective_height(cloud_top_height(bt[0]), height_scale, height_offset_km * 1000.0)
     height = np.where(np.isfinite(cth), cth, 0.0)
     lat_c, lon_c = parallax_correct(lat[have], lon[have], height[have], SATELLITE_LONGITUDES["INSAT-3DR"])
     shift, _ = parallax_shift(lat[have], lon[have], lat_c, lon_c)
@@ -157,6 +157,10 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     ap.add_argument("-j", "--jobs", type=int, default=max(1, multiprocessing.cpu_count() // 2))
     ap.add_argument("--limit", type=int, help="process only the first N scenes (testing)")
+    ap.add_argument("--height-scale", type=float, default=1.0,
+                    help="correct with height-scale * cloud-top height - height-offset (default 1)")
+    ap.add_argument("--height-offset", type=float, default=0.0, metavar="KM",
+                    help="subtract this from the cloud-top height [km], e.g. 3 for a Model C (default 0)")
     args = ap.parse_args(argv)
 
     out = Path(args.out)
@@ -175,7 +179,7 @@ def main(argv=None):
     old = pd.read_csv(manifest) if manifest.exists() else pd.DataFrame()
     rows, t0 = [], time.perf_counter()
     with ProcessPoolExecutor(args.jobs) as ex:
-        futs = {ex.submit(process_scene, s, t, out): s for s, t in todo.items()}
+        futs = {ex.submit(process_scene, s, t, out, args.height_scale, args.height_offset): s for s, t in todo.items()}
         for n, f in enumerate(as_completed(futs), 1):
             try:
                 rows += f.result()

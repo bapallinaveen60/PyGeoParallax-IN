@@ -3,7 +3,8 @@
 For every L1C file found (each file once, however many folders hold it):
 
 1. Read TIR1 and WV over the South Asia grid, with the monsoon navigation
-   correction (pooled near-storm value, -0.5 km E / +2.5 km N).
+   correction (pooled near-storm value, -0.5 km E / +2.5 km N; the 38-case validation
+   later used per-year values, which does not matter for a speed benchmark).
 2. Cloud-top height from TIR1 BT (AFGL tropical profile); the cloud mask uses
    ISRO's clear-sky BT when a matching L2B CTP file is present, else BT < 270 K.
 3. Parallax-correct and regrid to the 0.04 deg South Asia grid, and regrid

@@ -142,7 +142,7 @@ The file has two grids, both in satellite projection over the full disk:
 | Cloud grid, about 37 km boxes over India | 313 × 312 | `CTP` cloud-top pressure [hPa, 25 hPa steps], `CTT` cloud-top temperature [K], `EFF_EMISS` effective emissivity; `Latitude`, `Longitude` | `read_insat_ctp` |
 | Clear-sky grid | 325 × 325 | `CSBT_TIR1`, `CSBT_TIR2`, `CSBT_MIR`, `CSBT_WVR` clear-sky BT [K]; `CLRFR_*` clear fraction; `CSBT_Latitude`, `CSBT_Longitude` | `read_insat_csbt` |
 
-Values are scaled integers or floats with `scale_factor`, `add_offset` and `_FillValue`; the readers apply them. The water-vapour channel is called `WVR` here (`read_insat_csbt(path, channel="WVR")`), not `WV` as in L1C.
+Values are scaled integers or floats with `scale_factor`, `add_offset` and `_FillValue`; the readers apply them. The water-vapour channel is called `WVR` here, not `WV` as in L1C; `read_insat_csbt` accepts either name.
 
 ### Use in the project
 

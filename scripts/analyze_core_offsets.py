@@ -97,7 +97,6 @@ def main(argv=None):
         gpm = rvc.gpm_on_grid(rvc.find(Path(args.base) / case, "2A.GPM.*"), grid, box)
         cen = gpm["conv_centre"]
         _, vaa = satellite_view_angles(*cen, 74.0)
-        d = json.loads((Path("05_validation/gpm_colocation") / f"{case}{args.suffix}.json").read_text())
         glat, glon = np.meshgrid(grid.lats, grid.lons, indexing="ij")
         near = range_mask(grid, cen[0], cen[1], args.radius) & gpm["covered"]
         labels, n = ndimage.label((np.nan_to_num(gpm["top"]) > 10000) & near)
@@ -105,7 +104,7 @@ def main(argv=None):
                  for k in ("uncorrected", "corrected")}
         bts = {k: g["TIR1"].values for k, g in grids.items()}
         raw_cth = grids["uncorrected"]["cth"].values
-        # With the monsoon navigation correction (from test_navigation_parallax.py), if available.
+        # With a navigation correction (the ``--nav-tag`` runs of run_navigation_states.py), if available.
         for k, src in (("nav_only", "uncorrected"), ("nav_parallax", "corrected")):
             f = Path("04_corrected_output/netcdf") / f"{case}{args.suffix}_{args.nav_tag}_nav_{src}.nc"
             if f.exists():

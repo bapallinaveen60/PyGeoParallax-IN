@@ -94,7 +94,7 @@ Measured on a Windows laptop, `-j 1`, four channels:
 
 Tips:
 
-- **Read only what you need.** `--bbox` decodes only that part of the file. Add a matching `--grid` for regular-grid output. Make the box about 0.2° larger than your area of interest, because pixels near the edge can move out of the box.
+- **Read only what you need.** `--bbox` decodes only that part of the file, and without `--grid` the output grid covers the same box. Make the box about 0.2° larger than your area of interest, because pixels near the edge can move out of the box.
 - **Fewer channels.** `--channels TIR1` is faster and smaller than the default four channels.
 - **Parallel files.** `-j N` runs N files at once. Memory grows with N: with 16 GB of RAM, use `-j 4` to `-j 6` for full sectors. The default (`-j` = number of CPUs) can run out of memory on machines with many cores.
 - **Threads.** The Numba solver uses all cores within each worker. With many workers, `NUMBA_NUM_THREADS=1` avoids oversubscription:
@@ -164,7 +164,7 @@ The demo still runs, checks the correction and writes the NetCDF files; only `de
 
 **Output files from an earlier run were skipped although I changed options.** `l1c` and `batch` skip outputs by file name only. Use a new output folder, or `--overwrite`. See [cli.md](cli.md#output-file-names-and-skipping).
 
-**The output covers 0–40° N, 60–100° E although I used `--bbox`.** `--bbox` limits reading, not the output grid. Add `--grid` with the same bounds and a resolution, or use `--native`.
+**The output covers 0–40° N, 60–100° E although I used `--bbox`.** This happened before version 0.4.2, when `--bbox` limited only the reading. Now a `--bbox` region without `--grid` goes on a 0.04° grid over the box. With `correct` and `batch` (no `--bbox`), pass `--grid`.
 
 **Clouds moved towards the satellite.** That is correct. The satellite at 74° E sees clouds displaced away from it (to the north-east over Northeast India). Correction moves them back towards the sub-satellite point.
 

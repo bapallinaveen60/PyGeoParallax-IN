@@ -73,6 +73,8 @@ Cells that receive no corrected pixel stay empty (`fill_flag` 2). Their input is
 | `--out` | output folder (required) |
 | `-j`, `--jobs` | parallel processes [half the CPU count] |
 | `--limit` | process only the first N scenes (testing) |
+| `--height-scale` | correct with height-scale × cloud-top height − height-offset [1] |
+| `--height-offset KM` | subtract this from the cloud-top height [0 km], e.g. 3 for an effective-height Model C |
 
 Outputs:
 

@@ -33,7 +33,7 @@ Extras add packages that only some features need. Install them with `pip install
 | Extra | Packages | Needed for |
 | :--- | :--- | :--- |
 | `plot` | matplotlib >= 3.5 | the before/after figure of `pygeoparallax demo`, and plotting your output. Without it the demo still runs and passes, but writes no figure. |
-| `geo` | rioxarray >= 0.11, geopandas >= 0.10, cartopy >= 0.20 | reading SRTM GeoTIFF tiles with `read_srtm` (rioxarray brings in rasterio), and maps with coastlines in your own analysis. The correction itself does not need them. |
+| `geo` | rioxarray >= 0.11, rasterio >= 1.3, geopandas >= 0.10, cartopy >= 0.20 | reading SRTM GeoTIFF tiles with `read_srtm` (needs rasterio), and maps with coastlines in your own analysis. The correction itself does not need them. |
 | `download` | cdsapi >= 0.5.1, requests >= 2.28 | downloading ERA5 profiles (`scripts/download_era5.py`) and other data. See [data.md](data.md). |
 | `dev` | pytest >= 7.0, pyorbital >= 1.8, satpy >= 0.50, ipykernel >= 6.9, rasterio >= 1.3 | running the tests (pyorbital and satpy are independent references), the notebooks, and `read_srtm`. See [development.md](development.md). |
 

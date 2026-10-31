@@ -68,10 +68,14 @@ def read_insat_ctp(path) -> xr.Dataset:
 def read_insat_csbt(path, channel="TIR1") -> xr.Dataset:
     """Clear-sky brightness temperature for one channel on the product's clear-sky grid.
 
+    ``channel`` is ``"TIR1"``, ``"TIR2"``, ``"MIR"`` or ``"WVR"`` (the product's
+    name for water vapour; ``"WV"`` is accepted as well).
+
     Returns ``clear_sky_bt`` [K] with 2-D ``lat``/``lon`` and the
     ``clear_fraction`` of each box.
     """
     path = Path(path)
+    channel = {"WV": "WVR"}.get(channel, channel)
     with h5py.File(path, "r") as f:
         start, end = _times(f)
         ds = xr.Dataset(

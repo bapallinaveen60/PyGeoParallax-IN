@@ -1,6 +1,6 @@
 """Measure and correct INSAT geolocation errors by matching coastlines.
 
-INSAT-3DR L1C positions can be off by up to ~15 km. The error changes with
+INSAT-3DR L1C positions can be off by up to about 20 km. The error changes with
 time (≈0 on 6 Jun 2022, 8-15 km from Sep 2022) and with region (see
 ``00_Documentation/navigation_check.md``). It must therefore be measured for
 each day or scan, not assumed. This module:
@@ -186,6 +186,19 @@ def measure_scan(path, land, windows=None, interps=None, **kwargs):
     return out
 
 
+def _clean(obj):
+    """NaN and infinity -> None (JSON null), so the file is standard JSON."""
+    if isinstance(obj, dict):
+        return {k: _clean(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_clean(v) for v in obj]
+    if isinstance(obj, np.generic):
+        obj = obj.item()
+    if isinstance(obj, float) and not np.isfinite(obj):
+        return None
+    return obj
+
+
 @dataclass
 class NavigationCorrection:
     """Smooth navigation correction from offsets measured at a few points.
@@ -280,13 +293,15 @@ class NavigationCorrection:
         return east.reshape(shape), north.reshape(shape)
 
     def to_json(self, path):
-        Path(path).write_text(json.dumps({
+        Path(path).write_text(json.dumps(_clean({
             "lat": self.lat.tolist(), "lon": self.lon.tolist(),
             "east_km": self.east_km.tolist(), "north_km": self.north_km.tolist(),
             "power": self.power, "meta": self.meta,
-        }, indent=2))
+        }), indent=2))
 
     @classmethod
     def from_json(cls, path):
         d = json.loads(Path(path).read_text())
-        return cls(d["lat"], d["lon"], d["east_km"], d["north_km"], power=d.get("power", 2.0), meta=d.get("meta", {}))
+        arr = lambda v: np.array([np.nan if x is None else x for x in v], float)  # noqa: E731  (null = NaN)
+        return cls(arr(d["lat"]), arr(d["lon"]), arr(d["east_km"]), arr(d["north_km"]),
+                   power=d.get("power", 2.0), meta=d.get("meta", {}))

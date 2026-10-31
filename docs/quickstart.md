@@ -73,7 +73,7 @@ done  3RIMG_01AUG2023_1815_L1C_SGP_V01R00_corrected.nc
 ```
 
 - `--bbox 20 30 85 97` reads only 20–30° N, 85–97° E from the file. This is much faster than the full sector (about 7 s instead of 20 s).
-- `--grid 20 30 85 97 0.04` puts the result on a 0.04° grid over the same box (250 × 300 cells). Without `--grid`, the output covers the default grid, 0–40° N, 60–100° E at 0.04° (1000 × 1000 cells), and everything outside the box is empty.
+- `--grid 20 30 85 97 0.04` puts the result on a 0.04° grid over the same box (250 × 300 cells). Without `--grid`, a `--bbox` region is put on a 0.04° grid over that box, so this is the same as leaving `--grid` out.
 - The output is `corrected/3RIMG_01AUG2023_1815_L1C_SGP_V01R00_corrected.nc`, with the channels TIR1, TIR2, WV and MIR, the cloud-top height and the shift.
 
 Make the uncorrected baseline on exactly the same grid, for comparison:

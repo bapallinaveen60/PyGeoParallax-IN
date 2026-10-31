@@ -224,7 +224,7 @@ def main(argv=None):
     ap.add_argument("--profile", choices=("afgl", "era5"), default="afgl",
                     help="temperature profile for cloud-top height (era5 needs era5_pl_*.nc in --dir)")
     ap.add_argument("--dem", help="DEM NetCDF (e.g. from prepare_srtm.py) for terrain-aware correction")
-    ap.add_argument("--max-lag", type=int, default=8, help="lag search in grid cells")
+    ap.add_argument("--max-lag", type=int, default=8, help="lag search in grid cells for the whole-box metrics (the near-storm match always searches 10 cells)")
     ap.add_argument("--out", default=".")
     args = ap.parse_args(argv)
     out = Path(args.out)

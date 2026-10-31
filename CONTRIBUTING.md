@@ -18,6 +18,7 @@ INSAT-3DR products change format occasionally. If a reader fails on a new file, 
 2. Set up a development environment:
    ```bash
    python -m venv .venv
+   source .venv/bin/activate        # Windows: .venv\Scripts\activate
    pip install -e ".[geo,download,plot,dev]"
    ```
 3. Make your change. Follow the style of the surrounding code: NumPy-style docstrings with units, and small functions that can be tested on their own.

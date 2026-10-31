@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+Fixes from the documentation review. The correction itself is unchanged.
+
+### Changed
+- `pygeoparallax l1c --bbox` without `--grid` now writes a 0.04° grid over the box, instead of the whole 0–40° N, 60–100° E grid with only the box filled.
+- The default number of parallel processes (`-j`) is 4, or the CPU count if lower (a full sector needs about 1.5 GB per process).
+- With an effective height, the output `cth` says so in its `long_name`; `effective_height` reads e.g. `1 * cloud-top height - 3 km`.
+- `correct` and `batch` keep the channel attributes (units) and the `sensor`, `product` and `end_time` attributes of the input; `count` has a `long_name`.
+- `correct` reports errors in one line instead of a traceback; `navigation` rejects unknown `--windows` names and warns when the scans span several days.
+- Navigation JSON files are standard JSON (NaN written as `null`, read back as NaN).
+- `read_insat_csbt` accepts `"WV"` for the product's `"WVR"` channel.
+- `validation_statistics.py` names its outputs after `--nav-tag` (`statistics_ynav.json`, ...); `build_unet_patches.py` has `--height-scale` and `--height-offset` for an effective-height Model C; `make_paper_figures.py` also draws `fig0_schematic`.
+- The `geo` extra includes rasterio, which `read_srtm` needs.
+
+### Fixed
+- `correct_native(..., fill_empty=True)` now records the `empty_cells_filled` attribute.
+
 ## 0.4.1 (2026-10-31)
 
 ### Added
