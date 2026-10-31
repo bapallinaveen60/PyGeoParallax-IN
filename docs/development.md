@@ -181,9 +181,9 @@ methods_draft.md, results_discussion_draft.md
         |  md_to_latex.py (pandoc)
         v
 latex_source/sections/{data,method,validation,results,discussion}.tex   + hand-written sections
-        |  make_amt.py                       |  make_ieee.py
-        v                                    v
-amt_source/ (Copernicus AMT)           ieee_source/ (IEEEtran)
+        |  make_amt.py              |  make_ieee.py           |  make_elsevier.py
+        v                           v                         v
+amt_source/ (Copernicus AMT)  ieee_source/ (IEEEtran)   atmosres_source/ (Elsevier)
 ```
 
 ### Article version (`latex_source/`)
@@ -215,12 +215,22 @@ Edit `latex_source/` (or the Markdown drafts), never `amt_source/`; the generate
 
 ### IEEE version (`ieee_source/`)
 
-The IEEE two-column version is being added as `08_manuscript/make_ieee.py`, which writes `ieee_source/` in `IEEEtran` journal layout from the same `latex_source/` sections. The script in progress has no options; IEEEtran ships with TeX Live and MiKTeX.
+`08_manuscript/make_ieee.py` writes `ieee_source/` in `IEEEtran` two-column journal layout from the same `latex_source/` sections, with a 250-word abstract, Index Terms and numbered citations (`IEEEtranN`). It has no options; IEEEtran ships with TeX Live and MiKTeX.
 
 ```bash
 python 08_manuscript/md_to_latex.py
 python 08_manuscript/make_ieee.py
 cd 08_manuscript/ieee_source && latexmk -pdf manuscript.tex
+```
+
+### Atmospheric Research version (`atmosres_source/`)
+
+`08_manuscript/make_elsevier.py` writes `atmosres_source/` for the chosen journal, *Atmospheric Research* (Elsevier, subscription route without a publication fee): `elsarticle` preprint layout with line numbers and Harvard references (`elsarticle-harv`), a title page with the corresponding author's e-mail and address, an abstract of at most 250 words, seven keywords, `highlights.txt` (five highlights of at most 85 characters, uploaded as a separate file), the journal's required end sections (data and code availability, CRediT statement, competing interest, funding, acknowledgements, generative-AI declaration) and the map-boundary note on Figs. 1 and 6. The script checks the abstract and highlight lengths.
+
+```bash
+python 08_manuscript/md_to_latex.py
+python 08_manuscript/make_elsevier.py
+cd 08_manuscript/atmosres_source && latexmk -pdf manuscript.tex
 ```
 
 Packaged submission versions are kept as zip files in `08_manuscript/submission_versions/` (not in git).

@@ -1,0 +1,5 @@
+- Open-source tool corrects INSAT-3DR imagery for cloud parallax on the ellipsoid
+- Meteosat confirms the correction: corrected views of two satellites agree
+- GPM radar can verify absolute cloud position only to about 3-5 km
+- Coldest cloud tops sit 4-5 km west of monsoon rain cores, hiding parallax
+- INSAT-3DR navigation errors are seasonal; near zero during the monsoon

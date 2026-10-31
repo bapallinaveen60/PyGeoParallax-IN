@@ -112,3 +112,14 @@ U_net_info/
 
 # Built PDF manual (python docs/build_manual.py)
 docs/*.pdf
+
+# Atmospheric Research (Elsevier) build outputs
+08_manuscript/atmosres_source/*.aux
+08_manuscript/atmosres_source/*.bbl
+08_manuscript/atmosres_source/*.blg
+08_manuscript/atmosres_source/*.fdb_latexmk
+08_manuscript/atmosres_source/*.fls
+08_manuscript/atmosres_source/*.log
+08_manuscript/atmosres_source/*.out
+08_manuscript/atmosres_source/*.spl
+08_manuscript/atmosres_source/*.pdf
