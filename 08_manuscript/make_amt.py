@@ -80,7 +80,7 @@ PREAMBLE = r"""%% PyGeoParallax-IN manuscript for Atmospheric Measurement Techni
 """
 
 BACKMATTER = r"""
-\codeavailability{PyGeoParallax-IN (version 0.4.0, MIT licence), with the scripts, case lists and U-Net training and comparison scripts used in this study, is archived on Zenodo \citep{pygeoparallax}: \url{https://doi.org/10.5281/zenodo.23812270}. The concept DOI \url{https://doi.org/10.5281/zenodo.23666957} always resolves to the latest version. Development continues at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}.}
+\codeavailability{PyGeoParallax-IN (version 0.4.2, MIT licence), with the scripts, case lists, storm-tilt and Meteosat comparison scripts, and U-Net training and comparison scripts used in this study, is archived on Zenodo \citep{pygeoparallax}: \url{https://doi.org/10.5281/zenodo.23838067}. The concept DOI \url{https://doi.org/10.5281/zenodo.23666957} always resolves to the latest version. Development continues at \url{https://github.com/bapallinaveen60/PyGeoParallax-IN}.}
 
 \dataavailability{INSAT-3DR Imager L1C and L2B products are available from MOSDAC, Space Applications Centre, ISRO (\url{https://www.mosdac.gov.in}) after free registration. GPM DPR 2A Ku version 8 data are available from NASA GES DISC \citep{gpm2aku_v08}. ERA5 pressure-level data are available from the Copernicus Climate Data Store \citep{c3s2018}. Meteosat SEVIRI Indian Ocean (IODC) Level 1.5 data are available from the EUMETSAT Data Store \citep{eumetsat_iodc} after free registration. SRTM elevation data \citep{farr2007} were obtained through OpenTopography, and coastlines from Natural Earth \citep{naturalearth}. The validation case list (GPM orbits and INSAT scan times) is part of the code archive.}
 
