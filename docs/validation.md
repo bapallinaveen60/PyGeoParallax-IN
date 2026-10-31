@@ -381,6 +381,30 @@ Outputs in `05_validation/nav_corrections/`: `near_<case>.json`, `near_storm_mat
 
 ### Offsets, statistics and sensitivity
 
+#### Meteosat IODC comparison (`download_seviri_iodc.py`, `compare_seviri_insat.py`)
+
+A second geostationary view separates the two explanations left after the storm-tilt test: a real offset of the cold cloud top from the radar echo appears in Meteosat too, while an INSAT navigation error does not. Meteosat-8 (41.5° E) was the prime Indian Ocean (IODC) satellite until 31 May 2022, and Meteosat-9 (45.5° E) from 1 June 2022.
+
+Setup, once:
+
+1. Register at the EUMETSAT Earth Observation Portal (<https://eoportal.eumetsat.int>), free.
+2. Get your consumer key and secret at <https://api.eumetsat.int/api-key>.
+3. Store them on your own machine (never in the repository):
+   ```bash
+   eumdac set-credentials <consumer-key> <consumer-secret>
+   ```
+   `eumdac` comes with the `download` extra (`pip install -e ".[download]"`).
+
+Then:
+
+```bash
+python scripts/download_seviri_iodc.py --dry-run --regions northeast himalaya   # list the cycles
+python scripts/download_seviri_iodc.py --regions northeast himalaya             # download and crop
+python scripts/compare_seviri_insat.py --base <validation folder>
+```
+
+`download_seviri_iodc.py` downloads, for each case, the two 15-min IODC cycles whose scan of the storm latitude brackets the GPM overpass (collection `EO:EUM:DAT:MSG:HRSEVIRI-IODC`, native format), crops them with satpy to the case region and keeps only the 10.8 µm channel, positions and line times (`--keep` keeps the full-disk files). `compare_seviri_insat.py` corrects each Meteosat cycle for its own parallax onto the case grid, measures storm motion between the two cycles, and reports (1) the INSAT minus Meteosat displacement of the corrected cloud field near the storm, the decisive number, and (2) the cold-core offsets from the GPM cells for both satellites. Outputs are in `05_validation/seviri/`. At Meteosat's viewing angle over Northeast India (about 60°) the parallax is large and a 1 km height error moves a corrected pixel by about 1.7 km, so the Northeast and Himalaya cases are the most informative but also the most sensitive to cloud height.
+
 #### `analyze_storm_tilt.py`
 
 Measures how far the deep convective cells lean, from GPM Ku 3-D reflectivity (`SLV/zFactorFinal`, with `PRE/height` and the spacecraft position to place every range bin on its slanted beam). For each usable case it takes the deep cells (storm top above 10 km) near the convective cluster and computes the reflectivity-weighted centroid of the 2–4 km core and of higher layers (5–7, 8–10, 11–13 km and the echo top). It reports their displacement towards the satellite and across the line of sight.
