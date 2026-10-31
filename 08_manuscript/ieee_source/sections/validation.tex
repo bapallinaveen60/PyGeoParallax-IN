@@ -96,6 +96,8 @@ Two further tests address the residual offset:
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
 
+\textbf{Storm tilt.} If the cells lean towards the satellite with height, the parallax and the lean cancel at the cell scale. We measure the lean from the GPM Ku 3-D reflectivity (\texttt{zFactorFinal}, 176 range bins). Each range bin is placed on its slanted beam from its height and the spacecraft position, so the beam's own slant is not mistaken for tilt. Deep cells are connected footprints with storm top above 10 km (at least two footprints, grown by two footprints so that a leaning upper part is kept), within 250 km of the convective cluster. In each cell we take the reflectivity-weighted centroid (linear Z) of the low-level core (2--4 km, Z ≥ 30 dBZ) and of higher layers (5--7, 8--10 and 11--13 km, and the top 1 km of echo in each column; Z ≥ 20 dBZ). The displacement of each higher centroid from the low-level core is split into a component towards the satellite and a cross-look component. Medians over cells carry a cluster-bootstrap interval over cases. To test robustness we vary the thresholds (25--35 dBZ and 18--25 dBZ) and the growth (one to three footprints).
+
 \subsection{Sensitivity}\label{sec:4.6}
 
 An error \(\delta h\) in cloud-top height shifts the corrected position by about \(\delta h\tan(\mathrm{VZA})\): about 0.4 km per km of height error at Mumbai and 0.7 km at Agartala. We quantify this with Monte Carlo perturbations of cloud-top height (standard deviation 1 km, 100 members) and with fixed biases of ±1 and ±2 km.

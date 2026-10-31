@@ -104,7 +104,7 @@ The GPM-navigation row uses the 31 cases valid in its own states; in that set th
 
 ### 5.6 Why the parallax is not visible
 
-We tested four explanations in turn.
+We tested five explanations in turn.
 
 1. **The comparison method.** We put a synthetic storm with a known parallax through the same gridding and cell-matching code. The raw offset equals the full parallax: +10.9 km measured against +10.5 km expected at VZA 35°, and +3.5 against +3.9 km at VZA 15°. After correction it is about zero. Overlays of uncorrected INSAT on GPM storm tops for six high-angle cases show the same as the statistics: the cold cloud masses sit on the deep-echo cells, not 8–10 km beyond them. The method detects parallax when it is there.
 2. **GPM's slanted beam.** Placing storm tops on the slanted Ku beam instead of at the surface footprint changes the cell medians by at most 0.6 km. This displacement has a median of 1 km and reaches 5 km. It adds scatter, not bias.
@@ -119,7 +119,18 @@ We tested four explanations in turn.
    - 10 of 31 cases better than raw;
    - Wilcoxon p = 0.027, sign test p = 0.07; against parallax only, p = 0.28.
 
-   **No single translation centres both measures.** The field and cell measures differ by 2–3 km in the raw and coastline-navigation states, and by about 5 km once the navigation is fitted to the cells. Navigation alone therefore cannot explain the result; we attribute the difference mainly to storm structure. The east component of the fitted value also disagrees with ISRO's reports, which point west.
+   **No single translation centres both measures.** The field and cell measures differ by 2–3 km in the raw and coastline-navigation states, and by about 5 km once the navigation is fitted to the cells. Navigation alone therefore cannot explain the result: the two measures see different parts of the storm (below). The east component of the fitted value also disagrees with ISRO's reports, which point west.
+
+5. **Storm tilt.** If the cells leaned towards the satellite with height, the lean would cancel the parallax at the cell scale. GPM's 3-D reflectivity shows that they do lean, but mostly across the line of sight (Table 5). In 203 deep cells in 29 cases, the echo leans westward with height: the echo top lies 1.5 km (95 % interval 0.6–3.1 km) and the 11–13 km layer 2.2 km west of the 2–4 km core, as expected under the upper-level easterlies of the monsoon. Towards the satellite, however, the lean is only +0.8 km (−0.9 to +1.4 km) at the echo top, because the satellite lies to the south or south-west of most cases. With other reflectivity thresholds and cell sizes this component stays between +0.4 and +0.8 km. Case by case, the median lean towards the satellite is +0.3 km, about 1 % of the parallax that the cell measure does not see (median 6.4 km), and it does not correlate with the cell offsets (Spearman r = 0.17, p = 0.41). By region it is +1.0 km in South India, +0.9 km in Central India, +0.3 km over the Himalaya and −0.7 km in Northeast India, where a westward lean would point most directly at the satellite. The tilt of the precipitating column therefore does not hide the parallax.
+
+**Table 5.** Displacement of GPM Ku echo centroids from the 2–4 km convective core, median over cells with 95 % interval (cluster bootstrap over cases). Towards the satellite is the direction of the parallax correction; the north component is within ±0.3 km of zero in every layer.
+
+| Layer | Cells (cases) | Towards satellite [km] | East [km] | Cross-look [km] |
+| :---------- | :------------ | :------------------------ | :------------------------ | :------------------------ |
+| 5–7 km | 201 (29) | +0.1 (−0.1, +0.4) | −0.5 (−0.8, −0.1) | +0.3 (−0.1, +0.6) |
+| 8–10 km | 196 (29) | +0.3 (−0.5, +1.0) | −1.3 (−2.1, −0.8) | +1.0 (+0.4, +1.9) |
+| 11–13 km | 100 (26) | +0.7 (−0.6, +2.1) | −2.2 (−3.4, −0.4) | +1.9 (+0.2, +3.4) |
+| Echo top | 140 (27) | +0.8 (−0.9, +1.4) | −1.5 (−3.1, −0.6) | +1.6 (+0.3, +3.1) |
 
 The two measures compare different parts of the storm. The field measure is driven by the large cold anvil against the radar's rain area, and the cell measure by the coldest tops against the tallest echoes. Their difference, 2–3 km and up to about 5 km depending on the navigation applied, is comparable to the parallax over South India and a third to a half of it at higher viewing angles. At the scale of the storm, parallax correction reverses the mean bias, and the corrected mean is not significantly different from zero. At the scale of the convective core, uncorrected cold cores already coincide with the radar cells, and correcting them with the full infrared height overshoots.
 
@@ -164,13 +175,14 @@ The two measures disagree with each other by 2–3 km, and by about 5 km once na
 
 ### 6.2 Why the coldest tops and the deepest echoes coincide
 
-For the uncorrected cold cores to sit on the radar cells, the coldest infrared top of a cell must lie, on average, a parallax-sized distance towards the satellite (south) of the deep echo beneath it. We see three non-exclusive explanations:
+For the uncorrected cold cores to sit on the radar cells, the coldest infrared top of a cell must lie, on average, a parallax-sized distance towards the satellite (south or south-west) of the deep echo beneath it. Three explanations are possible, and the GPM profiles rule out the most obvious one:
 
-- **Storm structure.** Monsoon convection over India is organised in large systems whose deep echoes reach 17 km and whose stratiform and anvil regions extend over hundreds of kilometres [Houze et al., 2007; Romatschke & Houze, 2011]. The coldest top of such a system need not lie vertically above its deepest radar echo: updraft tilt in the strong easterly shear of the monsoon, and anvil spreading, could displace it by several kilometres. A systematic southward component would cancel the northward parallax. Such offsets are documented elsewhere: in a tornadic supercell the highest radar echo top lay about 10 km from the overshooting cloud top after parallax correction [Bluestein et al., 2019], and across the tropics cold cloud tops cover far more area than the radar rain beneath them [Liu et al., 2007]. We are not aware of a measurement of this offset for monsoon storms, so it remains a hypothesis.
+- **Tilt of the convective column: ruled out as the main cause.** Monsoon convection over India is organised in large systems in strong easterly shear [Houze et al., 2007; Romatschke & Houze, 2011], so tilted updrafts were a natural explanation. GPM's 3-D reflectivity shows the tilt (Section 5.6, Table 5): the echo leans 1.5–2 km westward between the rain core and the echo top. But only about 1 km of this points towards the satellite, against a hidden parallax of about 6 km, and the lean does not vary with the cell offsets from case to case. The precipitating column does not lean enough.
+- **The cold top above the radar's view.** The coldest top lies at the tropopause, a median 3.2 km above the radar echo top, in the overshooting top and the anvil, where the Ku radar sees nothing. An offset there is documented elsewhere: in a tornadic supercell the highest radar echo top lay about 10 km from the overshooting cloud top after parallax correction [Bluestein et al., 2019], and across the tropics cold cloud covers far more area than the radar rain beneath it [Liu et al., 2007]. To hide the parallax, the cold top would have to lie about 5 km towards the satellite from the echo top, much more than the column's lean below it suggests. GPM cannot test this.
 - **Effective height.** The cold core seen at 10.8 µm is the cloud top at the tropopause (16.6 km median), about 3 km (median 3.2 km) above the radar echo top. If the radiating top of the core is spatially offset from the echo core, the full infrared height is the wrong height for matching rain.
-- **Navigation.** ISRO's own geolocation checks for June 2020 point to an error of 7–11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. We cannot exclude a navigation contribution, but navigation alone cannot reconcile the two measures.
+- **Navigation.** ISRO's own geolocation checks for June 2020 point to an error of 7–11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. With the column tilt ruled out, a navigation contribution becomes more likely, but navigation alone cannot reconcile the two measures.
 
-An independent geostationary view of the same storms, for example Meteosat IODC at 45.5° E, which sees the parallax in a different direction, would separate these explanations. So would ground radar at known positions. Both are left for future work.
+The tilt measurement narrows the question to two explanations that GPM cannot separate: an offset of the cold top above the radar's view, and a northward navigation error of the size ISRO reports. An independent geostationary view of the same storms, for example Meteosat IODC at 45.5° E, which sees the parallax in a different direction, would separate them: a navigation error of INSAT would not appear in it, while a real offset of the cold top would. So would ground radar at known positions. Both are left for future work.
 
 ### 6.3 Navigation
 
@@ -252,6 +264,7 @@ The pattern is nevertheless consistent with Section 5.5. Uncorrected cold cores 
 ## Notes for revision
 
 - Novelty search done on 30 Oct 2026 (`reports/INSAT parallax correction novelty.md`). Still open: a Scopus query for parallax AND (INSAT OR Kalpana), and the full texts of the Mishra et al. INSAT-3D + GPM papers (2023, 2025, 2026) for any parallax handling.
+- Section 5.6 / Table 5: storm tilt from `scripts/analyze_storm_tilt.py` (`05_validation/gpm_colocation/storm_tilt*.csv`); sensitivity runs `storm_tilt_cells_{strict,loose,grow1,grow3}.csv`.
 - Section 6.8: the training-loss histories (`history.json`) were not returned with the results; add a sentence on training loss if they are available.
 - Section 6.8: to separate the A/B difference from run-to-run variation, retrain each model with two or three more seeds. A Model C with an effective height (`--height-offset 3`) would test Section 6.4 directly.
 - Section 4.8: cite the group's U-Net work (paper or thesis) and the GPM product of the labels (2A.DPR or 2A.Ku `typePrecip`); confirm the class definitions with the group.

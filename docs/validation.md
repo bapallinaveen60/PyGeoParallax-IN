@@ -381,6 +381,22 @@ Outputs in `05_validation/nav_corrections/`: `near_<case>.json`, `near_storm_mat
 
 ### Offsets, statistics and sensitivity
 
+#### `analyze_storm_tilt.py`
+
+Measures how far the deep convective cells lean, from GPM Ku 3-D reflectivity (`SLV/zFactorFinal`, with `PRE/height` and the spacecraft position to place every range bin on its slanted beam). For each usable case it takes the deep cells (storm top above 10 km) near the convective cluster and computes the reflectivity-weighted centroid of the 2–4 km core and of higher layers (5–7, 8–10, 11–13 km and the echo top). It reports their displacement towards the satellite and across the line of sight.
+
+| Option | Meaning |
+| :--- | :--- |
+| `--base` | validation folder (required) |
+| `--radius` | km around the GPM convective cluster [250] |
+| `--min-footprints` | smallest deep cell, in GPM footprints [2] |
+| `--grow` | footprints added around each deep cell [2] |
+| `--core-dbz` | threshold of the 2–4 km core [30 dBZ] |
+| `--echo-dbz` | threshold in the upper layers [20 dBZ] |
+| `--cases` | only these cases |
+
+It writes `05_validation/gpm_colocation/storm_tilt_cells.csv` and `storm_tilt.csv`. Result: the cells lean 1.5 km westward between the core and the echo top, but only +0.8 km (−0.9 to +1.4 km) towards the satellite, far less than the about 6 km of parallax that the cell measure does not see (paper Section 5.6, Table 5).
+
 #### `analyze_core_offsets.py`
 
 Measures the cell-scale offset (see [the two offset measures](#the-two-offset-measures)) for every usable case.
@@ -588,7 +604,7 @@ Field: 30 cases (31 for the GPM-navigation row). Cells: 157–167 cells in 27–
 - **Only about 5 % of the computed parallax is visible.** The median per-case ratio of raw cell offset to applied shift is 0.05 (95 % interval −0.47 to +0.55). The raw field offset does not grow with viewing angle: Spearman ρ = −0.01, slope −0.8 km per unit tan(VZA), 95 % interval −12.9 to +9.4 km.
 - **The comparison method detects parallax when it is there.** A synthetic storm through the same gridding and matching code gives a raw offset of +10.9 km against +10.5 km expected at VZA 35°, and +3.5 km against +3.9 km at VZA 15°.
 - **No single translation centres both measures.** Navigation fitted to the GPM cells centres the cell measure but makes the field measure worse than raw (Wilcoxon p = 0.027). The two measures differ by 2–3 km with coastline navigation and by about 5 km once navigation is fitted to the cells.
-- **Conclusion:** GPM-based validation of absolute position is limited to about ±3–5 km for monsoon deep convection. The difference between the measures is attributed mainly to storm structure.
+- **Conclusion:** GPM-based validation of absolute position is limited to about ±3–5 km for monsoon deep convection. The two measures differ because they compare different parts of the storm. The tilt of the convective column, measured from GPM's 3-D reflectivity, is too small towards the satellite (+0.8 km) to hide the parallax; an offset of the cold top above the radar's view or a northward navigation error remain possible.
 
 ### Navigation results
 

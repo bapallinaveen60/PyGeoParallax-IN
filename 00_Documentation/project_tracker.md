@@ -59,7 +59,7 @@ This document tracks the 4-month (16-week) implementation and validation roadmap
 | `[x]` | Cell-by-cell core check | `analyze_core_offsets.py`: 157–167 cells in 27–28 cases; independent of the field correlation. |
 | `[x]` | Same-day navigation near each storm | 57 daytime scans around the case dates. Night matching fails in the monsoon; daytime same-day matches scatter ~9–10 km, so per-case corrections are unreliable. Pooled near-storm correction −0.5 km E, +2.5 km N; with parallax it gives field median 1.8 km (best so far), cells −4.1 km. See `validation_summary.md`. |
 | `[x]` | More South and Central India cases | Batch 4 (2018–2021): 24 more usable cases; now South 14, Central 15. |
-| `[x]` | Investigation of the invisible parallax | Synthetic test, overlays (`check_parallax_visibility.py`), ISRO DQE reports, GPM-derived navigation (`gpm_navigation.py`). Conclusion: mainly storm structure; navigation alone cannot explain it. |
+| `[x]` | Investigation of the invisible parallax | Synthetic test, overlays (`check_parallax_visibility.py`), ISRO DQE reports, GPM-derived navigation (`gpm_navigation.py`). Storm tilt from GPM 3-D reflectivity (`analyze_storm_tilt.py`, 31 Oct 2026): cells lean 1.5 km westward but only +0.8 km towards the satellite, so the column tilt does not hide the parallax. Navigation alone cannot explain it either; an offset of the cold top above the radar's view or a northward navigation error remain. |
 | `[ ]` | More Himalaya and Northeast cases | Only 4–5 usable each. |
 
 ---

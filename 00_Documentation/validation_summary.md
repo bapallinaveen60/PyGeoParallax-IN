@@ -224,6 +224,13 @@ Batch 4 added 2018–2021 cases over South and Central India (50 GPM passes scre
 3. **Cores:** uncorrected cold cores already sit on the GPM cells (−0.1 km); only ~5 % of the computed parallax is visible; correction overshoots by ~4.7 km.
 4. **Navigation alone cannot explain it:** the field and cell measures differ by 2–3 km (coastline navigation) and ~5 km once navigation is fitted to the cells; no single translation centres both. GPM validation of absolute position is limited to about ±3–5 km.
 5. **Heights:** IR cold-core heights (16.6 km median) lie ~3.2 km above the GPM echo tops with either profile; ERA5 and SRTM change the storm results by < 0.5 km (14 cases of 2022–2024).
+6. **Storm tilt (31 Oct 2026, `scripts/analyze_storm_tilt.py`):** GPM Ku 3-D reflectivity, bins placed on the slanted beam, 203 deep cells in 29 cases. Displacement from the 2–4 km core (median, 95 % cluster-bootstrap interval):
+   - echo top: towards the satellite +0.8 km (−0.9 … +1.4), east −1.5 km (−3.1 … −0.6), cross-look +1.6 km (+0.3 … +3.1);
+   - 11–13 km: towards the satellite +0.7 km (−0.6 … +2.1), east −2.2 km (−3.4 … −0.4);
+   - robust to thresholds and cell growth (towards the satellite +0.4 … +0.8 km at the echo top);
+   - case medians +0.3 km against a hidden parallax of 6.4 km; no correlation with the cell offsets (Spearman r = 0.17, p = 0.41); Northeast −0.7 km.
+
+   The cells lean westward, as the monsoon easterlies aloft predict, but mostly across the line of sight. **The tilt of the precipitating column does not hide the parallax.** Remaining explanations: an offset of the cold top above the radar's view (overshooting top, anvil) or a northward navigation error of the size in ISRO's June 2020 reports. GPM cannot separate them; Meteosat IODC or ground radar could.
 
 ## Next
 

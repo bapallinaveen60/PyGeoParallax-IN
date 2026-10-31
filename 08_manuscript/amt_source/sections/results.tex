@@ -204,11 +204,10 @@ The GPM-navigation row uses the 31 cases valid in its own states; in that set th
 
 \subsection{Why the parallax is not visible}\label{sec:5.6}
 
-We tested four explanations in turn.
+We tested five explanations in turn.
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
-\tightlist
 \item
   \textbf{The comparison method.} We put a synthetic storm with a known parallax through the same gridding and cell-matching code. The raw offset equals the full parallax: +10.9 km measured against +10.5 km expected at VZA 35°, and +3.5 against +3.9 km at VZA 15°. After correction it is about zero. Overlays of uncorrected INSAT on GPM storm tops for six high-angle cases show the same as the statistics: the cold cloud masses sit on the deep-echo cells, not 8--10 km beyond them. The method detects parallax when it is there.
 \item
@@ -240,8 +239,39 @@ We tested four explanations in turn.
     Wilcoxon p = 0.027, sign test p = 0.07; against parallax only, p = 0.28.
   \end{itemize}
 
-  \textbf{No single translation centres both measures.} The field and cell measures differ by 2--3 km in the raw and coastline-navigation states, and by about 5 km once the navigation is fitted to the cells. Navigation alone therefore cannot explain the result; we attribute the difference mainly to storm structure. The east component of the fitted value also disagrees with ISRO's reports, which point west.
+  \textbf{No single translation centres both measures.} The field and cell measures differ by 2--3 km in the raw and coastline-navigation states, and by about 5 km once the navigation is fitted to the cells. Navigation alone therefore cannot explain the result: the two measures see different parts of the storm (below). The east component of the fitted value also disagrees with ISRO's reports, which point west.
+\item
+  \textbf{Storm tilt.} If the cells leaned towards the satellite with height, the lean would cancel the parallax at the cell scale. GPM's 3-D reflectivity shows that they do lean, but mostly across the line of sight (Table~\ref{tab:5}). In 203 deep cells in 29 cases, the echo leans westward with height: the echo top lies 1.5 km (95 \% interval 0.6--3.1 km) and the 11--13 km layer 2.2 km west of the 2--4 km core, as expected under the upper-level easterlies of the monsoon. Towards the satellite, however, the lean is only +0.8 km (−0.9 to +1.4 km) at the echo top, because the satellite lies to the south or south-west of most cases. With other reflectivity thresholds and cell sizes this component stays between +0.4 and +0.8 km. Case by case, the median lean towards the satellite is +0.3 km, about 1 \% of the parallax that the cell measure does not see (median 6.4 km), and it does not correlate with the cell offsets (Spearman r = 0.17, p = 0.41). By region it is +1.0 km in South India, +0.9 km in Central India, +0.3 km over the Himalaya and −0.7 km in Northeast India, where a westward lean would point most directly at the satellite. The tilt of the precipitating column therefore does not hide the parallax.
 \end{enumerate}
+
+\begin{table*}[t]
+\caption{Displacement of GPM Ku echo centroids from the 2--4 km convective core, median over cells with 95 \% interval (cluster bootstrap over cases). Towards the satellite is the direction of the parallax correction; the north component is within ±0.3 km of zero in every layer.}\label{tab:5}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1111}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.1313}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2525}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2525}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+Layer
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cells (cases)
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Towards satellite {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+East {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Cross-look {[}km{]}
+\end{minipage} \\
+\middlehline
+5--7 km & 201 (29) & +0.1 (−0.1, +0.4) & −0.5 (−0.8, −0.1) & +0.3 (−0.1, +0.6) \\
+8--10 km & 196 (29) & +0.3 (−0.5, +1.0) & −1.3 (−2.1, −0.8) & +1.0 (+0.4, +1.9) \\
+11--13 km & 100 (26) & +0.7 (−0.6, +2.1) & −2.2 (−3.4, −0.4) & +1.9 (+0.2, +3.4) \\
+Echo top & 140 (27) & +0.8 (−0.9, +1.4) & −1.5 (−3.1, −0.6) & +1.6 (+0.3, +3.1) \\
+\bottomhline
+\end{tabular}
+\end{table*}
 
 The two measures compare different parts of the storm. The field measure is driven by the large cold anvil against the radar's rain area, and the cell measure by the coldest tops against the tallest echoes. Their difference, 2--3 km and up to about 5 km depending on the navigation applied, is comparable to the parallax over South India and a third to a half of it at higher viewing angles. At the scale of the storm, parallax correction reverses the mean bias, and the corrected mean is not significantly different from zero. At the scale of the convective core, uncorrected cold cores already coincide with the radar cells, and correcting them with the full infrared height overshoots.
 
