@@ -1,6 +1,6 @@
 """PyGeoParallax-IN: cloud parallax correction for INSAT-3DR imagery over India."""
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 from .pipeline import correct_native, correct_scene  # noqa: E402
 

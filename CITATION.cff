@@ -12,8 +12,8 @@ authors:
   - family-names: Bapalli
     given-names: Naveen
 doi: 10.5281/zenodo.23666957
-version: 0.4.0
-date-released: 2026-10-30
+version: 0.4.1
+date-released: 2026-10-31
 license: MIT
 repository-code: "https://github.com/bapallinaveen60/PyGeoParallax-IN"
 keywords:
