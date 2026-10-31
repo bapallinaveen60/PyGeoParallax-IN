@@ -147,6 +147,32 @@ def main():
         tex = f"\\section{{{title}}}\n\\label{{{label}}}\n\\label{{sec:{numbers[title]}}}\n\n{body}"
         (OUT / fname).write_text(tex, encoding="utf-8", newline="\n")
         print(f"wrote {OUT / fname}")
+    write_appendix()
+
+
+#: Subsections moved from the main text to Appendix A (the U-Net experiment), with their new headings.
+APPENDIX = (("validation.tex", "sec:4.8", "Experiment design"), ("discussion.tex", "sec:6.8", "Results"))
+
+
+def write_appendix():
+    """Cut the U-Net subsections out of the main sections and write them as ``appendix.tex``.
+
+    Their labels stay, so references such as Section~\\ref{sec:6.8} point into the appendix.
+    """
+    parts = []
+    for fname, label, heading in APPENDIX:
+        path = OUT / fname
+        tex = path.read_text(encoding="utf-8")
+        m = re.search(r"\\subsection\{[^}]*\}\\label\{" + re.escape(label) + r"\}.*?(?=\\subsection\{|\Z)", tex, flags=re.S)
+        if not m:
+            raise KeyError(f"{label} not found in {fname}")
+        block = m.group(0)
+        path.write_text(tex.replace(block, "").rstrip() + "\n", encoding="utf-8", newline="\n")
+        parts.append(re.sub(r"\\subsection\{[^}]*\}", lambda _: "\\subsection{" + heading + "}", block, count=1).rstrip())
+    out = ("\\section{Precipitation-type classification experiment}\n\\label{app:unet}\n\n"
+           + "\n\n".join(parts) + "\n")
+    (OUT / "appendix.tex").write_text(out, encoding="utf-8", newline="\n")
+    print(f"wrote {OUT / 'appendix.tex'}")
 
 
 if __name__ == "__main__":

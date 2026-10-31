@@ -32,7 +32,7 @@ HERE = Path(__file__).parent
 SRC = HERE / "latex_source"
 OUT = HERE / "atmosres_source"
 SECTIONS = ("introduction", "data", "figure_schematic", "method", "validation", "results",
-            "figures", "discussion", "conclusions")
+            "figures", "discussion", "conclusions", "appendix")
 MAP_NOTE = " Map lines delineate study areas and do not necessarily depict accepted national boundaries."
 MAP_FIGURES = ("fig:1", "fig:6")
 
@@ -41,20 +41,7 @@ EMAIL = "baipallinaveen60@gmail.com"
 ADDRESS = "organization={Independent researcher}, city={[city]}, postcode={[PIN code]}, country={India}"
 
 ABSTRACT = (
-    "Geostationary imagers see high clouds displaced away from the sub-satellite point. For INSAT-3DR at "
-    "74\\textdegree\\,E, deep convection over the Himalaya and Northeast India appears about 10\\,km from its true "
-    "position. We present PyGeoParallax-IN, an open-source tool that corrects this parallax by tracing each line of "
-    "sight to the cloud top on the WGS84 ellipsoid, with optional terrain and navigation correction. Against GPM "
-    "Ku-band radar in 38 usable monsoon cases (2018--2024), the correction moves deep cores by 4--10\\,km along the "
-    "line of sight and reverses the mean storm-scale bias (+2.2 to $-$1.9\\,km), but the per-case gain is not "
-    "significant and little of the computed parallax is visible at convective cores; GPM can verify absolute "
-    "position only to about $\\pm$3--5\\,km. A second geostationary view resolves this. Correcting INSAT-3DR and "
-    "Meteosat (41.5--45.5\\textdegree\\,E) each for its own parallax removes the 9.5\\,km east--west disagreement "
-    "between their images (29 of 38 cases closer, $p=3\\times10^{-5}$), confirming the correction without radar and "
-    "ruling out an INSAT navigation error ($-$1.1\\,km north--south). Both satellites place the corrected cold cores "
-    "4--5\\,km west to south-west of the GPM rain cores, the direction in which the radar echo leans with height: the "
-    "coldest tops, above the radar's view, lie off the rain cores. INSAT-3DR navigation errors are seasonal, "
-    "7--20\\,km westward in winter. A precipitation-type U-Net retrained on corrected input does not improve."
+    "Geostationary imagers see high clouds displaced away from the sub-satellite point. For INSAT-3DR at 74\\,\\textdegree\\,E, deep convection over the Himalaya and Northeast India appears about 10\\,km from its true position. We present PyGeoParallax-IN, an open-source tool that corrects this parallax by tracing each line of sight to the cloud top on the WGS84 ellipsoid, with optional terrain and navigation correction. Against GPM Ku-band radar in 38 usable monsoon cases (2018--2024), the correction moves deep cores by 4--10\\,km along the line of sight and reverses the mean storm-scale bias ($+2.2$ to $-1.9$\\,km), but the per-case gain is not significant and little of the computed parallax is visible at convective cores, so GPM can verify absolute position only to about $\\pm$3--5\\,km. A second geostationary view explains why. Correcting INSAT-3DR and Meteosat (41.5--45.5\\,\\textdegree\\,E) each for its own parallax removes the 9.5\\,km east--west disagreement between their images (29 of 38 cases closer, $p=3\\times10^{-5}$), confirming the correction without radar and ruling out an INSAT navigation error. Both satellites place the corrected cold cores 4--5\\,km west to south-west of the GPM rain cores, the direction in which the radar echo leans with height: the coldest tops, above the radar's view, lie off the rain cores and hide most of the parallax at the cell scale. INSAT-3DR navigation errors are seasonal, 7--20\\,km westward in winter."
 )
 
 KEYWORDS = ("Parallax correction", "INSAT-3DR", "Geostationary satellite", "GPM DPR", "Meteosat",
@@ -156,7 +143,7 @@ def main():
              f"\\begin{{abstract}}\n{ABSTRACT}\n\\end{{abstract}}\n\n"
              "\\begin{keyword}\n" + " \\sep ".join(KEYWORDS) + "\n\\end{keyword}\n\n"
              "\\end{frontmatter}\n\n\\linenumbers\n\n")
-    body = "".join(f"\\input{{sections/{name}}}\n" for name in SECTIONS)
+    body = "".join(("\\appendix\n" if name == "appendix" else "") + f"\\input{{sections/{name}}}\n" for name in SECTIONS)
     (OUT / "manuscript.tex").write_text(PREAMBLE + front + body + BACKMATTER, encoding="utf-8", newline="\n")
     (OUT / "highlights.txt").write_text("".join(f"- {h}\n" for h in HIGHLIGHTS), encoding="utf-8", newline="\n")
     print(f"wrote {OUT / 'manuscript.tex'} (abstract {words} words) and highlights.txt "

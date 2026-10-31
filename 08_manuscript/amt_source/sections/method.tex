@@ -104,7 +104,7 @@ After correction, pixels no longer lie on a regular grid: several may land in on
 
 Each output cell carries a flag: 0 observed, 1 interpolated, 2 empty. Later analysis can exclude flags 1 and 2. The default grid is 0.04° (0--40° N, 60--100° E); validation uses 0.02°.
 
-The uncorrected dataset is produced by the same resampling with the apparent positions. Both datasets therefore share exactly the same grid, which is required for the downstream model comparison.
+The uncorrected dataset is produced by the same resampling with the apparent positions, so both datasets share exactly the same grid.
 
 \subsection{Navigation correction}\label{sec:3.6}
 
@@ -142,5 +142,5 @@ These rules reject matches distorted by cloud, which are common in the monsoon.
 
 \subsection{Implementation}\label{sec:3.7}
 
-The method is implemented in the open-source Python package \texttt{pygeoparallax} (v0.4.2, MIT licence; Zenodo DOI 10.5281/zenodo.23838067). The solver has a vectorised NumPy reference and a parallel Numba kernel \citep{lam2015} with identical results. The Numba kernel corrects a full disk in 0.5 s on a laptop (the NumPy version takes about 9 s); a 1-million-pixel India scene, including resampling, takes about 2 s. Unit tests (73 in v0.4.2) run on Linux and Windows under continuous integration. A command-line interface handles single scenes, parallel batches and navigation measurement.
+The method is implemented in the open-source Python package \texttt{pygeoparallax} (v0.4.2, MIT licence; Zenodo DOI 10.5281/zenodo.23838067), with a parallel Numba kernel \citep{lam2015} for the solver. On all 148 monsoon scenes available to us it ran without failure, at 1.8 s per India scene (median) including cloud-top height and both grids; in clear sky the corrected and uncorrected grids are identical.
 

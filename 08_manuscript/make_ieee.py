@@ -30,10 +30,10 @@ HERE = Path(__file__).parent
 SRC = HERE / "latex_source"
 OUT = HERE / "ieee_source"
 SECTIONS = ("introduction", "data", "figure_schematic", "method", "validation", "results",
-            "figures", "discussion", "conclusions")
+            "figures", "discussion", "conclusions", "appendix")
 
 ABSTRACT = r"""\begin{abstract}
-Geostationary imagers see high clouds displaced away from the sub-satellite point. For INSAT-3DR at 74\textdegree\,E, deep convection over the Himalaya and Northeast India appears about 10\,km from its true position. We present PyGeoParallax-IN, an open-source tool that corrects this parallax by tracing each line of sight to the cloud top on the WGS84 ellipsoid, with optional terrain and a coastline-based navigation correction, and that produces uncorrected and corrected datasets on a common grid. Against GPM Ku-band radar in 38 usable monsoon cases (2018--2024), the correction moves deep cores by 4--10\,km along the line of sight and leaves the cross-look offset unchanged. It reverses the mean storm-scale bias ($+2.2$ to $-1.9$\,km), but the per-case gain is not significant. At convective cores, uncorrected cold cores already coincide with GPM deep-echo cells, and only about 5\,\% of the computed parallax is visible. A navigation correction fitted to GPM centres the cells but degrades the storm-scale agreement; no single translation centres both measures, which differ by 2--5\,km. This limits GPM-based validation of absolute position to about $\pm$3--5\,km. Meteosat at 41.5--45.5\textdegree\,E confirms the correction independently of radar (29 of 38 cases agree better) and rules out an INSAT navigation error; both satellites place the cold tops 4--5\,km west of the radar cells. INSAT-3DR navigation errors are seasonal, 7--20\,km westward in winter. A precipitation-type U-Net retrained on corrected input does not improve, and its convective scores fall slightly.
+Geostationary imagers see high clouds displaced away from the sub-satellite point. For INSAT-3DR at 74\,\textdegree\,E, deep convection over the Himalaya and Northeast India appears about 10\,km from its true position. We present PyGeoParallax-IN, an open-source tool that corrects this parallax by tracing each line of sight to the cloud top on the WGS84 ellipsoid, with optional terrain and navigation correction. Against GPM Ku-band radar in 38 usable monsoon cases (2018--2024), the correction moves deep cores by 4--10\,km along the line of sight and reverses the mean storm-scale bias ($+2.2$ to $-1.9$\,km), but the per-case gain is not significant and little of the computed parallax is visible at convective cores, so GPM can verify absolute position only to about $\pm$3--5\,km. A second geostationary view explains why. Correcting INSAT-3DR and Meteosat (41.5--45.5\,\textdegree\,E) each for its own parallax removes the 9.5\,km east--west disagreement between their images (29 of 38 cases closer, $p=3\times10^{-5}$), confirming the correction without radar and ruling out an INSAT navigation error. Both satellites place the corrected cold cores 4--5\,km west to south-west of the GPM rain cores, the direction in which the radar echo leans with height: the coldest tops, above the radar's view, lie off the rain cores and hide most of the parallax at the cell scale. INSAT-3DR navigation errors are seasonal, 7--20\,km westward in winter.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -125,7 +125,7 @@ def main():
         (OUT / "sections" / f"{name}.tex").write_text(convert(tex), encoding="utf-8", newline="\n")
     shutil.copytree(SRC / "figures", OUT / "figures", dirs_exist_ok=True)
     shutil.copy2(SRC / "references.bib", OUT / "references.bib")
-    body = "".join(f"\\input{{sections/{name}}}\n" for name in SECTIONS)
+    body = "".join(("\\appendix\n" if name == "appendix" else "") + f"\\input{{sections/{name}}}\n" for name in SECTIONS)
     (OUT / "manuscript.tex").write_text(PREAMBLE + ABSTRACT + "\n" + body + BACKMATTER, encoding="utf-8",
                                         newline="\n")
     words = len(re.sub(r"\\[a-zA-Z]+|[{}$]", " ", ABSTRACT.split("\\begin{IEEEkeywords}")[0]).split()) - 2

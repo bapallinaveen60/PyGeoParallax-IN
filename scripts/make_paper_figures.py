@@ -363,6 +363,81 @@ def fig0_schematic(vza_deg=35.0):
 DAMAGED_SRTM = []
 
 
+def _cluster_ci(df, col, n=2000, seed=2026):
+    """Median over cells with a 95 % interval from resampling whole cases."""
+    rng = np.random.default_rng(seed)
+    groups = [g[col].dropna().values for _, g in df.groupby("case")]
+    groups = [g for g in groups if g.size]
+    meds = [np.median(np.concatenate([groups[i] for i in rng.integers(0, len(groups), len(groups))])) for _ in range(n)]
+    return float(np.median(np.concatenate(groups))), float(np.percentile(meds, 2.5)), float(np.percentile(meds, 97.5))
+
+
+def fig7_meteosat_tilt():
+    """Second view and storm tilt: (a) INSAT minus Meteosat cloud field per case, (b) corrected cold cores
+    relative to the GPM cells for both satellites, (c) lean of the GPM echo with height."""
+    sev = Path("05_validation/seviri")
+    cases = pd.read_csv(sev / "seviri_cases.csv")
+    cells = pd.read_csv(sev / "seviri_cells.csv")
+    tilt = pd.read_csv(VAL / "storm_tilt_cells.csv")
+    fig, ax = plt.subplots(1, 3, figsize=(12.5, 4.2), gridspec_kw={"width_ratios": [1, 1, 0.9]})
+
+    # (a) INSAT minus Meteosat, uncorrected (open) and corrected (filled), by region.
+    a = ax[0]
+    for reg, (lab, col, mk, _) in REGIONS.items():
+        d = cases[cases.region == reg]
+        a.scatter(d.field_raw_east_km, d.field_raw_north_km, s=26, marker=mk, facecolors="none", edgecolors=col, lw=0.9)
+        a.scatter(d.field_cor_east_km, d.field_cor_north_km, s=26, marker=mk, color=col, label=lab)
+    for state, face in (("raw", "white"), ("cor", INK)):
+        e, n = cases[f"field_{state}_east_km"].median(), cases[f"field_{state}_north_km"].median()
+        a.scatter(e, n, s=120, marker="X", color=face, edgecolors=INK, lw=1.2, zorder=5)
+    a.annotate("", xy=(cases.field_cor_east_km.median(), cases.field_cor_north_km.median()),
+               xytext=(cases.field_raw_east_km.median(), cases.field_raw_north_km.median()),
+               arrowprops=dict(arrowstyle="->", color=INK, lw=1.2))
+    a.axhline(0, color=AXIS, lw=0.8); a.axvline(0, color=AXIS, lw=0.8)
+    a.set_xlim(-22, 12); a.set_ylim(-20, 12); a.set_aspect("equal")
+    a.set_xlabel("east [km]"); a.set_ylabel("north [km]")
+    a.set_title("(a) INSAT minus Meteosat, cloud field", loc="left")
+    a.text(0.02, 0.03, "open: uncorrected   filled: corrected\nX: median (11.6 → 7.9 km apart)",
+           transform=a.transAxes, fontsize=7.5, color=INK2)
+    a.legend(loc="upper left", fontsize=7.5, handletextpad=0.2)
+
+    # (b) Corrected cold core minus GPM cell, case medians, for both satellites.
+    b = ax[1]
+    for src, col, mk, lab in (("insat", "#2a78d6", "o", "INSAT-3DR"), ("meteosat", "#eb6834", "s", "Meteosat")):
+        med = cells.groupby("case")[[f"{src}_cor_east_km", f"{src}_cor_north_km"]].median().dropna()
+        b.scatter(med.iloc[:, 0], med.iloc[:, 1], s=22, marker=mk, color=col, alpha=0.55, lw=0)
+        e, n = cells[f"{src}_cor_east_km"].median(), cells[f"{src}_cor_north_km"].median()
+        b.scatter(e, n, s=130, marker=mk, color=col, edgecolors=INK, lw=1.1, zorder=5, label=f"{lab} (median {e:+.1f} E, {n:+.1f} N)")
+    for ang, lab, col, y0 in ((200.0, "towards INSAT", "#2a78d6", 12.0), (255.0, "towards Meteosat", "#eb6834", 6.5)):
+        t = np.radians(ang)
+        b.annotate(lab, xy=(11 + 5 * np.sin(t), y0 + 5 * np.cos(t)), xytext=(11, y0), fontsize=7.5, color=col,
+                   arrowprops=dict(arrowstyle="->", color=col, lw=1.1), ha="center", va="bottom")
+    b.scatter(0, 0, s=60, marker="+", color=INK, zorder=6)
+    b.axhline(0, color=AXIS, lw=0.8); b.axvline(0, color=AXIS, lw=0.8)
+    b.set_xlim(-16, 14); b.set_ylim(-16, 14); b.set_aspect("equal")
+    b.set_xlabel("east [km]"); b.set_ylabel("north [km]")
+    b.set_title("(b) Corrected cold core minus GPM cell", loc="left")
+    b.legend(loc="lower right", fontsize=7.5, handletextpad=0.2)
+
+    # (c) Lean of the GPM echo with height: east and towards-INSAT components, median with 95 % interval.
+    c = ax[2]
+    layers = (("mid", 6.0), ("upper", 9.0), ("high", 12.0), ("top", 14.0))
+    for comp, col, lab, dz in (("east", "#1baf7a", "east", -0.12), ("along", "#2a78d6", "towards INSAT", 0.12)):
+        vals = [_cluster_ci(tilt, f"{k}_{comp}_km") for k, _ in layers]
+        z = [h + dz for _, h in layers]
+        c.errorbar([v[0] for v in vals], z, xerr=[[v[0] - v[1] for v in vals], [v[2] - v[0] for v in vals]],
+                   fmt="o-", color=col, ms=5, lw=1.2, capsize=2, label=lab)
+    c.plot([0, 0], [2.5, 15], color=AXIS, lw=0.8)
+    c.set_yticks([3, 6, 9, 12, 14]); c.set_yticklabels(["2–4 km\ncore", "5–7", "8–10", "11–13", "echo\ntop"])
+    c.set_xlim(-5, 4); c.set_ylim(2.5, 15)
+    c.set_xlabel("displacement from the 2–4 km core [km]")
+    c.set_title("(c) Lean of the GPM echo", loc="left")
+    c.scatter([0], [3], s=40, color=INK, zorder=5)
+    c.legend(loc="lower left", fontsize=7.5)
+    fig.tight_layout()
+    save(fig, "fig7_meteosat_tilt")
+
+
 def main():
     fig0_schematic()
     fig1_geometry()
@@ -371,6 +446,7 @@ def main():
     fig4_states()
     fig5_heights()
     fig6_terrain(damaged=DAMAGED_SRTM)
+    fig7_meteosat_tilt()
 
 
 if __name__ == "__main__":
