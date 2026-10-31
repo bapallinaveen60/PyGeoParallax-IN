@@ -209,7 +209,7 @@ We tested five explanations in turn.
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  \textbf{The comparison method.} We put a synthetic storm with a known parallax through the same gridding and cell-matching code. The raw offset equals the full parallax: +10.9 km measured against +10.5 km expected at VZA 35°, and +3.5 against +3.9 km at VZA 15°. After correction it is about zero. Overlays of uncorrected INSAT on GPM storm tops for six high-angle cases show the same as the statistics: the cold cloud masses sit on the deep-echo cells, not 8--10 km beyond them. The method detects parallax when it is there.
+  \textbf{The comparison method.} We put a synthetic storm with a known parallax through the same gridding and cell-matching code. The raw offset equals the full parallax: +10.9 km measured against +10.5 km expected at VZA 35°, and +3.5 against +3.9 km at VZA 15°. After correction it is about zero. Overlays of uncorrected INSAT on GPM storm tops for six high-angle cases show the same as the statistics: the cold cloud masses sit on the deep-echo cells, not 8--10 km beyond them. The method detects parallax when it is there. In real scenes it is less sensitive: shifting the uncorrected INSAT images by a known 4.4, 8.9, 13.3 and 20 km moves the cell offsets by a median of 71, 64, 57 and 43 \% of the shift (means 32--40 \%), because large cold anvils fill the 25 km cold-core search. Allowing for this, about 8 \% of the computed parallax is visible at the cells instead of 5 \%.
 \item
   \textbf{GPM's slanted beam.} Placing storm tops on the slanted Ku beam instead of at the surface footprint changes the cell medians by at most 0.6 km. This displacement has a median of 1 km and reaches 5 km. It adds scatter, not bias.
 \item
@@ -275,7 +275,40 @@ Echo top & 140 (27) & +0.8 (−0.9, +1.4) & −1.5 (−3.1, −0.6) & +1.6 (+0.3
 
 The two measures compare different parts of the storm. The field measure is driven by the large cold anvil against the radar's rain area, and the cell measure by the coldest tops against the tallest echoes. Their difference, 2--3 km and up to about 5 km depending on the navigation applied, is comparable to the parallax over South India and a third to a half of it at higher viewing angles. At the scale of the storm, parallax correction reverses the mean bias, and the corrected mean is not significantly different from zero. At the scale of the convective core, uncorrected cold cores already coincide with the radar cells, and correcting them with the full infrared height overshoots.
 
-\subsection{Terrain}\label{sec:5.7}
+\subsection{A second view: Meteosat}\label{sec:5.7}
+
+Meteosat sees the same storms from the west (Section~\ref{sec:2.5}), with a larger parallax that points mainly east. This gives a test of the correction that does not depend on GPM, and a way to separate the explanations left in Section~\ref{sec:5.6}.
+
+\textbf{The correction makes the two satellites agree} (Table~\ref{tab:6}). Uncorrected, INSAT's cloud field lies 9.5 km west of Meteosat's (95 \% interval 6.5--12.1 km), the difference of the two parallaxes. After each satellite is corrected for its own parallax, the east offset falls to −2.3 km (−5.2 to +0.9 km), consistent with zero. The distance between the two fields falls from a median of 11.6 to 7.9 km, and the corrected fields are closer in 29 of 38 cases (Wilcoxon p = \(3 \times 10^{-5}\)). The field correlation is high in every case (r = 0.86--0.99, median 0.97).
+
+\textbf{INSAT's navigation is not the cause.} Relative to Meteosat, the corrected INSAT field lies −1.1 km (−3.9 to +1.4 km) to the north. Hiding the parallax at the cells would need INSAT positions about 5--10 km too far south (towards the satellite), the size suggested by ISRO's June 2020 reports. No such offset is present in these monsoon cases. In the east--west direction a navigation error and a common error in cloud height cannot be separated, because both satellites look from the west; we therefore draw no conclusion about the east component.
+
+\textbf{The cold tops sit off the radar echoes for both satellites.} After correction, the cold cores lie west and south-west of the GPM deep-echo cells in both images: 4.2 km west and 4.5 km south for INSAT (95 \% intervals 2.1--5.7 and 1.5--6.4 km, 27 cases), and 4.5 km west and 1.5 km south for Meteosat (3.8--5.8 km west; −0.2 to 4.5 km south, 29 cases), from 211 cells. Uncorrected, Meteosat's cold cores also sit near the cells (−0.1 km east), although its parallax of 10--20 km towards the east should appear as at least 5--8 km given the measure's sensitivity. Two satellites that look from different directions agree that the cold top lies west or south-west of the deep echo. This is the direction in which the echo itself leans (Table~\ref{tab:5}), continued above the radar's view, and towards INSAT for most cases.
+
+\begin{table*}[t]
+\caption{INSAT minus Meteosat position of the cloud field within 250 km of the convective cluster, after moving Meteosat to the GPM time: median over 38 cases with 95 \% bootstrap interval. Both satellites see the storms from different directions, so their uncorrected images disagree; correcting each for its own parallax should make them agree.}\label{tab:6}
+\begin{tabular}{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3026}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.3026}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.1447}}@{}}
+\tophline
+\begin{minipage}[b]{\linewidth}\raggedright
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+East {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+North {[}km{]}
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Distance, median {[}km{]}
+\end{minipage} \\
+\middlehline
+Uncorrected & −9.5 (−12.1, −6.5) & −1.2 (−4.4, +1.5) & 11.6 \\
+Parallax-corrected & −2.3 (−5.2, +0.9) & −1.1 (−3.9, +1.4) & 7.9 \\
+\bottomhline
+\end{tabular}
+\end{table*}
+
+\subsection{Terrain}\label{sec:5.8}
 
 Terrain-aware correction with SRTM moves clear-sky ground by:
 
@@ -293,7 +326,7 @@ In the Himalayan validation scenes, clear-sky ground pixels move by 1.3--2.5 km 
 
 At the storms (14 cases of 2022--2024), terrain makes no difference: the field and cell offsets are identical to 0.1 km with and without it. Storm tops lie 10--17 km above the ground, so the height of the ground beneath them does not enter the correction.
 
-\subsection{Benchmark}\label{sec:5.8}
+\subsection{Benchmark}\label{sec:5.9}
 
 The full pipeline processed all 148 available monsoon scenes without a failure. Each scene took 1.8 s (median; 3.2 s at most) on a laptop, with about 450 MB of memory. Processing includes reading two channels over 0--40° N, 60--100° E, cloud-top height, and the corrected and uncorrected grids at 0.04°.
 

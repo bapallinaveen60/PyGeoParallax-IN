@@ -6,6 +6,8 @@
 
 The ellipsoid ray-tracing correction is exact to well under the pixel size, and on real data it does what geometry predicts. Features move along the line of sight by h·tan(VZA), and nothing moves across it: the cross-look offset changes by a median of 0.0 km (95 \% interval −0.2 to +0.2 km). At the scale of whole storms it reverses the mean INSAT--GPM bias, from +2.2 to −1.9 km.
 
+A second geostationary view confirms the correction independently of radar: correcting INSAT and Meteosat each for its own parallax removes the 9.5 km east--west disagreement between them (Section~\ref{sec:5.7}).
+
 What GPM cannot do is confirm that the corrected positions are more accurate than the uncorrected ones. With 38 usable cases over seven monsoons:
 
 \begin{itemize}
@@ -20,25 +22,25 @@ The two measures disagree with each other by 2--3 km, and by about 5 km once nav
 
 \subsection{Why the coldest tops and the deepest echoes coincide}\label{sec:6.2}
 
-For the uncorrected cold cores to sit on the radar cells, the coldest infrared top of a cell must lie, on average, a parallax-sized distance towards the satellite (south or south-west) of the deep echo beneath it. Three explanations are possible, and the GPM profiles rule out the most obvious one:
+For the uncorrected cold cores to sit on the radar cells, the coldest infrared top of a cell must lie, on average, a parallax-sized distance towards the satellite (south or south-west) of the deep echo beneath it. The GPM profiles and the Meteosat comparison test the explanations in turn:
 
 \begin{itemize}
 \tightlist
 \item
   \textbf{Tilt of the convective column: ruled out as the main cause.} Monsoon convection over India is organised in large systems in strong easterly shear \citep{houze2007,romatschke2011}, so tilted updrafts were a natural explanation. GPM's 3-D reflectivity shows the tilt (Section~\ref{sec:5.6}, Table~\ref{tab:5}): the echo leans 1.5--2 km westward between the rain core and the echo top. But only about 1 km of this points towards the satellite, against a hidden parallax of about 6 km, and the lean does not vary with the cell offsets from case to case. The precipitating column does not lean enough.
 \item
-  \textbf{The cold top above the radar's view.} The coldest top lies at the tropopause, a median 3.2 km above the radar echo top, in the overshooting top and the anvil, where the Ku radar sees nothing. An offset there is documented elsewhere: in a tornadic supercell the highest radar echo top lay about 10 km from the overshooting cloud top after parallax correction \citep{bluestein2019}, and across the tropics cold cloud covers far more area than the radar rain beneath it \citep{liu2007}. To hide the parallax, the cold top would have to lie about 5 km towards the satellite from the echo top, much more than the column's lean below it suggests. GPM cannot test this.
+  \textbf{The cold top above the radar's view.} The coldest top lies at the tropopause, a median 3.2 km above the radar echo top, in the overshooting top and the anvil, where the Ku radar sees nothing. An offset there is documented elsewhere: in a tornadic supercell the highest radar echo top lay about 10 km from the overshooting cloud top after parallax correction \citep{bluestein2019}, and across the tropics cold cloud covers far more area than the radar rain beneath it \citep{liu2007}. To hide the parallax, the cold top would have to lie about 5 km towards the satellite from the echo top, much more than the column's lean below it suggests. Meteosat shows that it does (below).
 \item
   \textbf{Effective height.} The cold core seen at 10.8 µm is the cloud top at the tropopause (16.6 km median), about 3 km (median 3.2 km) above the radar echo top. If the radiating top of the core is spatially offset from the echo core, the full infrared height is the wrong height for matching rain.
 \item
-  \textbf{Navigation.} ISRO's own geolocation checks for June 2020 point to an error of 7--11 km towards the north, which would hide most of the parallax. Coastlines cannot confirm it in monsoon cloud, and fitting the navigation to GPM breaks the field measure. With the column tilt ruled out, a navigation contribution becomes more likely, but navigation alone cannot reconcile the two measures.
+  \textbf{Navigation: ruled out.} ISRO's own geolocation checks for June 2020 point to an error of 7--11 km towards the north, which would hide most of the parallax. Against Meteosat, however, INSAT's north--south error in our cases is only −1.1 km (−3.9 to +1.4 km; Section~\ref{sec:5.7}).
 \end{itemize}
 
-The tilt measurement narrows the question to two explanations that GPM cannot separate: an offset of the cold top above the radar's view, and a northward navigation error of the size ISRO reports. An independent geostationary view of the same storms, for example Meteosat IODC at 45.5° E, which sees the parallax in a different direction, would separate them: a navigation error of INSAT would not appear in it, while a real offset of the cold top would. So would ground radar at known positions. Both are left for future work.
+The explanation that remains is the cold top itself. Meteosat, which looks from the west and whose navigation does not share INSAT's errors, puts the corrected cold cores in the same place relative to the GPM cells as INSAT: about 4--5 km west and up to 4 km south. The coldest tops of monsoon cells therefore lie west to south-west of the deepest echoes. This continues, above the radar's view, the westward lean of the echo under the upper-level easterlies, and it points largely towards INSAT, so it cancels most of INSAT's parallax at the scale of the cell. Because the cell measure recovers only about half to two-thirds of a displacement, the real offset is probably larger than 4--5 km. Ground radar at known sites would show it at higher resolution and is left for future work.
 
 \subsection{Navigation}\label{sec:6.3}
 
-The INSAT-3DR L1C navigation error is seasonal: 7--20 km to the west from late September to mid-March. This is larger than the parallax, and outside the monsoon it is the dominant geolocation error. In the monsoon the coastline method gives small values (−2.0 to +3.0 km east, −0.8 to +2.5 km north per year) but cannot constrain the north component better than several kilometres, and it cannot be applied per day. Users should apply the seasonal correction outside the monsoon, and should not fit navigation to radar cells: Section~\ref{sec:5.6} shows that doing so absorbs storm structure into the navigation and degrades storm-scale agreement.
+The INSAT-3DR L1C navigation error is seasonal: 7--20 km to the west from late September to mid-March. This is larger than the parallax, and outside the monsoon it is the dominant geolocation error. In the monsoon the coastline method gives small values (−2.0 to +3.0 km east, −0.8 to +2.5 km north per year) but cannot constrain the north component better than several kilometres, and it cannot be applied per day. Meteosat constrains it better: relative to Meteosat, the north--south error in our 38 monsoon cases is −1.1 km (−3.9 to +1.4 km). Users should apply the seasonal correction outside the monsoon, and should not fit navigation to radar cells: Section~\ref{sec:5.6} shows that doing so absorbs storm structure into the navigation and degrades storm-scale agreement.
 
 \subsection{Which cloud height to use}\label{sec:6.4}
 
@@ -73,7 +75,9 @@ Some earlier studies point the other way at the cell scale. Comparisons with gro
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Reference instrument.} Validation uses GPM only. GPM samples each storm once, in a 245 km swath. Its echo tops differ from infrared tops by definition, and the two offset measures differ by 2--5 km depending on the navigation applied. Ground-based radar (IMD Doppler Weather Radar) at fixed sites, or a second geostationary view, would be needed to verify absolute positions to better than this.
+  \textbf{Reference instrument.} Validation uses GPM only. GPM samples each storm once, in a 245 km swath. Its echo tops differ from infrared tops by definition, and the two offset measures differ by 2--5 km depending on the navigation applied. A second geostationary view (Meteosat) confirms the correction and rules out an INSAT navigation error, but not to better than a few kilometres; ground-based radar (IMD Doppler Weather Radar) at fixed sites would be needed for that.
+\item
+  \textbf{Meteosat comparison.} Meteosat's navigation is taken as correct. Its pixels are 4--7 km at the viewing angles used, and the storms are matched within a median 1.3 min after a motion correction. In the east--west direction an INSAT navigation error and a common cloud-height error cannot be separated, because both satellites look from the west. The cell measure recovers only about half to two-thirds of a displacement, so the 4--5 km offset of the cold tops is a lower bound.
 \item
   \textbf{Sample by region.} South and Central India have 14--15 usable cases each, but the Himalaya and Northeast India only 4--5. Regional means at high viewing angles rest on few cases.
 \item

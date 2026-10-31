@@ -57,3 +57,7 @@ Northeast India and Bangladesh & 21--29° N, 88--97° E & 29--42° \\
 \end{tabular}
 \end{table*}
 
+\subsection{Meteosat SEVIRI, Indian Ocean service}\label{sec:2.5}
+
+As a second geostationary view we use Level 1.5 SEVIRI images of EUMETSAT's Indian Ocean Data Coverage (IODC) service \citep{schmetz2002,eumetsat_iodc}: Meteosat-8 at 41.5° E until 31 May 2022 (24 cases) and Meteosat-9 at 45.5° E from 1 June 2022 (14 cases). Meteosat sees India from the west, so its parallax points mainly east, while INSAT-3DR's points mainly north or north-east. For each case we take the two 15-min repeat cycles whose scan of the storm latitude brackets the GPM overpass, and use the 10.8 µm channel (IR\_108), read with satpy \citep{raspaud2018}. Over the case regions Meteosat's viewing zenith angle is 36--62° (median 49°), and its IR pixels are 4--7 km.
+

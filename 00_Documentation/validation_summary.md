@@ -230,7 +230,14 @@ Batch 4 added 2018–2021 cases over South and Central India (50 GPM passes scre
    - robust to thresholds and cell growth (towards the satellite +0.4 … +0.8 km at the echo top);
    - case medians +0.3 km against a hidden parallax of 6.4 km; no correlation with the cell offsets (Spearman r = 0.17, p = 0.41); Northeast −0.7 km.
 
-   The cells lean westward, as the monsoon easterlies aloft predict, but mostly across the line of sight. **The tilt of the precipitating column does not hide the parallax.** Remaining explanations: an offset of the cold top above the radar's view (overshooting top, anvil) or a northward navigation error of the size in ISRO's June 2020 reports. GPM cannot separate them; Meteosat IODC or ground radar could.
+   The cells lean westward, as the monsoon easterlies aloft predict, but mostly across the line of sight. **The tilt of the precipitating column does not hide the parallax.**
+7. **Meteosat IODC (31 Oct 2026, `download_seviri_iodc.py`, `compare_seviri_insat.py`):** all 38 cases, Meteosat-8 (41.5° E, 24 cases) and Meteosat-9 (45.5° E, 14 cases), storm scanned a median 1.3 min from GPM, motion-corrected. INSAT minus Meteosat cloud field within 250 km (median, 95 % bootstrap):
+   - uncorrected: east −9.5 km (−12.1 … −6.5), north −1.2 km (−4.4 … +1.5);
+   - corrected: east −2.3 km (−5.2 … +0.9), north −1.1 km (−3.9 … +1.4);
+   - distance 11.6 → 7.9 km, closer in 29 of 38 cases (Wilcoxon p = 3 × 10⁻⁵); field r 0.86–0.99.
+
+   **The correction is confirmed without radar, and INSAT navigation is ruled out** (north–south error −1.1 km; ISRO's June 2020 7–11 km does not apply to these cases). East–west navigation and a common height error cannot be separated (both satellites look from the west). After correction both satellites put the cold cores 4–5 km west to south-west of the GPM cells (INSAT −4.2 E / −4.5 N, Meteosat −4.5 E / −1.5 N; 211 cells): **the coldest tops sit off the rain cores**, in the direction the echo leans. Uncorrected Meteosat cores also sit near the cells (−0.1 km E) despite a 10–20 km eastward parallax.
+8. **Cell-measure sensitivity:** shifting INSAT images by 4.4 / 8.9 / 13.3 / 20 km moves the cell offsets by a median of 71 / 64 / 57 / 43 % (means 32–40 %). About 8 % of the parallax is visible at the cells after allowing for this; the 4–5 km cold-top offset is a lower bound.
 
 ## Next
 

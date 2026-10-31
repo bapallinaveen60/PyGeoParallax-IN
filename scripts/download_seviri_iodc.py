@@ -58,7 +58,7 @@ def token():
         raise SystemExit(f"no EUMETSAT credentials at {path}: run `eumdac set-credentials <key> <secret>` once "
                          "(key and secret from https://api.eumetsat.int/api-key)")
     key, secret = path.read_text().strip().split(",", 1)
-    return eumdac.AccessToken((key, secret))
+    return eumdac.AccessToken((key, secret), cache=False)  # a cached token may predate new licences
 
 
 def storm_time(product_start, lat):
@@ -75,8 +75,30 @@ def bracketing(products, t_target, lat):
     return ([before[-1]] if before else []) + ([after[0]] if after else [])
 
 
-def fetch_native(product, workdir):
-    """Download the product's native (.nat) file into ``workdir`` and return its path."""
+def fetch_native(product, workdir, attempts=6, wait_s=30):
+    """Download the product's native (.nat) file into ``workdir``, retrying refused downloads.
+
+    The Data Store sometimes refuses a download (403) and accepts the same
+    request a little later, e.g. while new licences reach all its servers, and
+    long transfers are sometimes cut off. Both are retried.
+    """
+    import time
+
+    from eumdac.product import ProductError
+
+    for attempt in range(1, attempts + 1):
+        try:
+            return _fetch_native_once(product, workdir)
+        except Exception as exc:  # refused (403) or a broken connection
+            transient = ("403" in str(exc)) if isinstance(exc, ProductError) else True
+            if not transient or attempt == attempts:
+                raise
+            reason = "refused (403)" if isinstance(exc, ProductError) else f"transfer broken ({type(exc).__name__})"
+            print(f"    {reason}, retry {attempt}/{attempts - 1} in {wait_s} s", flush=True)
+            time.sleep(wait_s)
+
+
+def _fetch_native_once(product, workdir):
     entries = list(getattr(product, "entries", []) or [])
     nat = [e for e in entries if e.lower().endswith(".nat")]
     if nat:
@@ -173,11 +195,15 @@ def main(argv=None):
             if args.dry_run:
                 print(f"{tag}  {p}", flush=True)
                 continue
-            with tempfile.TemporaryDirectory(dir=out if out.exists() else None) as tmp:
-                nat = fetch_native(p, tmp)
-                crop_to_netcdf(nat, box, dst)
-                if args.keep:
-                    shutil.copy2(nat, out / case / nat.name)
+            try:
+                with tempfile.TemporaryDirectory(dir=out if out.exists() else None) as tmp:
+                    nat = fetch_native(p, tmp)
+                    crop_to_netcdf(nat, box, dst)
+                    if args.keep:
+                        shutil.copy2(nat, out / case / nat.name)
+            except Exception as exc:  # keep going; a rerun picks up what is missing
+                print(f"{tag}  FAILED: {type(exc).__name__}: {str(exc)[-120:]}", flush=True)
+                continue
             print(f"{tag}  -> {dst}", flush=True)
 
 

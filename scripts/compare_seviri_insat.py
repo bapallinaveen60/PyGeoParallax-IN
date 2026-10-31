@@ -123,6 +123,7 @@ def main(argv=None):
     ap.add_argument("--min-cells", type=int, default=8, help="smallest deep-echo cell, in 0.02 deg grid cells")
     ap.add_argument("--max-lag", type=int, default=10, help="field-correlation search, in grid cells")
     ap.add_argument("--fill-radius", type=int, default=3, help="gap filling for the coarser Meteosat pixels [cells]")
+    ap.add_argument("--min-r", type=float, default=0.7, help="field correlation needed for the navigation/height fit")
     ap.add_argument("--out", default="05_validation/seviri")
     args = ap.parse_args(argv)
 
@@ -156,6 +157,12 @@ def main(argv=None):
         dt_min = float((t_gpm - near["t"]) / np.timedelta64(1, "s")) / 60.0
         adv = (motion[0] * dt_min, motion[1] * dt_min) if np.isfinite(motion[0]) else (0.0, 0.0)
         vza_sev = float(satellite_view_angles(cen[0], cen[1], near["sat_lon"])[0])
+        # Shift of a corrected position per km of cloud-height error, towards each satellite [km/km].
+        geo = {}
+        for tag, slon in (("insat", 74.0), ("meteosat", near["sat_lon"])):
+            vza, vaa = (float(v) for v in satellite_view_angles(cen[0], cen[1], slon))
+            t = np.tan(np.radians(vza))
+            geo[f"g_{tag}_east"], geo[f"g_{tag}_north"] = t * np.sin(np.radians(vaa)), t * np.cos(np.radians(vaa))
 
         # Whole-field match of corrected INSAT to corrected Meteosat (Meteosat moved to the GPM time).
         fe, fn, fr = field_shift(near["cor"], ins["cor"], window, grid, cen[0], args.max_lag)
@@ -167,6 +174,7 @@ def main(argv=None):
             # INSAT minus Meteosat position of the cloud field, after moving Meteosat to the GPM time
             "field_cor_east_km": round(fe - adv[0], 2), "field_cor_north_km": round(fn - adv[1], 2), "field_cor_r": round(fr, 2),
             "field_raw_east_km": round(re_ - adv[0], 2), "field_raw_north_km": round(rn - adv[1], 2), "field_raw_r": round(rr, 2),
+            **{k: round(v, 3) for k, v in geo.items()},
         })
 
         labels, n = ndimage.label((np.nan_to_num(gpm["top"]) > 10000) & window)
@@ -214,7 +222,47 @@ def main(argv=None):
     for state in ("cor", "raw"):
         e, n_ = cases_df[f"field_{state}_east_km"], cases_df[f"field_{state}_north_km"]
         print(f"  {'corrected' if state == 'cor' else 'uncorrected':11s} east {e.median():+5.1f}  north {n_.median():+5.1f}  ({e.notna().sum()} cases)")
+    fit = navigation_and_height_fit(cases_df, min_r=args.min_r)
+    if fit:
+        print(f"Joint fit over {fit['cases']} cases (field r >= {args.min_r}): INSAT minus Meteosat = navigation + height bias x geometry")
+        for k, lab in (("nav_east", "INSAT position error, east "), ("nav_north", "INSAT position error, north"),
+                       ("height_bias", "cloud-height bias [km]      ")):
+            print(f"  {lab} {fit[k]:+5.1f}  [{fit[k + '_ci'][0]:+5.1f}, {fit[k + '_ci'][1]:+5.1f}]")
+        print(f"  residual rms {fit['rms']:.1f} km. Positive north error: INSAT places clouds too far north "
+              "(a southward error would hide the parallax).")
+        (out / "navigation_height_fit.json").write_text(json.dumps(fit, indent=2))
     print(f"wrote {out / 'seviri_cells.csv'} and {out / 'seviri_cases.csv'}")
+
+
+def navigation_and_height_fit(df, min_r=0.7, n_boot=5000, seed=2026):
+    """Least-squares split of the INSAT minus Meteosat field offsets into navigation and a common height bias.
+
+    For each case, d = nav + bias * (g_insat - g_meteosat), where g is the shift
+    of a corrected position per km of height error, towards each satellite.
+    Meteosat navigation is taken as correct. Returns the fit with 95 %
+    intervals from resampling cases, or None with fewer than four cases.
+    """
+    d = df[(df["field_cor_r"] >= min_r)].dropna(subset=["field_cor_east_km", "field_cor_north_km"])
+    if len(d) < 4:
+        return None
+
+    def solve(sub):
+        ge = (sub.g_insat_east - sub.g_meteosat_east).values
+        gn = (sub.g_insat_north - sub.g_meteosat_north).values
+        n = len(sub)
+        A = np.zeros((2 * n, 3))
+        A[:n, 0], A[n:, 1] = 1.0, 1.0
+        A[:n, 2], A[n:, 2] = ge, gn
+        y = np.concatenate([sub.field_cor_east_km.values, sub.field_cor_north_km.values])
+        x, *_ = np.linalg.lstsq(A, y, rcond=None)
+        return x, float(np.sqrt(np.mean((A @ x - y) ** 2)))
+
+    x, rms = solve(d)
+    rng = np.random.default_rng(seed)
+    boots = np.array([solve(d.iloc[rng.integers(0, len(d), len(d))])[0] for _ in range(n_boot)])
+    ci = lambda i: [float(np.percentile(boots[:, i], 2.5)), float(np.percentile(boots[:, i], 97.5))]  # noqa: E731
+    return {"cases": len(d), "nav_east": float(x[0]), "nav_north": float(x[1]), "height_bias": float(x[2]),
+            "nav_east_ci": ci(0), "nav_north_ci": ci(1), "height_bias_ci": ci(2), "rms": rms}
 
 
 if __name__ == "__main__":

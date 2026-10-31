@@ -41,6 +41,10 @@ Validation cases come from the monsoon seasons (June–September) of 2018–2024
 | Himalaya (Uttarakhand, Himachal, Nepal) | 24–33° N, 74–90° E | 28–42° |
 | Northeast India and Bangladesh | 21–29° N, 88–97° E | 29–42° |
 
+### 2.5 Meteosat SEVIRI, Indian Ocean service
+
+As a second geostationary view we use Level 1.5 SEVIRI images of EUMETSAT's Indian Ocean Data Coverage (IODC) service [Schmetz et al., 2002; EUMETSAT]: Meteosat-8 at 41.5° E until 31 May 2022 (24 cases) and Meteosat-9 at 45.5° E from 1 June 2022 (14 cases). Meteosat sees India from the west, so its parallax points mainly east, while INSAT-3DR's points mainly north or north-east. For each case we take the two 15-min repeat cycles whose scan of the storm latitude brackets the GPM overpass, and use the 10.8 µm channel (IR_108), read with satpy [Raspaud et al., 2018]. Over the case regions Meteosat's viewing zenith angle is 36–62° (median 49°), and its IR pixels are 4–7 km.
+
 ---
 
 ## 3 Parallax correction method
@@ -215,6 +219,10 @@ Two further tests address the residual offset:
 - **Synthetic storm.** A storm with known height and position is displaced by its computed parallax and put through the same gridding and matching code, to check that the method recovers the full parallax and zero after correction.
 
 To separate sources of residual offset, we also compare INSAT cold-core heights with GPM maximum echo-top heights in each matched cell, and repeat the cell analysis with GPM storm tops at their surface footprints instead of on the beam.
+
+**Second geostationary view.** Each Meteosat cycle is corrected for its own parallax with the same method as INSAT (10.8 µm height from the AFGL profile, BT < 270 K as cloud, sub-satellite longitude 41.5° or 45.5° E) onto the 0.02° case grid, with gaps up to three cells interpolated because Meteosat's pixels are coarser. Storm motion is the displacement between the two Meteosat cycles near the convective cluster (field correlation), and Meteosat positions are moved with it to the GPM time; the nearer cycle scans the storm a median 1.3 min (at most 5 min) from GPM. Two comparisons follow. (1) The cloud field of INSAT is matched to that of Meteosat within 250 km of the convective cluster, uncorrected and corrected (field correlation, sub-cell refinement). If both corrections are right, the uncorrected fields differ by the difference of the two parallaxes and the corrected fields agree; a remaining offset common to all cases is an INSAT navigation error relative to Meteosat, plus the effect of any common error in cloud height. (2) For each GPM deep-echo cell, the cold core is found in both images, as in the cell measure, and its offset from the cell is given as east and north components.
+
+**Sensitivity of the cell measure.** To see how much of a real displacement the cell measure recovers in real scenes, we shift each uncorrected INSAT image by a known distance away from the satellite (4.4, 8.9, 13.3 and 20 km) and repeat the cold-core search.
 
 **Storm tilt.** If the cells lean towards the satellite with height, the parallax and the lean cancel at the cell scale. We measure the lean from the GPM Ku 3-D reflectivity (`zFactorFinal`, 176 range bins). Each range bin is placed on its slanted beam from its height and the spacecraft position, so the beam's own slant is not mistaken for tilt. Deep cells are connected footprints with storm top above 10 km (at least two footprints, grown by two footprints so that a leaning upper part is kept), within 250 km of the convective cluster. In each cell we take the reflectivity-weighted centroid (linear Z) of the low-level core (2–4 km, Z ≥ 30 dBZ) and of higher layers (5–7, 8–10 and 11–13 km, and the top 1 km of echo in each column; Z ≥ 20 dBZ). The displacement of each higher centroid from the low-level core is split into a component towards the satellite and a cross-look component. Medians over cells carry a cluster-bootstrap interval over cases. To test robustness we vary the thresholds (25–35 dBZ and 18–25 dBZ) and the growth (one to three footprints).
 

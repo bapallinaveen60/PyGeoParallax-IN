@@ -68,6 +68,7 @@ CITATIONS = [
     (r"\[Harjupa et al\., 2017\]", r"\\citep{harjupa2017}"),
     (r"\[D'Adderio et al\., 2023\]", r"\\citep{dadderio2023}"),
     (r"\[Hilburn et al\., 2021\]", r"\\citep{hilburn2021}"),
+    (r"\[Schmetz et al\., 2002; EUMETSAT\]", r"\\citep{schmetz2002,eumetsat_iodc}"),
     (r"\[Hou et al\., 2014; Toyoshima et al\., 2015\]", r"\\citep{hou2014,toyoshima2015}"),
     (r"\[Toyoshima et al\., 2015\]", r"\\citep{toyoshima2015}"),
     (r"\[Houze et al\., 2007; Romatschke & Houze, 2011\]", r"\\citep{houze2007,romatschke2011}"),
